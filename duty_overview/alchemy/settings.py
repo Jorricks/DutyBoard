@@ -1,23 +1,22 @@
 import logging
 import os
-from typing import Optional, Callable, Any
+from typing import Callable, Any
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
 from sqlalchemy.orm.session import Session as SASession
 
 
 log = logging.getLogger(__name__)
-SQL_ALCHEMY_CONN: Optional[str] = None
+SQL_ALCHEMY_CONN: str = os.environ["SQL_ALCHEMY_CONNECTION"]
 engine: Engine
 Session: Callable[..., SASession]
-SQL_ALCHEMY_SCHEMA: str = ""
+Base: Any = declarative_base()
 
-metadata = (
-    None if not SQL_ALCHEMY_SCHEMA or SQL_ALCHEMY_SCHEMA.isspace() else MetaData(schema=SQL_ALCHEMY_SCHEMA)
-)
-Base: Any = declarative_base(metadata=metadata)
+
+def get_engine() -> Engine:
+    return engine
 
 
 def prepare_engine_args():
