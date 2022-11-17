@@ -36,6 +36,8 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int]) -> 
             uid=single_calendar.uid,
             name=single_calendar.name,
             description=single_calendar.description,
+            category=single_calendar.category,
+            order=single_calendar.order,
             last_update_utc=single_calendar.last_update_utc,
             error_msg=single_calendar.error_msg or "",
             sync=single_calendar.sync,

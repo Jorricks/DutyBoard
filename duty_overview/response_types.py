@@ -24,6 +24,8 @@ class _Calendar(BaseModel):
     uid: str
     name: str
     description: str
+    category: str
+    order: int
     last_update_utc: datetime.datetime
     error_msg: str
     sync: bool

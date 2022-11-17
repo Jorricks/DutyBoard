@@ -1,10 +1,13 @@
-from sqlalchemy import Column, String, Boolean, Integer
+from sqlalchemy import Column, String, Boolean, Integer, Index
 
 from duty_overview.alchemy.settings import Base
 from duty_overview.alchemy.sqlalchemy_types import UtcDateTime
 
 
 class Person(Base):
+    __table_args__ = (
+        Index("person_last_update_utc", "last_update_utc"),
+    )
     __tablename__ = "person"
     uid = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     ldap = Column(String(50), unique=True)
