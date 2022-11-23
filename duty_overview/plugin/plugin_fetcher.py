@@ -7,7 +7,6 @@ import sys
 from functools import lru_cache
 from typing import List, Optional
 
-
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
 from duty_overview.plugin.standard_plugin import StandardPlugin
 
@@ -32,7 +31,9 @@ def _get_plugin() -> Optional[AbstractPlugin]:
         return None
     try:
         loader = importlib.machinery.SourceFileLoader(mod_name, file_path)
-        spec = importlib.util.spec_from_loader(mod_name, loader)
+        spec = importlib.util.spec_from_loader(mod_name, loader)  # type: ignore
+        if spec is None:
+            raise ImportError(f"Unable to import {mod_name}.")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = mod
         loader.exec_module(mod)

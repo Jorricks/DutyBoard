@@ -6,7 +6,7 @@ from typing import Optional
 
 from fastapi import FastAPI
 from pendulum import DateTime
-from sqladmin import ModelView, Admin
+from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from sqladmin.fields import DateTimeField
 from sqlalchemy.orm import session as SASession
@@ -22,7 +22,6 @@ from duty_overview.models.person import Person
 from duty_overview.models.token import Token
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
 
-
 loop = asyncio.get_event_loop()
 
 
@@ -36,14 +35,14 @@ class AppBuilderDateTimeAwareSelector(DateTimeField):
             self.data = self.data.astimezone(utc)
 
 
-class PersonAdmin(ModelView, model=Person):
+class PersonAdmin(ModelView, model=Person):  # type: ignore
     column_searchable_list = [Person.ldap, Person.email, Person.sync]
     column_sortable_list = [Person.uid, Person.ldap, Person.email, Person.last_update_utc, Person.sync]
     column_list = [Person.uid, Person.ldap, Person.email, Person.last_update_utc, Person.sync]
     form_overrides = dict(last_update_utc=AppBuilderDateTimeAwareSelector)
 
 
-class CalendarAdmin(ModelView, model=Calendar):
+class CalendarAdmin(ModelView, model=Calendar):  # type: ignore
     column_searchable_list = [Calendar.uid, Calendar.name, Calendar.sync, Calendar.category]
     column_sortable_list = [
         Calendar.uid,
@@ -70,9 +69,12 @@ class CalendarAdmin(ModelView, model=Calendar):
     form_include_pk = True
 
 
-class OnCallEventAdmin(ModelView, model=OnCallEvent):
+class OnCallEventAdmin(ModelView, model=OnCallEvent):  # type: ignore
     column_searchable_list = [
-        OnCallEvent.calendar_uid, OnCallEvent.start_event_utc, OnCallEvent.end_event_utc, OnCallEvent.person_uid
+        OnCallEvent.calendar_uid,
+        OnCallEvent.start_event_utc,
+        OnCallEvent.end_event_utc,
+        OnCallEvent.person_uid,
     ]
     column_sortable_list = [OnCallEvent.calendar_uid, OnCallEvent.start_event_utc, OnCallEvent.end_event_utc]
     column_list = [OnCallEvent.calendar, OnCallEvent.start_event_utc, OnCallEvent.end_event_utc, OnCallEvent.person]
@@ -88,14 +90,14 @@ class OnCallEventAdmin(ModelView, model=OnCallEvent):
     }
 
 
-class TokenAdmin(ModelView, model=Token):
+class TokenAdmin(ModelView, model=Token):  # type: ignore
     can_create = False
     can_edit = False
     can_delete = True
     column_list = [Token.username, Token.token, Token.last_update_utc]
 
 
-def add_sqladmin(app: FastAPI, plugin: AbstractPlugin,) -> Admin:
+def add_sqladmin(app: FastAPI, plugin: AbstractPlugin) -> Admin:
     # Create the tables if that was not done already
     Base.metadata.create_all(settings.get_engine())
 
@@ -120,16 +122,16 @@ class MyBackend(AuthenticationBackend):
             session.query(Token).where(Token.username == username).delete()
         with create_session() as session:
             new_token = Token(
-                token=''.join(secrets.choice(string.ascii_lowercase) for i in range(50)),
+                token="".join(secrets.choice(string.ascii_lowercase) for i in range(50)),
                 username=username,
-                last_update_utc=DateTime.utcnow()
+                last_update_utc=DateTime.utcnow(),
             )
             session.merge(new_token)
         return new_token.token
 
-    def verify_token(self, token: str) -> bool:
+    def verify_token(self, provided_token: str) -> bool:
         with create_session() as session:
-            token: Optional[Token] = session.query(Token).filter(Token.token == token).first()
+            token: Optional[Token] = session.query(Token).filter(Token.token == provided_token).first()
             if not token:
                 return False
             elif token.last_update_utc < DateTime.utcnow() - self.plugin.admin_session_length:

@@ -1,15 +1,14 @@
 import logging
 import os
-from typing import Callable, Any
+from typing import Any, Callable
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import scoped_session, sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
 from sqlalchemy.orm.session import Session as SASession
 
-
 log = logging.getLogger(__name__)
-SQL_ALCHEMY_CONN: str = os.environ["SQL_ALCHEMY_CONNECTION"]
+SQL_ALCHEMY_CONN: str = os.environ.get("SQL_ALCHEMY_CONNECTION", "")
 engine: Engine
 Session: Callable[..., SASession]
 Base: Any = declarative_base()
