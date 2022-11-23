@@ -27,14 +27,15 @@ module.exports = {
         loader: 'svg-inline-loader'
       },
       {
-        test: /\.?js$/,
+        test: /\.(js|jsx|tsx|ts)$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
           options: {
              "presets": [
-                 "@babel/preset-env",
-                ["@babel/preset-react", {"runtime": "automatic"}]
+               "@babel/preset-env",
+               "@babel/preset-flow",
+               ["@babel/preset-react", {"runtime": "automatic"}]
              ]
           },
         },
