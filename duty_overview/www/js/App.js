@@ -1,6 +1,11 @@
 import './App.css';
+import { useGetSchedule } from "./api";
 
 function App() {
+
+  const { data: { calendars, persons } } = useGetSchedule();
+  console.log(calendars);
+  console.log(persons);
   return (
     <div className="App">
       <header className="App-header">

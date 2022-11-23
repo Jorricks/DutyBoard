@@ -1,11 +1,24 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+
 module.exports = {
   mode: "development",
-  entry: "/src/index.js", // main js
+  entry: path.resolve(__dirname, "js/index.js"), // main js
   output: {
     path: path.resolve(__dirname, "dist"), // output folder
     publicPath: "/",
+  },
+  resolve: {
+    alias: { // Be sure to update aliases in jest.config.js and tsconfig.json
+      src: path.resolve(__dirname),
+    },
+    extensions: [
+      '.js',
+      '.jsx',
+      '.ts',
+      '.tsx',
+      '.css',
+    ],
   },
   module: {
     rules: [

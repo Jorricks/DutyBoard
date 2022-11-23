@@ -16,6 +16,9 @@ with open("openapi.json", "w") as f:
     )
     json.dump(openapi_definition, f)
 
-cmd = "npx swagger-typescript-api -p ../openapi.json -o ./src -n myApi.ts --axios"
+# consider removing --axios and adding --no-client.
+output_folder = "./src/api"
+output_file = "api-generated-types.ts"
+cmd = f"npx swagger-typescript-api -p ../openapi.json -o {output_folder} -n {output_file} --no-client"
 subprocess.run(cmd, cwd=Path.cwd() / "www", shell=True)
 os.remove(Path.cwd() / "openapi.json")
