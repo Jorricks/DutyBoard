@@ -152,3 +152,7 @@ dmypy.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Extra
+.idea
+duty_overview/www/node_modules
