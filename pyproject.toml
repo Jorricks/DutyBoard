@@ -35,9 +35,11 @@ dynamic = ["version", "description"]
 requires-python = ">=3.8"
 dependencies = [
     "fastapi >=0.87.0",
+    "pendulum >=2.0.0",
+    "psycopg2 >= 2.9.0",
     "sqladmin >=0.8.0",
     "sqlalchemy >=1.4.40,<2.0.0",
-    "pendulum >=2.0.0",
+    "uvicorn >=0.20.0"
 ]
 
 [project.optional-dependencies]
