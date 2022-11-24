@@ -14,10 +14,10 @@ export interface CurrentSchedule {
   /** Calendars */
   calendars: Calendar[];
   /** Persons */
-  persons: Person[];
+  persons: Record<string, Person>;
 }
 
-/** _Calendar */
+/** Calendar */
 export interface Calendar {
   /** Uid */
   uid: string;
@@ -33,48 +33,46 @@ export interface Calendar {
    * Last Update Utc
    * @format date-time
    */
-  last_update_utc: string;
+  lastUpdateUtc: string;
   /** Error Msg */
-  error_msg: string;
+  errorMsg: string;
   /** Sync */
   sync: boolean;
   /** Events */
   events: Events[];
 }
 
-/** _Events */
+/** Events */
 export interface Events {
   /**
    * Start Event Utc
    * @format date-time
    */
-  start_event_utc: string;
+  startEventUtc: string;
   /**
    * End Event Utc
    * @format date-time
    */
-  end_event_utc: string;
+  endEventUtc: string;
   /** Person Uid */
-  person_uid: number;
+  personUid: number;
 }
 
-/** _Person */
+/** Person */
 export interface Person {
-  /** Uid */
-  uid: number;
   /** Ldap */
   ldap: string;
   /** Email */
   email: string;
   /** Extra Attributes */
-  extra_attributes: object;
+  extraAttributes: object;
   /**
    * Last Update Utc
    * @format date-time
    */
-  last_update_utc: string;
+  lastUpdateUtc: string;
   /** Error Msg */
-  error_msg: string;
+  errorMsg: string;
   /** Sync */
   sync: boolean;
 }

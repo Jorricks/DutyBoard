@@ -2,7 +2,12 @@ import { useQuery } from 'react-query';
 import axios, { AxiosResponse } from 'axios';
 
 import useErrorToast from '../utils/useErrorToast';
-import {CurrentSchedule} from "./api-generated-types";
+import {Calendar, CurrentSchedule, Person} from "./api-generated-types";
+
+export const emptyScheduleData: CurrentSchedule = {
+  calendars: [],
+  persons: {},
+};
 
 const useGetSchedule = () => {
   const errorToast = useErrorToast();
@@ -10,10 +15,11 @@ const useGetSchedule = () => {
   const query = useQuery(
     ['useGetSchedule'],
     async () => {
-      return await axios.get<AxiosResponse, CurrentSchedule>("/get_schedule/")
+      return await axios.get<AxiosResponse, CurrentSchedule>("http://localhost:8000/get_schedule/")
     },
     {
-      onError: (error) => {
+      keepPreviousData: true,
+      onError: (error: Error) => {
         errorToast({error});
         console.log(error);
       },
@@ -21,7 +27,7 @@ const useGetSchedule = () => {
   )
   return {
     ...query,
-    data: query.data,
+    data: query.data ?? emptyScheduleData,
   };
 };
 
