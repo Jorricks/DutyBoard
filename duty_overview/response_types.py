@@ -1,11 +1,10 @@
 import datetime
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
 
 class _Person(BaseModel):
-    uid: int
     ldap: str
     email: str
     extra_attributes: Dict[str, Any]
@@ -34,4 +33,4 @@ class _Calendar(BaseModel):
 
 class CurrentSchedule(BaseModel):
     calendars: List[_Calendar]
-    persons: List[_Person]
+    persons: Dict[int, _Person]
