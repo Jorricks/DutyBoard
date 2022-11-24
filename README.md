@@ -9,15 +9,29 @@ Overview of Duty calendars using iCalendar
 pip3 install -e ."[dev, test]"
 ```
 
-### Starting it up
+### Database
+Initial start
 ```shell
 docker run -p 5432:5432 --name pgduty -e POSTGRES_PASSWORD=mysecretpassword -d postgres
-export SQL_ALCHEMY_CONNECTION="postgresql://postgres:mysecretpassword@127.0.0.1:5432/postgres"
-export DUTY_OVERVIEW_SECRET_KEY="RANDOM_SECRET_KEY"
-uvicorn duty_overview.server:app --reload
 ```
-
-Restarting it
+Stopping
+```shell
+docker stop pgduty
+```
+Starting a stopped instance
+```shell
+docker start pgduty
+```
+Starting over with a wiped database
 ```shell
 docker stop pgduty; docker rm pgduty
+```
+
+### Starting application
+```
+docker start pgduty
+export SQL_ALCHEMY_CONNECTION="postgresql://postgres:mysecretpassword@127.0.0.1:5432/postgres"
+export DUTY_OVERVIEW_SECRET_KEY="RANDOM_SECRET_KEY"
+export CREATE_DUMMY_RECORDS="1"
+uvicorn duty_overview.server:app --reload
 ```
