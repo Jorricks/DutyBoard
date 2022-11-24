@@ -16,6 +16,8 @@ def to_camel_case(snake_str: str) -> str:
 
 
 def convert_dict_from_snake_to_camel(given_value: Any) -> Any:
+    if isinstance(given_value, (bool, int, float)):
+        return given_value
     if isinstance(given_value, list):
         return [
             to_camel_case(item) if isinstance(item, str) else convert_dict_from_snake_to_camel(item)

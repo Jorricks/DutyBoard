@@ -17,6 +17,22 @@ export interface CurrentSchedule {
   persons: Record<string, Person>;
 }
 
+/** HTTPValidationError */
+export interface HTTPValidationError {
+  /** Detail */
+  detail?: ValidationError[];
+}
+
+/** ValidationError */
+export interface ValidationError {
+  /** Location */
+  loc: any[];
+  /** Message */
+  msg: string;
+  /** Error Type */
+  type: string;
+}
+
 /** Calendar */
 export interface Calendar {
   /** Uid */
@@ -29,11 +45,8 @@ export interface Calendar {
   category: string;
   /** Order */
   order: number;
-  /**
-   * Last Update Utc
-   * @format date-time
-   */
-  lastUpdateUtc: string;
+  /** Last Update */
+  lastUpdate: string;
   /** Error Msg */
   errorMsg: string;
   /** Sync */
@@ -44,16 +57,10 @@ export interface Calendar {
 
 /** Events */
 export interface Events {
-  /**
-   * Start Event Utc
-   * @format date-time
-   */
-  startEventUtc: string;
-  /**
-   * End Event Utc
-   * @format date-time
-   */
-  endEventUtc: string;
+  /** Start Event */
+  startEvent: string;
+  /** End Event */
+  endEvent: string;
   /** Person Uid */
   personUid: number;
 }
@@ -66,11 +73,8 @@ export interface Person {
   email: string;
   /** Extra Attributes */
   extraAttributes: object;
-  /**
-   * Last Update Utc
-   * @format date-time
-   */
-  lastUpdateUtc: string;
+  /** Last Update */
+  lastUpdate: string;
   /** Error Msg */
   errorMsg: string;
   /** Sync */

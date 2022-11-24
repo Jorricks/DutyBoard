@@ -1,4 +1,3 @@
-import datetime
 from typing import Any, Dict, List
 
 from pydantic import BaseModel
@@ -8,14 +7,14 @@ class _Person(BaseModel):
     ldap: str
     email: str
     extra_attributes: Dict[str, Any]
-    last_update_utc: datetime.datetime
+    last_update: str
     error_msg: str
     sync: bool
 
 
 class _Events(BaseModel):
-    start_event_utc: datetime.datetime
-    end_event_utc: datetime.datetime
+    start_event: str
+    end_event: str
     person_uid: int
 
 
@@ -25,7 +24,7 @@ class _Calendar(BaseModel):
     description: str
     category: str
     order: int
-    last_update_utc: datetime.datetime
+    last_update: str
     error_msg: str
     sync: bool
     events: List[_Events]

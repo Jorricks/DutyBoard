@@ -43,11 +43,11 @@ const SingleCalendar = ({
       <List spacing={3} textAlign="start">
         <ListItem key="def">
           <ListIcon color="green.500" />
-          {firstEvent.startEventUtc}
+          {firstEvent.startEvent}
         </ListItem>
         <ListItem key="abc">
           <ListIcon color="green.500" />
-          {firstEvent.endEventUtc}
+          {firstEvent.endEvent}
         </ListItem>
       </List>
       <Heading size={'xl'}>{firstPerson.ldap}</Heading>

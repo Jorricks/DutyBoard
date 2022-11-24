@@ -11,11 +11,14 @@ export const emptyScheduleData: CurrentSchedule = {
 
 const useGetSchedule = () => {
   const errorToast = useErrorToast();
+  const timezoneValue = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const query = useQuery(
     ['useGetSchedule'],
     async () => {
-      return await axios.get<AxiosResponse, CurrentSchedule>("http://localhost:8000/get_schedule/")
+      return await axios.get<AxiosResponse, CurrentSchedule>(
+        "http://localhost:8000/get_schedule", { params: { timezone: timezoneValue } }
+      )
     },
     {
       keepPreviousData: true,
