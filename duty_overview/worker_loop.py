@@ -1,7 +1,7 @@
 import logging
 import time
 import traceback
-from typing import Optional
+from typing import Optional, Dict
 
 from pendulum import DateTime
 from sqlalchemy.orm import Session as SASession
@@ -67,7 +67,7 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
                 if calendar is None:
                     break
                 try:
-                    plugin.sync_calendar(calendar=calendar, session=session)
+                    plugin.sync_calendar(calendar=calendar, prefix=None, session=session)
                 except Exception:
                     logger.exception(f"Failed to update {calendar}.")
                     calendar.error_msg = traceback.format_exc()
@@ -78,6 +78,7 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
 
 
 def enter_loop():
+    # @ToDo(jorrick) Sync Calendar based on yaml file.
     plugin: AbstractPlugin = plugin_fetcher.get_plugin()
     while True:
         logger.info("Updating persons.")

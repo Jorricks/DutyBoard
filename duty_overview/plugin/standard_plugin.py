@@ -13,11 +13,8 @@ class StandardPlugin(AbstractPlugin):
         """This is to be implemented by our end user."""
         person.last_update_utc = DateTime.utcnow()
 
-    def sync_calendar(self, calendar: Calendar, session: SASession) -> None:
+    def sync_calendar(self, calendar: Calendar, prefix, session: SASession) -> None:
         raise NotImplementedError()
-
-    def location_to_company_logo(self) -> Optional[str]:
-        pass
 
     async def admin_login_attempt(self, username: str, password: str) -> bool:
         return username == "admin" and password == "admin123"
