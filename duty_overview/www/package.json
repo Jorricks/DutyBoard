@@ -39,11 +39,13 @@
     "@chakra-ui/react": "^2.4.1",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
+    "@tanstack/react-router": "0.0.1-beta.28",
     "axios": "^0.26.0",
     "camelcase-keys": "^8.0.2",
     "framer-motion": "^7.6.9",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.6.0",
     "react-query": "^3.39.2",
     "web-vitals": "^2.1.4"
   },

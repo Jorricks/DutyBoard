@@ -2,9 +2,14 @@ import { useQuery } from 'react-query';
 import axios, { AxiosResponse } from 'axios';
 
 import useErrorToast from '../utils/useErrorToast';
-import {Calendar, CurrentSchedule, Person} from "./api-generated-types";
+import {CurrentSchedule} from "./api-generated-types";
+
 
 export const emptyScheduleData: CurrentSchedule = {
+  config: {
+    companyColorHex: "#3C9C2D",
+    categories: ["Loading..", "123"],
+  },
   calendars: [],
   persons: {},
 };
@@ -24,7 +29,7 @@ const useGetSchedule = () => {
       keepPreviousData: true,
       onError: (error: Error) => {
         errorToast({error});
-        console.log(error);
+        console.error(error);
       },
     }
   )

@@ -35,3 +35,12 @@ export DUTY_OVERVIEW_SECRET_KEY="RANDOM_SECRET_KEY"
 export CREATE_DUMMY_RECORDS="1"
 uvicorn duty_overview.server:app --reload
 ```
+
+
+## @ToDos:
+- [ ] Parse iCalendars
+- [ ] Create YAML config loader
+- [ ] Create YAML tester
+- [ ] Create YAML database syncer
+- [ ] (Optional) Create docker image
+- [ ] (Optional) Create docker compose

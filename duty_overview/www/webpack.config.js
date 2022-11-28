@@ -57,5 +57,6 @@ module.exports = {
   ],
   devServer: {
     static: path.resolve(__dirname, "static"),
+    historyApiFallback: true,
   }
 };

@@ -1,4 +1,4 @@
-from typing import Optional
+from pathlib import Path
 
 from pendulum import DateTime
 from sqlalchemy.orm import Session as SASession
@@ -9,6 +9,9 @@ from duty_overview.plugin.abstract_plugin import AbstractPlugin
 
 
 class StandardPlugin(AbstractPlugin):
+    absolute_path_to_company_logo_png = Path(__file__).resolve().parent / "example_logo.png"
+    category_order = ["Big Data", "Infrastructure"]
+
     def sync_person(self, person: Person, session: SASession) -> None:
         """This is to be implemented by our end user."""
         person.last_update_utc = DateTime.utcnow()

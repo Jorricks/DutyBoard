@@ -11,6 +11,7 @@
 
 /** CurrentSchedule */
 export interface CurrentSchedule {
+  config: Config;
   /** Calendars */
   calendars: Calendar[];
   /** Persons */
@@ -53,6 +54,18 @@ export interface Calendar {
   sync: boolean;
   /** Events */
   events: Events[];
+}
+
+/** Config */
+export interface Config {
+  /** Text Color */
+  textColor: string;
+  /** Background Color */
+  backgroundColor: string;
+  /** Categories */
+  categories: string[];
+  /** Timezone */
+  timezone: string;
 }
 
 /** Events */

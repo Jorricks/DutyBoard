@@ -1,75 +1,35 @@
 import { Box, Divider, Stack } from "@chakra-ui/react";
-import axios, { AxiosResponse } from "axios";
-import { useQuery } from "react-query";
+import { useMatch } from "@tanstack/react-router";
 import {useGetSchedule} from "../api";
-import {Calendar, CurrentSchedule} from "../api/api-generated-types";
-import SingleCalendar from "./single_calendar"
-import useErrorToast from "../utils/useErrorToast";
-
-// function Todos() {
-//   const { isLoading, isError, data, error } = useQuery('todos', fetchTodoList)
-//
-//   if (isLoading) {
-//     return <span>Loading...</span>
-//   }
-//
-//   if (isError) {
-//     return <span>Error: {error.message}</span>
-//   }
-//
-//   // We can assume by this point that `isSuccess === true`
-//   return (
-//     <ul>
-//       {data.map(todo => (
-//         <li key={todo.id}>{todo.title}</li>
-//       ))}
-//     </ul>
-//   )
-// }
+import {Calendar} from "../api/api-generated-types";
+import SingleCalendar from "./singleCalendar"
 
 
 const Schedule = () => {
-  const { data: { calendars, persons }, isLoading } = useGetSchedule();
+  const data = useMatch('/$category', {strict: false})
+  const { data: { config, calendars, persons } } = useGetSchedule();
+  console.log({data});
+  const category = data ? decodeURI(data.params.category) : config.categories[0];
   const personsMap = new Map(Object.entries(persons));
+  console.log({category});
 
   // Design heavily influenced by https://chakra-templates.dev/page-sections/pricing
   return (
     <Box py={6} px={5} width={'100%'}>
       <Stack spacing={4} width={'100%'} direction={'column'}>
-        {calendars.map((calendar: Calendar, index) => (
-          <>
+        {calendars.filter(calendar => calendar.category == category).map((calendar: Calendar, index) => (
+          <Box key={index}>
             <Divider />
             <SingleCalendar
               key={index}
               calendar={calendar}
               persons={personsMap}
             />
-          </>
+          </Box>
         ))}
       </Stack>
     </Box>
   )
-
-  // const errorToast = useErrorToast();
-  // const abc = "hallo"
-  // const { isLoading, isError, data, error } = useQuery(['todos', abc], fetchSchedule);
-  // console.log({data, isLoading, isError, error});
-  //
-  // if (isLoading) {
-  //   return <span>Loading...</span>
-  // }
-  //
-  // if (isError) {
-  //   errorToast({ error });
-  //   return <span>Error: {error.message}</span>
-  // }
-  //
-  // // We can assume by this point that `isSuccess === true`
-  // return (
-  //   <ul>
-  //     {data}
-  //   </ul>
-  // )
 }
 
 export default Schedule;

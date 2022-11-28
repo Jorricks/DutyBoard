@@ -5,3 +5,5 @@ jqClock.min.js
 coverage/**
 static/dist/*
 static/docs/*
+dist/*
+webpack*

@@ -30,6 +30,14 @@ class _Calendar(BaseModel):
     events: List[_Events]
 
 
+class _Config(BaseModel):
+    text_color: str
+    background_color: str
+    categories: List[str]
+    timezone: str
+
+
 class CurrentSchedule(BaseModel):
+    config: _Config
     calendars: List[_Calendar]
     persons: Dict[int, _Person]

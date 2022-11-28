@@ -11,12 +11,8 @@ interface Props {
 const SingleCalendar = ({
   calendar, persons
 }: Props) => {
-  console.log({calendar});
   const firstEvent = calendar.events[0];
-  console.log({firstEvent});
   const firstPersonUid = firstEvent.personUid;
-  console.log({firstPersonUid});
-  console.log({persons});
   const firstPerson = persons.get(firstPersonUid.toString());
 
   const checked = true;
