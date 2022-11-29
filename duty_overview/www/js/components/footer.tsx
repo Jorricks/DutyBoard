@@ -59,7 +59,7 @@ export default function Footer() {
         spacing={4}
         justify={'center'}
         align={'center'}>
-        <CompanyLogo maxWidth={400} maxHeight={150}/>
+        <CompanyLogo maxWidth={250} maxHeight={150}/>
         <Stack direction={'row'} spacing={6}>
           {
             config.categories.map(
