@@ -1,9 +1,10 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
 
 class _Person(BaseModel):
+    uid: int
     ldap: str
     email: str
     extra_attributes: Dict[str, Any]
@@ -41,3 +42,20 @@ class CurrentSchedule(BaseModel):
     config: _Config
     calendars: List[_Calendar]
     persons: Dict[int, _Person]
+
+
+class _ExtraInfoOnPerson(BaseModel):
+    information: str
+    icon: str
+    icon_color: str
+    url: Optional[str]
+
+
+class PersonResponse(BaseModel):
+    uid: str
+    ldap: str
+    email: str
+    extra_attributes: List[_ExtraInfoOnPerson]
+    last_update: str
+    error_msg: str
+    sync: bool

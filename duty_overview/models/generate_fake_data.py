@@ -20,7 +20,7 @@ def create_calendars(session: SASession) -> None:
         description="If you have any issues with Spark, Airflow or Jupyterhub, contact these guys. "
         "They are available 24/7, however, they work in AMS hours. Only call them if there is an "
         "emergency.",
-        category="bigdata",
+        category="Big Data",
         order=1,
         last_update_utc=DateTime.utcnow(),
         sync=False,
@@ -31,7 +31,7 @@ def create_calendars(session: SASession) -> None:
         description="If you have any issues with Firewalls or critical tools such as Yarn, HDFS etc."
         "However, usually Data Platform Duty is your first point of contact for application "
         "issues.",
-        category="bigdata",
+        category="Infrastructure",
         order=2,
         last_update_utc=DateTime.utcnow(),
         sync=False,
@@ -40,7 +40,7 @@ def create_calendars(session: SASession) -> None:
         uid="machine_learning",
         name="Machine learning",
         description="Do you have any issues with your machine learning tools? Ask these guys.",
-        category="bigdata",
+        category="Big Data",
         order=3,
         last_update_utc=DateTime.utcnow(),
         sync=False,
@@ -55,14 +55,32 @@ def create_persons(session: SASession) -> None:
     nr_1 = Person(
         ldap="jorrick",
         email="jorricks@gmail.com",
-        extra_attributes_json=json.dumps({"mattermost": "https://mattermost.com/jorrick"}),
+        extra_attributes_json=json.dumps(
+            {
+                "mattermost": {
+                    "information": "Send Mattermost message",
+                    "icon": "FaExchangeAlt",
+                    "icon_color": "#2980B9",
+                    "url": "https://mattermost.com/jorrick",
+                },
+            }
+        ),
         last_update_utc=DateTime.utcnow(),
         sync=False,
     )
     nr_2 = Person(
         ldap="bart",
         email="bart@gmail.com",
-        extra_attributes_json=json.dumps({"mattermost": "https://mattermost.com/bart"}),
+        extra_attributes_json=json.dumps(
+            {
+                "mattermost": {
+                    "information": "Send Mattermost message",
+                    "icon": "FaExchangeAlt",
+                    "icon_color": "#2980B9",
+                    "url": "https://mattermost.com/bart",
+                },
+            }
+        ),
         last_update_utc=DateTime.utcnow(),
         sync=False,
     )

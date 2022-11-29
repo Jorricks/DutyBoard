@@ -13,8 +13,9 @@ npx webpack-dev-server
 - [x] Implement react router.
 - [x] Only display categories of selected category.
 - [x] Create dropdown for calendar.
-- [ ] Implement Person view.
+- [x] Implement Person view.
 - [ ] Integrate ReactJS with our FastAPI.
 - [ ] Add button to link to repository.
+- [ ] Add image option.
 - [ ] (Optional) Ability to add heads up notification.
-- [ ] (Optional) Create loader icon on page load
+- [ ] (Optional) Create loader icon on page load.

@@ -15,7 +15,7 @@ from duty_overview.alchemy.session import create_session
 from duty_overview.models import generate_fake_data
 from duty_overview.plugin import plugin_fetcher
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
-from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule
+from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
 
 app = FastAPI()
 app.add_middleware(
@@ -35,13 +35,16 @@ if settings.SQL_ALCHEMY_CONN:
         generate_fake_data.create_fake_database_rows_if_not_present()
 
 
+async def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:
+    try:
+        return pytz.timezone(timezone_str)
+    except UnknownTimeZoneError:
+        return get_localzone()
+
+
 @app.get("/get_schedule", response_model=CurrentSchedule)
 async def get_schedule(timezone: str):
-    try:
-        timezone_object: BaseTzInfo = pytz.timezone(timezone)
-    except UnknownTimeZoneError:
-        timezone_object = get_localzone()
-
+    timezone_object = await _parse_timezone_str(timezone)
     config = _Config(
         text_color=plugin.text_color_hex,
         background_color=plugin.background_color_hex,
@@ -57,6 +60,13 @@ async def get_schedule(timezone: str):
             session=session, all_person_uids=all_encountered_person_uids, timezone=timezone_object
         )
         return CurrentSchedule(config=config, calendars=calendars, persons=persons)
+
+
+@app.get("/get_person", response_model=PersonResponse)
+async def get_person(person_uid: int, timezone: str):
+    timezone_object = await _parse_timezone_str(timezone)
+    with create_session() as session:
+        return queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
 
 
 @app.get(

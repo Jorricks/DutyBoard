@@ -24,6 +24,24 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+/** PersonResponse */
+export interface PersonResponse {
+  /** Uid */
+  uid: string;
+  /** Ldap */
+  ldap: string;
+  /** Email */
+  email: string;
+  /** Extra Attributes */
+  extraAttributes: ExtraInfoOnPerson[];
+  /** Last Update */
+  lastUpdate: string;
+  /** Error Msg */
+  errorMsg: string;
+  /** Sync */
+  sync: boolean;
+}
+
 /** ValidationError */
 export interface ValidationError {
   /** Location */
@@ -78,8 +96,22 @@ export interface Events {
   personUid: number;
 }
 
+/** ExtraInfoOnPerson */
+export interface ExtraInfoOnPerson {
+  /** Information */
+  information: string;
+  /** Icon */
+  icon: string;
+  /** Icon Color */
+  iconColor: string;
+  /** Url */
+  url?: string;
+}
+
 /** Person */
 export interface Person {
+  /** Uid */
+  uid: number;
   /** Ldap */
   ldap: string;
   /** Email */

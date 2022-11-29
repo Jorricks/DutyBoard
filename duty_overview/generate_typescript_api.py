@@ -12,7 +12,7 @@ def to_camel_case(snake_str: str) -> str:
     components = snake_str.split("_")
     # We capitalize the first letter of each component except the first one
     # with the 'title' method and join them together.
-    return components[0] + "".join(x.title() for x in components[1:])
+    return components[0] + "".join(x[0].upper() + x[1:] for x in components[1:])
 
 
 def convert_dict_from_snake_to_camel(given_value: Any) -> Any:
