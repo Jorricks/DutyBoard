@@ -62,3 +62,22 @@
     transform: rotate(360deg);
   }
 }
+
+.code-snippet {
+  background: #eee;
+  padding: 1rem;
+  margin-top: 2rem;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  overflow: auto;
+  border-radius: 3px;
+}
+
+.code-snippet .code {
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+}

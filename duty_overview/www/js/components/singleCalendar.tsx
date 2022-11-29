@@ -1,5 +1,8 @@
-import {Button, Heading, List, ListItem, ListIcon, Stack, useColorModeValue,} from "@chakra-ui/react";
+import {Box, Button, Heading, List, ListItem, Stack, useColorModeValue} from "@chakra-ui/react";
+import useCollapse from "react-collapsed";
 import {Calendar, Person} from "../api/api-generated-types";
+import ExpandedCalendarInfo from "./expandedCalendarInfo";
+import {BsCalendarCheck, BsCalendarX} from "react-icons/bs";
 
 
 interface Props {
@@ -8,12 +11,16 @@ interface Props {
 }
 
 
+// Huge credits to https://blog.logrocket.com/create-collapsible-react-components-react-collapsed/
 const SingleCalendar = ({
   calendar, persons
 }: Props) => {
-  const firstEvent = calendar.events[0];
-  const firstPersonUid = firstEvent.personUid;
-  const firstPerson = persons.get(firstPersonUid.toString());
+  const firstEvent = calendar.events.length > 0 ? calendar.events[0] : undefined;
+  const firstPersonUid = firstEvent.personUid ?? undefined;
+  const firstPerson = firstPersonUid ? persons.get(firstPersonUid.toString()) : undefined;
+
+  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({duration: 500});
+
 
   const checked = true;
   const colorTextLight = checked ? 'white' : 'purple.600';
@@ -23,39 +30,51 @@ const SingleCalendar = ({
   const bgColorDark = checked ? 'purple.400' : 'gray.300';
 
   return (
-    <Stack
-      p={3}
-      py={3}
-      justifyContent={{
-        base: 'flex-start',
-        md: 'space-around',
-      }}
-      direction={{
-        base: 'column',
-        md: 'row',
-      }}
-      alignItems={{ md: 'center' }}>
-      <Heading size={'md'}>{calendar.name}</Heading>
-      <List spacing={3} textAlign="start">
-        <ListItem key="def">
-          <ListIcon color="green.500" />
-          {firstEvent.startEvent}
-        </ListItem>
-        <ListItem key="abc">
-          <ListIcon color="green.500" />
-          {firstEvent.endEvent}
-        </ListItem>
-      </List>
-      <Heading size={'xl'}>{firstPerson.ldap}</Heading>
-      <Stack>
-        <Button
-          size="md"
-          color={useColorModeValue(colorTextLight, colorTextDark)}
-          bgColor={useColorModeValue(bgColorLight, bgColorDark)}>
-          Get Started
-        </Button>
+    <>
+      <Stack
+        p={3}
+        py={3}
+        justifyContent={{
+          base: 'flex-start',
+          md: 'space-around',
+        }}
+        direction={{
+          base: 'column',
+          md: 'row',
+        }}
+        alignItems={{ md: 'center' }}>
+        <Heading size={'md'}>{calendar.name}</Heading>
+        <List spacing={3} textAlign="start">
+          <ListItem key="def">
+            <Box color="green.500" style={{display: "inline-block"}} mr={3}><BsCalendarCheck/></Box>
+            <Box style={{display: "inline-block"}}>{firstEvent.startEvent ?? "unknown"}</Box>
+          </ListItem>
+          <ListItem key="abc">
+            <Box color="green.500" style={{display: "inline-block"}} mr={3}><BsCalendarX/></Box>
+            <Box style={{display: "inline-block"}}>{firstEvent.endEvent ?? "unknown"}</Box>
+          </ListItem>
+        </List>
+        <Heading size={'xl'}>{firstPerson.ldap ?? "Unknown"}</Heading>
+        <Stack>
+          <div className="header" {...getToggleProps()}>
+            <Button
+              size="md"
+              color={useColorModeValue(colorTextLight, colorTextDark)}
+              bgColor={useColorModeValue(bgColorLight, bgColorDark)}>
+                {isExpanded ? 'Less': 'More'}
+            </Button>
+          </div>
+        </Stack>
       </Stack>
-    </Stack>
+      <div  {...getCollapseProps()}>
+        <div className="content">
+          <ExpandedCalendarInfo
+            calendar={calendar}
+            persons={persons}
+            />
+        </div>
+      </div>
+    </>
   );
 }
 
