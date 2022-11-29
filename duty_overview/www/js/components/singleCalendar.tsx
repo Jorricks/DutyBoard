@@ -3,6 +3,7 @@ import useCollapse from "react-collapsed";
 import {Calendar, Person} from "../api/api-generated-types";
 import ExpandedCalendarInfo from "./expandedCalendarInfo";
 import {BsCalendarCheck, BsCalendarX} from "react-icons/bs";
+import PersonComponent from "./personComponent";
 
 
 interface Props {
@@ -54,7 +55,11 @@ const SingleCalendar = ({
             <Box style={{display: "inline-block"}}>{firstEvent.endEvent ?? "unknown"}</Box>
           </ListItem>
         </List>
-        <Heading size={'xl'}>{firstPerson.ldap ?? "Unknown"}</Heading>
+        <Heading size={'xl'}>
+          <div>
+            <PersonComponent person={firstPerson}/>
+          </div>
+        </Heading>
         <Stack>
           <div className="header" {...getToggleProps()}>
             <Button

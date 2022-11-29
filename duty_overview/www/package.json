@@ -39,6 +39,7 @@
     "@chakra-ui/react": "^2.4.1",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
+    "@loadable/component": "^5.15.2",
     "@tanstack/react-router": "0.0.1-beta.28",
     "axios": "^0.26.0",
     "camelcase-keys": "^8.0.2",

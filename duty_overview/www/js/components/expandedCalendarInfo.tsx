@@ -2,6 +2,7 @@ import {Divider, TableContainer, Table, Text, Tr, Tbody, Td, Box,} from "@chakra
 import {Calendar, Events, Person} from "../api/api-generated-types";
 import ParsingError from "./parsingError";
 import ParsingWarning from "./parsingWarning";
+import PersonComponent from "./personComponent";
 
 
 interface Props {
@@ -14,7 +15,6 @@ const ExpandedCalendarInfo = ({
 }: Props) => {
   return (
     <Box bg="#f5f5f5">
-
       <Divider />
       {calendar.errorMsg &&
         <>
@@ -48,11 +48,13 @@ const ExpandedCalendarInfo = ({
             <Table variant='simple'>
               {/*<TableCaption>Schedule for {calendar.name}.</TableCaption>*/}
               <Tbody>
-                {calendar.events.map((event: Events) => (
-                  <Tr>
+                {calendar.events.map((event: Events, index) => (
+                  <Tr key={event.personUid + "CalendarUidNr" + calendar.uid + "AndPersonComponentNr" + index}>
                     <Td>{event.startEvent}</Td>
                     <Td>{event.endEvent}</Td>
-                    <Td>{persons.get(event.personUid.toString()).ldap}</Td>
+                    <Td>
+                      <PersonComponent person={persons.get(event.personUid.toString())}/>
+                    </Td>
                   </Tr>
                 ))}
               </Tbody>

@@ -12,7 +12,7 @@ import {
   createRouteConfig,
   useMatch,
 } from '@tanstack/react-router'
-import PersonView from "./components/personView";
+import PersonComponent from "./components/personComponent";
 
 
 const rootRoute = createRouteConfig()
@@ -29,7 +29,7 @@ const categoryRoute = rootRoute.createRoute({
 
 const personRoute = categoryRoute.createRoute({
   path: '$personId',
-  component: PersonView,
+  component: PersonComponent,
 })
 
 const routeConfig = rootRoute.addChildren([

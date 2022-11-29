@@ -21,7 +21,7 @@ const Schedule = () => {
           <Box key={index}>
             <Divider />
             <SingleCalendar
-              key={index}
+              key={"singleCalendarNr" + index}
               calendar={calendar}
               persons={personsMap}
             />
