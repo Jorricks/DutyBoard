@@ -50,8 +50,8 @@ export default function Footer() {
 
   return (
     <Box
-      bg={config.companyColorHex}
-      color={useColorModeValue('gray.700', 'gray.200')}>
+      bg={config.backgroundColor}
+      color={config.textColor}>
       <Container
         as={Stack}
         maxW={'6xl'}
@@ -63,13 +63,13 @@ export default function Footer() {
         <Stack direction={'row'} spacing={6}>
           {
             config.categories.map(
-              (category: string) => (
+              (aCategory: string) => (
                 <Link
                   to="/$category"
-                  params={{category: category}}
+                  params={{category: aCategory}}
                   activeProps={{ className: 'font-bold' }}
-                  key={"footer" + category}>
-                  {category}
+                  key={"footer" + aCategory}>
+                  {aCategory}
                 </Link>
               )
             )

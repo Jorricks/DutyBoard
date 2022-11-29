@@ -42,7 +42,7 @@ export default function Navbar() {
 
   return (
     <>
-      <Box bg={config.companyColorHex} px={4}>
+      <Box bg={config.backgroundColor} color={config.textColor} px={4}>
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
           <IconButton
             size={'md'}
