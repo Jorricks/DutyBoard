@@ -39,6 +39,7 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
     events: Dict[str, List[_Events]] = _get_events_ending_from_now_onwards(
         session=session, all_encountered_person_uids=all_encountered_person_uids, timezone=timezone
     )
+    # @ToDo(jorrick) Add order here. Lower is shown ealier.
     result: List[Calendar] = session.query(Calendar).all()
     return [
         _Calendar(

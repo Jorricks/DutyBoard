@@ -12,7 +12,7 @@ class Calendar(Base):
     __tablename__ = "calendar"
     uid = Column(String(50), primary_key=True, nullable=False)
     name = Column(String(200), nullable=False)
-    description = Column(String(5000), nullable=False)
+    description = Column(String(5000), nullable=True)
     category = Column(String(50), nullable=False)
     order = Column(Integer, nullable=False)
     icalendar_url = Column(String(500), nullable=True)

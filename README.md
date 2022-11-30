@@ -38,9 +38,8 @@ uvicorn duty_overview.server:app --reload
 
 
 ## @ToDos:
-- [ ] Parse iCalendars
-- [ ] Create YAML config loader
-- [ ] Create YAML tester
-- [ ] Create YAML database syncer
+- [x] Parse iCalendars
+- [x] Create calendar config for usage in Configs
+- [ ] Create calendar config to Database syncer
 - [ ] (Optional) Create docker image
 - [ ] (Optional) Create docker compose

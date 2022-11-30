@@ -51,7 +51,7 @@ class ICalPlugin(StandardPlugin):
             person = Person(
                 ldap=ldap,
                 email=email,
-                extra_attributes_json=json.dumps({}),
+                extra_attributes_json=None,
                 last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
                 sync=True
             )
