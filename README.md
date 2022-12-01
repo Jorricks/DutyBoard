@@ -40,6 +40,8 @@ uvicorn duty_overview.server:app --reload
 ## @ToDos:
 - [x] Parse iCalendars
 - [x] Create calendar config for usage in Configs
-- [ ] Create calendar config to Database syncer
-- [ ] (Optional) Create docker image
-- [ ] (Optional) Create docker compose
+- [x] Create calendar config to Database syncer
+- [ ] Create docker image
+- [ ] Create docker compose
+- [ ] Create kustomize example
+- [ ] (Optional) Implement announcement calendar

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session as SASession
 
 from duty_overview.models.calendar import Calendar
 from duty_overview.models.person import Person
-from duty_overview.plugin.calendar_config import DutyCalendarConfig
+from duty_overview.plugin.duty_calendar_config import DutyCalendarConfig
 
 
 class AbstractPlugin(ABC):

@@ -3,13 +3,14 @@ import json
 from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
-from pendulum import DateTime
+from pendulum import DateTime, UTC
 from pytz.tzinfo import BaseTzInfo
 from sqlalchemy.orm import Session as SASession
 
 from duty_overview.models.calendar import Calendar
 from duty_overview.models.on_call_event import OnCallEvent
 from duty_overview.models.person import Person
+from duty_overview.plugin.duty_calendar_config import DutyCalendarConfig
 from duty_overview.response_types import _Calendar, _Events, _ExtraInfoOnPerson, _Person, PersonResponse
 
 
@@ -39,8 +40,7 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
     events: Dict[str, List[_Events]] = _get_events_ending_from_now_onwards(
         session=session, all_encountered_person_uids=all_encountered_person_uids, timezone=timezone
     )
-    # @ToDo(jorrick) Add order here. Lower is shown ealier.
-    result: List[Calendar] = session.query(Calendar).all()
+    result: List[Calendar] = session.query(Calendar).order_by(Calendar.order).all()
     return [
         _Calendar(
             uid=single_calendar.uid,
@@ -113,3 +113,38 @@ def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> Per
         error_msg=person.error_msg or "",
         sync=person.sync,
     )
+
+
+def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig) -> None:
+    calendar_db_instance: Optional[Calendar] = session.query(Calendar).where(Calendar.uid == calendar.uid).first()
+    if calendar_db_instance is not None:
+        calendar_db_instance.name = calendar.name
+        calendar_db_instance.description = calendar.description
+        calendar_db_instance.category = calendar.category
+        calendar_db_instance.order = calendar.order
+        calendar_db_instance.icalendar_url = calendar.icalendar_url
+        calendar_db_instance.prefix = calendar.prefix
+        session.merge(calendar_db_instance)
+
+    calendar_db_instance = Calendar(
+        uid=calendar.uid,
+        name=calendar.name,
+        description=calendar.description,
+        category=calendar.category,
+        order=calendar.order,
+        icalendar_url=calendar.icalendar_url,
+        prefix=calendar.prefix,
+        error_msg=None,
+        last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
+        sync=True,
+    )
+    session.add(calendar_db_instance)
+
+
+def sync_duty_calendar_configurations_to_postgres(
+    session: SASession, duty_calendar_configurations: List[DutyCalendarConfig]
+) -> None:
+    for duty_calendar_config in duty_calendar_configurations:
+        _create_or_update_calendar(session, duty_calendar_config)
+    all_described_calendar_uids: List[str] = [dcc.uid for dcc in duty_calendar_configurations]
+    session.query(Calendar).where(Calendar.uid.not_in(all_described_calendar_uids)).delete()
