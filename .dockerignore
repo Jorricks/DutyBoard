@@ -1,0 +1,4 @@
+venv/
+.flake8
+.gitignore
+.pre-commit-config.yaml

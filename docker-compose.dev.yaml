@@ -1,0 +1,47 @@
+---
+version: "2.1"
+services:
+  postgres:
+    container_name: duty_database
+    image: registry.hub.docker.com/library/postgres:13.3-alpine
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+
+  backend:
+    depends_on:
+      - postgres
+    container_name: duty_backend
+    image: registry.hub.docker.com/library/python:3.10-slim
+    ports:
+      - 8000:8000
+    links:
+      - "postgres:database_container"
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5432/postgres
+      - DUTY_OVERVIEW_SECRET_KEY=RANDOM_SECRET_KEY
+      - CREATE_DUMMY_RECORDS=1
+    volumes:
+      - ./:/code
+      - ./docker_venv:/venv
+      # Prevent docker_venv from being synced into the container twice; https://stackoverflow.com/a/37898591/2277445
+      - /code/docker_venv
+      - /code/duty_overview/www/node_modules
+    working_dir: /code
+    command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install -e . && uvicorn duty_overview.server:app --host 0.0.0.0 --reload"
+
+  frontend:
+    container_name: duty_frontend
+    image: registry.hub.docker.com/library/node:18-slim
+    ports:
+      - 8080:8080
+    environment:
+      - BACKEND_PORT=8000
+      - SERVER_PORT=8080
+    volumes:
+      - ./duty_overview/www:/code
+      - ./duty_overview/www/docker_node_modules:/code/node_modules
+      - ./duty_overview/www/docker_dist:/code/dist
+    working_dir: /code
+    command: /bin/bash -c "npm install && npx webpack-dev-server"

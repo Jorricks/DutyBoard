@@ -17,5 +17,6 @@ npx webpack-dev-server
 - [ ] Integrate ReactJS with our FastAPI.
 - [ ] Add button to link to repository.
 - [ ] Add image option.
+- [ ] Change favicon to duty icon.
 - [ ] (Optional) Ability to add heads up notification.
 - [ ] (Optional) Create loader icon on page load.

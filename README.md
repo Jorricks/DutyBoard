@@ -36,6 +36,15 @@ export CREATE_DUMMY_RECORDS="1"
 uvicorn duty_overview.server:app --reload
 ```
 
+## Docker compose dev setup
+Starting up
+```shell
+docker-compose -f docker-compose.dev.yaml up -d
+```
+Shutting down
+```shell
+docker-compose -f docker-compose.dev.yaml down
+```
 
 ## @ToDos:
 - [x] Parse iCalendars
@@ -44,4 +53,9 @@ uvicorn duty_overview.server:app --reload
 - [ ] Create docker image
 - [ ] Create docker compose
 - [ ] Create kustomize example
+- [ ] Add extra pre-commit hooks
 - [ ] (Optional) Implement announcement calendar
+
+## Extra pre-commit hooks;
+- [ ] Automated run of generate_typescript_api.py.
+- [ ] Docker run to generate new compiled javascript files or other files?

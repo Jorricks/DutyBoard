@@ -156,3 +156,5 @@ yarn-error.log*
 # Extra
 .idea
 duty_overview/www/node_modules
+duty_overview/www/docker_node_modules
+docker_venv/
