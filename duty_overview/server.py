@@ -7,7 +7,9 @@ from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
 from sqladmin import Admin
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import FileResponse
+from starlette.middleware.gzip import GZipMiddleware
+from starlette.responses import FileResponse, HTMLResponse
+from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
 
 from duty_overview.alchemy import add_sqladmin, queries, settings
@@ -18,6 +20,8 @@ from duty_overview.plugin.abstract_plugin import AbstractPlugin
 from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="duty_overview/www/dist"), name="static")
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,12 +31,13 @@ app.add_middleware(
 
 plugin: AbstractPlugin
 admin: Admin
+
 if settings.SQL_ALCHEMY_CONN:
     settings.configure_orm()
     plugin = plugin_fetcher.get_plugin()
     admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
-    if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
-        generate_fake_data.create_fake_database_rows_if_not_present()
+if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
+    generate_fake_data.create_fake_database_rows_if_not_present()
 
 
 async def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:
@@ -79,3 +84,13 @@ def thumbnail_image():
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type="image/jpeg", filename="company_logo.png")
     return {"error": f"{file_path=} not found!"}
+
+
+@app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
+async def accept_all():
+    return FileResponse("duty_overview/www/dist/index.html")
+
+
+# @app.get("/duty", response_class=HTMLResponse)
+# async def get_schedule():
+#     return FileResponse("duty_overview/www/dist/index.html")

@@ -31,7 +31,7 @@ const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
   const { data: apiPerson } = useGetPerson({ personUid });
 
   return (
-    <PopoverContent>
+    <>
       <PopoverHeader>{apiPerson ? apiPerson.ldap ?? apiPerson.email : "unknown"}</PopoverHeader>
       <PopoverCloseButton />
       <PopoverBody>
@@ -44,7 +44,7 @@ const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
         <br />
         Sync enabled: {apiPerson?.sync ? "True" : "False"}
       </PopoverFooter>
-    </PopoverContent>
+    </>
   );
 };
 
@@ -56,7 +56,7 @@ const PersonComponent = ({ person }: { person: Person }) => {
       {person == undefined ? (
         "Unknown error.."
       ) : (
-        <Popover placement="left" initialFocusRef={initRef}>
+        <Popover placement="left" initialFocusRef={initRef} isLazy lazyBehavior='keepMounted'>
           {({ isOpen, onClose }) => (
             <>
               <PopoverTrigger>
@@ -68,7 +68,9 @@ const PersonComponent = ({ person }: { person: Person }) => {
                 </Box>
               </PopoverTrigger>
               <Portal>
-                <LazyLoadingPopoverContent personUid={person.uid} />
+                <PopoverContent>
+                    <LazyLoadingPopoverContent personUid={person.uid} />
+                </PopoverContent>
               </Portal>
             </>
           )}

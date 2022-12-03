@@ -12,7 +12,7 @@ const useGetSchedule = ({ personUid }: { personUid: number }) => {
   return useQuery(
     ["useGetSchedule", personUid],
     () =>
-      axios.get<AxiosResponse, PersonResponse>("http://localhost:8000/get_person", {
+      axios.get<AxiosResponse, PersonResponse>("/get_person", {
         params: params
       }),
     {

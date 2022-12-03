@@ -1,1 +1,46 @@
-# This is left ToDo
+---
+version: "2.1"
+services:
+  prod_postgres:
+    container_name: duty_prod_database
+    image: registry.hub.docker.com/library/postgres:13.3-alpine
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+
+  prod_frontend:
+    container_name: duty_prod_frontend
+    image: registry.hub.docker.com/library/node:18-slim
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./duty_overview/www:/code
+    working_dir: /code
+    command: /bin/bash -c "npm install && npm run build"
+
+  prod_backend:
+    container_name: duty_prod_backend
+    depends_on:
+      prod_postgres:
+        condition: service_started
+      prod_frontend:
+        condition: service_completed_successfully
+    image: registry.hub.docker.com/library/python:3.10-slim
+    ports:
+      - 8001:8000
+    links:
+      - "prod_postgres:database_container"
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5432/postgres
+      - DUTY_OVERVIEW_SECRET_KEY=RANDOM_SECRET_KEY
+      - CREATE_DUMMY_RECORDS=1
+    volumes:
+      - ./:/code
+      - ./docker_prod_venv:/venv
+      # Prevent docker_venv from being synced into the container twice; https://stackoverflow.com/a/37898591/2277445
+      - /code/docker_venv
+      - /code/docker_prod_venv
+      - /code/duty_overview/www/node_modules
+    working_dir: /code
+    command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install . && uvicorn duty_overview.server:app --host 0.0.0.0"

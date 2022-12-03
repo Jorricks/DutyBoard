@@ -11,7 +11,7 @@ module.exports = {
   entry: path.resolve(__dirname, "js/index.js"), // main js
   output: {
     path: path.resolve(__dirname, "dist"), // output folder
-    publicPath: "/"
+    publicPath: "/static/"
   },
   resolve: {
     alias: {
@@ -68,5 +68,6 @@ module.exports = {
   optimization: {
     minimize: true,
     minimizer: [new CssMinimizerPlugin({})]
-  }
+  },
+  devtool: 'eval-cheap-source-map',
 };

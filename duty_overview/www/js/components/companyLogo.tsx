@@ -6,7 +6,7 @@ interface Props {
 const CompanyLogo = ({ maxHeight, maxWidth }: Props) => {
   return (
     <img
-      src="http://localhost:8000/company_logo.png"
+      src="/company_logo.png"
       alt="Logo"
       style={{ maxHeight: maxHeight, maxWidth: maxWidth }}
     />
