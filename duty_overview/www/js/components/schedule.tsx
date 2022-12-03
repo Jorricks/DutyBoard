@@ -1,35 +1,38 @@
 import { Box, Divider, Stack } from "@chakra-ui/react";
 import { useMatch } from "@tanstack/react-router";
-import {useGetSchedule} from "../api";
-import {Calendar} from "../api/api-generated-types";
-import SingleCalendar from "./singleCalendar"
-
+import { useGetSchedule } from "../api";
+import { Calendar } from "../api/api-generated-types";
+import SingleCalendar from "./singleCalendar";
 
 const Schedule = () => {
-  const data = useMatch('/$category', {strict: false})
-  const { data: { config, calendars, persons } } = useGetSchedule();
-  console.log({data});
+  const data = useMatch("/$category", { strict: false });
+  const {
+    data: { config, calendars, persons }
+  } = useGetSchedule();
+  console.log({ data });
   const category = data ? decodeURI(data.params.category) : config.categories[0];
   const personsMap = new Map(Object.entries(persons));
-  console.log({category});
+  console.log({ category });
 
   // Design heavily influenced by https://chakra-templates.dev/page-sections/pricing
   return (
-    <Box py={6} px={5} width={'100%'}>
-      <Stack spacing={4} width={'100%'} direction={'column'}>
-        {calendars.filter(calendar => calendar.category == category).map((calendar: Calendar, index) => (
-          <Box key={index}>
-            <Divider />
-            <SingleCalendar
-              key={"singleCalendarNr" + index}
-              calendar={calendar}
-              persons={personsMap}
-            />
-          </Box>
-        ))}
+    <Box py={6} px={5} width={"100%"}>
+      <Stack spacing={4} width={"100%"} direction={"column"}>
+        {calendars
+          .filter((calendar) => calendar.category == category)
+          .map((calendar: Calendar, index) => (
+            <Box key={index}>
+              <Divider />
+              <SingleCalendar
+                key={"singleCalendarNr" + index}
+                calendar={calendar}
+                persons={personsMap}
+              />
+            </Box>
+          ))}
       </Stack>
     </Box>
-  )
-}
+  );
+};
 
 export default Schedule;

@@ -9,8 +9,8 @@
     "prod": "NODE_ENV=production node --max_old_space_size=4096 ./node_modules/webpack/bin/webpack.js --mode production --progress",
     "build": "NODE_ENV=production webpack --progress --mode production",
     "format": "prettier --write './**/*.{js,jsx,ts,tsx,css,md,json}' --config ./.prettierrc",
-    "lint": "eslint --ignore-path=.eslintignore --ext .js,.jsx,.ts,.tsx . && tsc",
-    "lint:fix": "eslint --fix --ignore-path=.eslintignore --ext .js,.jsx,.ts,.tsx . && tsc"
+    "lint": "eslint --ignore-path=.eslintignore --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "eslint --fix --ignore-path=.eslintignore --ext .js,.jsx,.ts,.tsx ."
   },
   "devDependencies": {
     "@babel/core": "^7.20.2",
@@ -31,6 +31,7 @@
     "eslint-plugin-react": "^7.31.11",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.1",
+    "prettier": "^2.7.1",
     "style-loader": "^3.3.1",
     "svg-inline-loader": "^0.8.2",
     "swagger-typescript-api": "^12.0.2",
