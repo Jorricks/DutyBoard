@@ -1,5 +1,5 @@
 import { Box, Heading } from "@chakra-ui/react";
-import { IoWarning } from 'react-icons/io5';
+import { IoWarning } from '@react-icons/all-files/io5/IoWarning';
 
 
 const ParsingWarning = ({

@@ -39,9 +39,8 @@ services:
     environment:
       - BACKEND_PORT=8000
       - SERVER_PORT=8080
+      - NODE_ENV=development
     volumes:
       - ./duty_overview/www:/code
-      - ./duty_overview/www/docker_node_modules:/code/node_modules
-      - ./duty_overview/www/docker_dist:/code/dist
     working_dir: /code
     command: /bin/bash -c "npm install && npx webpack-dev-server"

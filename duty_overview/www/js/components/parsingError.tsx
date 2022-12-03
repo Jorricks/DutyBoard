@@ -1,5 +1,5 @@
 import { Box, Heading } from "@chakra-ui/react";
-import { GiTerror } from 'react-icons/gi';
+import { GiTerror } from '@react-icons/all-files/gi/GiTerror';
 
 
 const ParsingError = ({

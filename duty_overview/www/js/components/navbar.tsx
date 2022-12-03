@@ -11,9 +11,9 @@ import {
   useColorModeValue,
   Stack,
 } from '@chakra-ui/react';
-import { GiHamburgerMenu } from 'react-icons/gi';
-import { IoCloseOutline } from 'react-icons/io5';
-import { GrUserAdmin } from 'react-icons/gr';
+import { GiHamburgerMenu } from '@react-icons/all-files/gi/GiHamburgerMenu';
+import { IoCloseOutline } from '@react-icons/all-files/io5/IoCloseOutline';
+import { GrUserAdmin } from '@react-icons/all-files/gr/GrUserAdmin';
 import CompanyLogo from "./companyLogo";
 import {useGetSchedule} from "../api";
 import { Link } from '@tanstack/react-router';

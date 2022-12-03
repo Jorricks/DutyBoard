@@ -2,7 +2,8 @@ import {Box, Button, Heading, List, ListItem, Stack, useColorModeValue} from "@c
 import useCollapse from "react-collapsed";
 import {Calendar, Person} from "../api/api-generated-types";
 import ExpandedCalendarInfo from "./expandedCalendarInfo";
-import {BsCalendarCheck, BsCalendarX} from "react-icons/bs";
+import { FaCalendarCheck } from "react-icons/fa";
+import { FaCalendarTimes } from "react-icons/fa";
 import PersonComponent from "./personComponent";
 
 
@@ -47,11 +48,11 @@ const SingleCalendar = ({
         <Heading size={'md'}>{calendar.name}</Heading>
         <List spacing={3} textAlign="start">
           <ListItem key="def">
-            <Box color="green.500" style={{display: "inline-block"}} mr={3}><BsCalendarCheck/></Box>
+            <Box color="green.500" style={{display: "inline-block"}} mr={3}><FaCalendarCheck/></Box>
             <Box style={{display: "inline-block"}}>{firstEvent.startEvent ?? "unknown"}</Box>
           </ListItem>
           <ListItem key="abc">
-            <Box color="green.500" style={{display: "inline-block"}} mr={3}><BsCalendarX/></Box>
+            <Box color="green.500" style={{display: "inline-block"}} mr={3}><FaCalendarTimes/></Box>
             <Box style={{display: "inline-block"}}>{firstEvent.endEvent ?? "unknown"}</Box>
           </ListItem>
         </List>
