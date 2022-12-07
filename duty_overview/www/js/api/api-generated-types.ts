@@ -84,6 +84,10 @@ export interface Config {
   categories: string[];
   /** Timezone */
   timezone: string;
+  /** Git Repository Url */
+  gitRepositoryUrl?: string;
+  /** Enable Admin Button */
+  enableAdminButton: boolean;
 }
 
 /** Events */

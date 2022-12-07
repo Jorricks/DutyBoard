@@ -9,8 +9,10 @@ import {
   MenuButton,
   useDisclosure,
   useColorModeValue,
-  Stack
+  Stack,
+  Text,
 } from "@chakra-ui/react";
+import { AiFillGithub } from "@react-icons/all-files/ai/AiFillGithub";
 import { GiHamburgerMenu } from "@react-icons/all-files/gi/GiHamburgerMenu";
 import { IoCloseOutline } from "@react-icons/all-files/io5/IoCloseOutline";
 import { GrUserAdmin } from "@react-icons/all-files/gr/GrUserAdmin";
@@ -60,12 +62,34 @@ export default function Navbar() {
               ))}
             </HStack>
           </HStack>
-          <Flex alignItems={"center"}>
-            <Menu>
-              <MenuButton as={Button} rounded={"full"} variant={"link"} cursor={"pointer"} minW={0}>
-                <GrUserAdmin />
-              </MenuButton>
-            </Menu>
+          <Flex alignItems={"center"} mr={"20px"}>
+            {config.gitRepositoryUrl &&
+              <Menu>
+                <Link to={config.gitRepositoryUrl} target="_blank">
+                  <Button
+                      leftIcon={<AiFillGithub color={config.textColor} fontSize={"30px"}/>}
+                      colorScheme='teal'
+                      variant='outline'
+                      mr={"20px"}
+                  >
+                    <Text color={config.textColor}>Repo</Text>
+                  </Button>
+                </Link>
+              </Menu>
+            }
+            {config.enableAdminButton &&
+              <Menu>
+                <Link to="/admin/" target="_blank">
+                  <Button
+                      leftIcon={<GrUserAdmin color={config.textColor} fontSize={"25px"} />}
+                      colorScheme='teal'
+                      variant='outline'
+                  >
+                    <Text color={config.textColor}>Admin</Text>
+                  </Button>
+                </Link>
+              </Menu>
+            }
           </Flex>
         </Flex>
 

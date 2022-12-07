@@ -41,37 +41,45 @@ const SingleCalendar = ({ calendar, persons }: Props) => {
         }}
         alignItems={{ md: "center" }}
       >
-        <Heading size={"md"}>{calendar.name}</Heading>
-        <List spacing={3} textAlign="start">
-          <ListItem key="def">
-            <Box color="green.500" style={{ display: "inline-block" }} mr={3}>
-              <FaCalendarCheck />
-            </Box>
-            <Box style={{ display: "inline-block" }}>{firstEvent.startEvent ?? "unknown"}</Box>
-          </ListItem>
-          <ListItem key="abc">
-            <Box color="green.500" style={{ display: "inline-block" }} mr={3}>
-              <FaCalendarTimes />
-            </Box>
-            <Box style={{ display: "inline-block" }}>{firstEvent.endEvent ?? "unknown"}</Box>
-          </ListItem>
-        </List>
-        <Heading size={"xl"}>
-          <div>
-            <PersonComponent person={firstPerson} />
-          </div>
-        </Heading>
-        <Stack>
-          <div className="header" {...getToggleProps()}>
-            <Button
-              size="md"
-              color={useColorModeValue(colorTextLight, colorTextDark)}
-              bgColor={useColorModeValue(bgColorLight, bgColorDark)}
-            >
-              {isExpanded ? "Less" : "More"}
-            </Button>
-          </div>
-        </Stack>
+        <Box width={{base: "auto", md: "25%"}}>
+          <Heading size={"md"}>{calendar.name}</Heading>
+        </Box>
+        <Box width={{base: "auto", md: "25%"}}>
+          <List spacing={3} textAlign="start">
+            <ListItem key="def">
+              <Box color="green.500" style={{ display: "inline-block" }} mr={3}>
+                <FaCalendarCheck />
+              </Box>
+              <Box style={{ display: "inline-block" }}>{firstEvent.startEvent ?? "unknown"}</Box>
+            </ListItem>
+            <ListItem key="abc">
+              <Box color="green.500" style={{ display: "inline-block" }} mr={3}>
+                <FaCalendarTimes />
+              </Box>
+              <Box style={{ display: "inline-block" }}>{firstEvent.endEvent ?? "unknown"}</Box>
+            </ListItem>
+          </List>
+        </Box>
+        <Box width={{base: "auto", md: "30%"}}>
+          <Heading size={"xl"}>
+            <div>
+              <PersonComponent person={firstPerson} />
+            </div>
+          </Heading>
+        </Box>
+        <Box width={{base: "auto", md: "10%"}}>
+          <Stack>
+            <div className="header" {...getToggleProps()}>
+              <Button
+                size="md"
+                color={useColorModeValue(colorTextLight, colorTextDark)}
+                bgColor={useColorModeValue(bgColorLight, bgColorDark)}
+              >
+                {isExpanded ? "Less" : "More"}
+              </Button>
+            </div>
+          </Stack>
+        </Box>
       </Stack>
       <div {...getCollapseProps()}>
         <div className="content">

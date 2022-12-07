@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session as SASession
 
@@ -21,13 +21,15 @@ class AbstractPlugin(ABC):
     absolute_path_to_company_logo_png: Path | None = None
     category_order: List[str] = []
     duty_calendar_configurations: List[DutyCalendarConfig] = []
+    enable_admin_button: bool = True
+    git_repository_url: Optional[str] = "https://github.com/Jorricks/DutyOverview"
 
     @abstractmethod
     def sync_person(self, person: Person, session: SASession) -> None:
         pass
 
     @abstractmethod
-    def sync_calendar(self, calendar: Calendar, prefix: str | None, session: SASession) -> None:
+    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> None:
         pass
 
     @abstractmethod

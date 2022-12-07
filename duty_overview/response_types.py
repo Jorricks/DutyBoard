@@ -32,10 +32,12 @@ class _Calendar(BaseModel):
 
 
 class _Config(BaseModel):
+    timezone: str
     text_color: str
     background_color: str
     categories: List[str]
-    timezone: str
+    git_repository_url: Optional[str]
+    enable_admin_button: bool
 
 
 class CurrentSchedule(BaseModel):

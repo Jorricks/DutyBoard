@@ -43,7 +43,6 @@ class PersonAdmin(ModelView, model=Person):  # type: ignore
 
 
 class CalendarAdmin(ModelView, model=Calendar):  # type: ignore
-    # @ToDo(jorrick) Add prefix to list items.
     column_searchable_list = [Calendar.uid, Calendar.name, Calendar.sync, Calendar.category]
     column_sortable_list = [
         Calendar.uid,
@@ -60,6 +59,7 @@ class CalendarAdmin(ModelView, model=Calendar):  # type: ignore
         Calendar.name,
         Calendar.description,
         Calendar.icalendar_url,
+        Calendar.event_prefix,
         Calendar.category,
         Calendar.order,
         Calendar.error_msg,

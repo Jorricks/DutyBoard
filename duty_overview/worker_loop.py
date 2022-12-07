@@ -67,7 +67,7 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
                 if calendar is None:
                     break
                 try:
-                    plugin.sync_calendar(calendar=calendar, prefix=None, session=session)
+                    plugin.sync_calendar(calendar=calendar, event_prefix=None, session=session)
                 except Exception:
                     logger.exception(f"Failed to update {calendar}.")
                     calendar.error_msg = traceback.format_exc()
@@ -78,7 +78,7 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
 
 
 def enter_loop():
-    # @ToDo(jorrick) Sync Calendar based on yaml file.
+    # @ToDo(jorrick) sync based on the plugins present.
     plugin: AbstractPlugin = plugin_fetcher.get_plugin()
     while True:
         logger.info("Updating persons.")

@@ -20,8 +20,6 @@ from duty_overview.plugin.abstract_plugin import AbstractPlugin
 from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
 
 app = FastAPI()
-app.mount("/dist", StaticFiles(directory="duty_overview/www/dist"), name="dist")
-app.mount("/static", StaticFiles(directory="duty_overview/www/static"), name="static")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
@@ -36,27 +34,35 @@ admin: Admin
 if settings.SQL_ALCHEMY_CONN:
     settings.configure_orm()
     plugin = plugin_fetcher.get_plugin()
+    app.mount("/dist", StaticFiles(directory="duty_overview/www/dist"), name="dist")
+    app.mount("/static", StaticFiles(directory="duty_overview/www/static"), name="static")
     admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
 if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
     generate_fake_data.create_fake_database_rows_if_not_present()
 
 
-async def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:
+def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:
     try:
         return pytz.timezone(timezone_str)
     except UnknownTimeZoneError:
         return get_localzone()
 
 
-@app.get("/get_schedule", response_model=CurrentSchedule)
-async def get_schedule(timezone: str):
-    timezone_object = await _parse_timezone_str(timezone)
-    config = _Config(
+def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
+    return _Config(
         text_color=plugin.text_color_hex,
         background_color=plugin.background_color_hex,
         categories=plugin.category_order,
+        git_repository_url=plugin.git_repository_url,
+        enable_admin_button=plugin.enable_admin_button,
         timezone=timezone_object.zone,
     )
+
+
+@app.get("/get_schedule", response_model=CurrentSchedule)
+async def get_schedule(timezone: str):
+    timezone_object = _parse_timezone_str(timezone)
+    config = _get_config_object(timezone_object)
     with create_session() as session:
         all_encountered_person_uids: Set[int] = set()
         calendars: List[_Calendar] = queries.get_calendars(

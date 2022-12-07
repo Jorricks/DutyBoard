@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class ICalPlugin(StandardPlugin):
     @staticmethod
-    def _get_events_for_upcoming_month(icalendar_url: str, prefix: str, limit: int = 10) -> List[VEvent]:
+    def _get_events_for_upcoming_month(icalendar_url: str, event_prefix: str, limit: int = 10) -> List[VEvent]:
         """Gets the calendar events for the upcoming 4 weeks."""
         logger.info(f"Loading {icalendar_url}, this might take some time.")
         now = DateTime.now()
@@ -33,7 +33,7 @@ class ICalPlugin(StandardPlugin):
         return [
             event
             for event in timeline.overlapping(now, month_from_now)
-            if isinstance(event, VEvent) and event.summary.value and event.summary.value.startswith(prefix)
+            if isinstance(event, VEvent) and event.summary.value and event.summary.value.startswith(event_prefix)
         ][:limit]
 
     def _get_or_create_person(self, value: str) -> int:
@@ -70,15 +70,15 @@ class ICalPlugin(StandardPlugin):
             person_uid=person_uid,
         )
 
-    def sync_calendar(self, calendar: Calendar, prefix: str | None, session: SASession) -> None:
+    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> None:
         items_to_insert: List[OnCallEvent] = []
         session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
         event: VEvent
-        for event in self._get_events_for_upcoming_month(calendar.icalendar_url, prefix or ""):
+        for event in self._get_events_for_upcoming_month(calendar.icalendar_url, event_prefix or ""):
             person_information_str: Optional[str] = event.summary.value
             if not person_information_str:
                 raise ValueError(f"{event.summary.value=} should not be None.")
-            person_information_str = person_information_str[len(prefix or ""):]
+            person_information_str = person_information_str[len(event_prefix or ""):]
             person_uid: int = self._get_or_create_person(person_information_str)
             on_call_event: OnCallEvent = self._create_on_call_event(calendar, event, person_uid=person_uid)
             items_to_insert.append(on_call_event)

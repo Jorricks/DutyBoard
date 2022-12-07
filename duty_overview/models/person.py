@@ -5,7 +5,6 @@ from duty_overview.alchemy.sqlalchemy_types import UtcDateTime
 
 
 class Person(Base):
-    # @ToDo(jorrick) Make a unique constraint on the combination of ldap&email.
     __table_args__ = (
         Index("person_last_update_utc", "last_update_utc"),
         UniqueConstraint("ldap", "email", name="ldap_email_combination_must_be_unique"),

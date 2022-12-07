@@ -123,7 +123,7 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
         calendar_db_instance.category = calendar.category
         calendar_db_instance.order = calendar.order
         calendar_db_instance.icalendar_url = calendar.icalendar_url
-        calendar_db_instance.prefix = calendar.prefix
+        calendar_db_instance.event_prefix = calendar.event_prefix
         session.merge(calendar_db_instance)
 
     calendar_db_instance = Calendar(
@@ -133,7 +133,7 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
         category=calendar.category,
         order=calendar.order,
         icalendar_url=calendar.icalendar_url,
-        prefix=calendar.prefix,
+        event_prefix=calendar.event_prefix,
         error_msg=None,
         last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
         sync=True,

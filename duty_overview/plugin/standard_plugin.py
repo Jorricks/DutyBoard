@@ -19,7 +19,7 @@ class StandardPlugin(AbstractPlugin):
         """This is to be implemented by our end user."""
         person.last_update_utc = DateTime.utcnow()
 
-    def sync_calendar(self, calendar: Calendar, prefix, session: SASession) -> None:
+    def sync_calendar(self, calendar: Calendar, event_prefix, session: SASession) -> None:
         raise NotImplementedError()
 
     async def admin_login_attempt(self, username: str, password: str) -> bool:

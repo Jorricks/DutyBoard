@@ -45,8 +45,10 @@ found 0 vulnerabilities
 - [x] Create dropdown for calendar.
 - [x] Implement Person view.
 - [x] Integrate ReactJS with our FastAPI.
-- [ ] Fix inconsistent UI.
-- [ ] Add button to link to repository.
+- [x] Fix inconsistent UI.
+- [x] Add button to link to repository.
+- [x] Add button to admin page (and make it optional).
+- [ ] Reintroduce webpack server with docker (as this gives more debug options).
 - [ ] Add image option.
 - [x] Change favicon to duty icon.
 - [ ] (Optional) Ability to add heads up notification.

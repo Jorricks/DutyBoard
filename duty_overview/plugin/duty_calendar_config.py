@@ -21,6 +21,6 @@ class DutyCalendarConfig:
     # Priority of order. The higher the number, the earlier this calendar shows up.
     order: int = field(default=999, validator=[validators.instance_of(int), validators.ge(0), validators.le(9999999)])
     # Prefix before user LDAP or user email is mentioned. Example prefix; 'duty:' when calendar event; 'duty: thomas'
-    prefix: str | None = field(
+    event_prefix: str | None = field(
         default=None, validator=validators.optional([validators.instance_of(str), validators.max_len(50)])
     )

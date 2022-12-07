@@ -16,7 +16,7 @@ class Calendar(Base):
     category = Column(String(50), nullable=False)
     order = Column(Integer, nullable=False)
     icalendar_url = Column(String(500), nullable=True)
-    prefix = Column(String(50), nullable=True)
+    event_prefix = Column(String(50), nullable=True)
     error_msg = Column(String(9999), nullable=True, comment="If any, the error of the latest sync attempt.")
     last_update_utc = Column(UtcDateTime(), nullable=False)
     sync = Column(Boolean(), default=True, nullable=False)
