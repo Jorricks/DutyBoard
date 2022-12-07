@@ -32,6 +32,8 @@ export interface PersonResponse {
   ldap: string;
   /** Email */
   email: string;
+  /** Img Filename */
+  imgFilename?: string;
   /** Extra Attributes */
   extraAttributes: ExtraInfoOnPerson[];
   /** Last Update */
@@ -76,14 +78,14 @@ export interface Calendar {
 
 /** Config */
 export interface Config {
+  /** Timezone */
+  timezone: string;
   /** Text Color */
   textColor: string;
   /** Background Color */
   backgroundColor: string;
   /** Categories */
   categories: string[];
-  /** Timezone */
-  timezone: string;
   /** Git Repository Url */
   gitRepositoryUrl?: string;
   /** Enable Admin Button */
@@ -120,6 +122,8 @@ export interface Person {
   ldap: string;
   /** Email */
   email: string;
+  /** Img Filename */
+  imgFilename?: string;
   /** Extra Attributes */
   extraAttributes: object;
   /** Last Update */

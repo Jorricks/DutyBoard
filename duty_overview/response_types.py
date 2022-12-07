@@ -7,6 +7,7 @@ class _Person(BaseModel):
     uid: int
     ldap: str
     email: str
+    img_filename: Optional[str]
     extra_attributes: Dict[str, Any]
     last_update: str
     error_msg: str
@@ -57,6 +58,7 @@ class PersonResponse(BaseModel):
     uid: str
     ldap: str
     email: str
+    img_filename: Optional[str]
     extra_attributes: List[_ExtraInfoOnPerson]
     last_update: str
     error_msg: str

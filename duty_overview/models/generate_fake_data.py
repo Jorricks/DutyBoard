@@ -55,6 +55,7 @@ def create_persons(session: SASession) -> None:
     nr_1 = Person(
         ldap="jorrick",
         email="jorricks@gmail.com",
+        img_filename="bert.jpeg",
         extra_attributes_json=json.dumps(
             {
                 "mattermost": {
@@ -71,6 +72,7 @@ def create_persons(session: SASession) -> None:
     nr_2 = Person(
         ldap="bart",
         email="bart@gmail.com",
+        img_filename="bert.jpeg",
         extra_attributes_json=json.dumps(
             {
                 "mattermost": {

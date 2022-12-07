@@ -38,7 +38,7 @@ class AppBuilderDateTimeAwareSelector(DateTimeField):
 class PersonAdmin(ModelView, model=Person):  # type: ignore
     column_searchable_list = [Person.ldap, Person.email, Person.sync]
     column_sortable_list = [Person.uid, Person.ldap, Person.email, Person.last_update_utc, Person.sync]
-    column_list = [Person.uid, Person.ldap, Person.email, Person.last_update_utc, Person.sync]
+    column_list = [Person.uid, Person.ldap, Person.email, Person.img_filename, Person.last_update_utc, Person.sync]
     form_overrides = dict(last_update_utc=AppBuilderDateTimeAwareSelector)
 
 

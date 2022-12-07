@@ -32,9 +32,20 @@ const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
 
   return (
     <>
-      <PopoverHeader>{apiPerson ? apiPerson.ldap ?? apiPerson.email : "unknown"}</PopoverHeader>
-      <PopoverCloseButton />
+      <PopoverHeader mt="5px" pl="20px" pb="10px" style={{fontWeight: "bold", fontSize: "20px"}}>
+          {apiPerson ? apiPerson.ldap ?? apiPerson.email : "unknown"}
+      </PopoverHeader>
+      <PopoverCloseButton pt={"22px"} pr={"22px"} fontSize={"12px"}/>
       <PopoverBody>
+        {apiPerson?.imgFilename &&
+          <Box mb={"10px"} mt={"10px"}>
+            <img
+              src={process.env.API_ADDRESS + "person_img/" + apiPerson.imgFilename}
+              style={{width: 200, height: 200, borderRadius: 200 / 2, marginLeft: "auto", marginRight: "auto"}}
+              alt={"Profile picture"}
+            />
+          </Box>
+        }
         {apiPerson?.extraAttributes.map((extraAttribute: ExtraInfoOnPerson, index) => (
           <ExtraInfoComponent {...extraAttribute} key={index} />
         ))}
@@ -68,7 +79,7 @@ const PersonComponent = ({ person }: { person: Person }) => {
                 </Box>
               </PopoverTrigger>
               <Portal>
-                <PopoverContent>
+                <PopoverContent backgroundColor={"#F5F5F5"}>
                     <LazyLoadingPopoverContent personUid={person.uid} />
                 </PopoverContent>
               </Portal>

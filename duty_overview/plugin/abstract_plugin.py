@@ -19,6 +19,7 @@ class AbstractPlugin(ABC):
     background_color_hex: str = "#3C9C2D"
     text_color_hex: str = "white"
     absolute_path_to_company_logo_png: Path | None = None
+    absolute_path_to_user_images_folder: Path | None = None
     category_order: List[str] = []
     duty_calendar_configurations: List[DutyCalendarConfig] = []
     enable_admin_button: bool = True

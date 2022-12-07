@@ -36,6 +36,7 @@ if settings.SQL_ALCHEMY_CONN:
     plugin = plugin_fetcher.get_plugin()
     app.mount("/dist", StaticFiles(directory="duty_overview/www/dist"), name="dist")
     app.mount("/static", StaticFiles(directory="duty_overview/www/static"), name="static")
+    app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
     admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
 if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
     generate_fake_data.create_fake_database_rows_if_not_present()

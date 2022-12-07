@@ -10,6 +10,7 @@ from duty_overview.plugin.abstract_plugin import AbstractPlugin
 
 class StandardPlugin(AbstractPlugin):
     absolute_path_to_company_logo_png = Path(__file__).resolve().parent / "example_logo.png"
+    absolute_path_to_user_images_folder = Path(__file__).resolve().parent.parent / "www" / "user_images"
     category_order = ["Big Data", "Infrastructure"]
 
     # @ToDo(jorrick) Create utility to merge two persons into one.
