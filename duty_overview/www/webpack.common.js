@@ -11,7 +11,7 @@ module.exports = {
   entry: path.resolve(__dirname, "js/index.js"), // main js
   output: {
     path: path.resolve(__dirname, "dist"), // output folder
-    publicPath: "/static/"
+    publicPath: "/dist/"
   },
   resolve: {
     alias: {

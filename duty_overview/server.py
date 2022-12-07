@@ -20,7 +20,8 @@ from duty_overview.plugin.abstract_plugin import AbstractPlugin
 from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="duty_overview/www/dist"), name="static")
+app.mount("/dist", StaticFiles(directory="duty_overview/www/dist"), name="dist")
+app.mount("/static", StaticFiles(directory="duty_overview/www/static"), name="static")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,

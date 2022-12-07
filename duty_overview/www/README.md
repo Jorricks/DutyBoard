@@ -44,9 +44,10 @@ found 0 vulnerabilities
 - [x] Only display categories of selected category.
 - [x] Create dropdown for calendar.
 - [x] Implement Person view.
-- [ ] Integrate ReactJS with our FastAPI.
+- [x] Integrate ReactJS with our FastAPI.
+- [ ] Fix inconsistent UI.
 - [ ] Add button to link to repository.
 - [ ] Add image option.
-- [ ] Change favicon to duty icon.
+- [x] Change favicon to duty icon.
 - [ ] (Optional) Ability to add heads up notification.
 - [ ] (Optional) Create loader icon on page load.
