@@ -76,7 +76,7 @@ async def get_schedule(timezone: str):
 
 @app.get("/get_person", response_model=PersonResponse)
 async def get_person(person_uid: int, timezone: str):
-    timezone_object = await _parse_timezone_str(timezone)
+    timezone_object = _parse_timezone_str(timezone)
     with create_session() as session:
         return queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
 

@@ -9,10 +9,6 @@ const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
 module.exports = {
   entry: path.resolve(__dirname, "js/index.js"), // main js
-  output: {
-    path: path.resolve(__dirname, "dist"), // output folder
-    publicPath: "/dist/"
-  },
   resolve: {
     alias: {
       // Be sure to update aliases in jest.config.js and tsconfig.json

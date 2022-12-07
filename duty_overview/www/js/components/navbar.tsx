@@ -6,7 +6,6 @@ import {
   IconButton,
   Button,
   Menu,
-  MenuButton,
   useDisclosure,
   useColorModeValue,
   Stack,
@@ -79,7 +78,7 @@ export default function Navbar() {
             }
             {config.enableAdminButton &&
               <Menu>
-                <Link to="/admin/" target="_blank">
+                <Link to={process.env.API_ADDRESS + "admin/"} target="_blank">
                   <Button
                       leftIcon={<GrUserAdmin color={config.textColor} fontSize={"25px"} />}
                       colorScheme='teal'

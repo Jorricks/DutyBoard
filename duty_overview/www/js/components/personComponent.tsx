@@ -60,9 +60,9 @@ const PersonComponent = ({ person }: { person: Person }) => {
           {({ isOpen, onClose }) => (
             <>
               <PopoverTrigger>
-                <Box>
-                  <Text style={{ display: "inline-block" }}>{person.ldap ?? person.email}</Text>
-                  <Text style={{ display: "inline-block" }}>
+                <Box style={{ cursor: "pointer" }}>
+                  <Text mr="10px" style={{ display: "inline-block" }}>{person.ldap ?? person.email}</Text>
+                  <Text style={{ display: "inline-block", verticalAlign: "middle", fontSize: "20px" }}>
                     <FaInfoCircle />
                   </Text>
                 </Box>
