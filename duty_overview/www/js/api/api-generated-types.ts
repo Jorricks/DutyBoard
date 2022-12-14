@@ -28,8 +28,8 @@ export interface HTTPValidationError {
 export interface PersonResponse {
   /** Uid */
   uid: string;
-  /** Ldap */
-  ldap: string;
+  /** Username */
+  username: string;
   /** Email */
   email: string;
   /** Img Filename */
@@ -118,8 +118,8 @@ export interface ExtraInfoOnPerson {
 export interface Person {
   /** Uid */
   uid: number;
-  /** Ldap */
-  ldap: string;
+  /** Username */
+  username: string;
   /** Email */
   email: string;
   /** Img Filename */

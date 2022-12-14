@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class _Person(BaseModel):
     uid: int
-    ldap: str
+    username: str
     email: str
     img_filename: Optional[str]
     extra_attributes: Dict[str, Any]

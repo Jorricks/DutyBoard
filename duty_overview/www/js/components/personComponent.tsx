@@ -33,7 +33,7 @@ const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
   return (
     <>
       <PopoverHeader mt="5px" pl="20px" pb="10px" style={{fontWeight: "bold", fontSize: "20px"}}>
-          {apiPerson ? apiPerson.ldap ?? apiPerson.email : "unknown"}
+          {apiPerson ? apiPerson.username ?? apiPerson.email : "unknown"}
       </PopoverHeader>
       <PopoverCloseButton pt={"22px"} pr={"22px"} fontSize={"12px"}/>
       <PopoverBody>
@@ -72,7 +72,7 @@ const PersonComponent = ({ person }: { person: Person }) => {
             <>
               <PopoverTrigger>
                 <Box style={{ cursor: "pointer" }}>
-                  <Text mr="10px" style={{ display: "inline-block" }}>{person.ldap ?? person.email}</Text>
+                  <Text mr="10px" style={{ display: "inline-block" }}>{person.username ?? person.email}</Text>
                   <Text style={{ display: "inline-block", verticalAlign: "middle", fontSize: "20px" }}>
                     <FaInfoCircle />
                   </Text>

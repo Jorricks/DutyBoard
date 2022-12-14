@@ -5,11 +5,13 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
 
+from duty_overview.alchemy.session import create_session
+from duty_overview.models.on_call_event import OnCallEvent
 from sqlalchemy.orm import Session as SASession
 
 from duty_overview.models.calendar import Calendar
 from duty_overview.models.person import Person
-from duty_overview.plugin.duty_calendar_config import DutyCalendarConfig
+from duty_overview.plugin.helpers.duty_calendar_config import DutyCalendarConfig
 
 
 class AbstractPlugin(ABC):
@@ -26,11 +28,11 @@ class AbstractPlugin(ABC):
     git_repository_url: Optional[str] = "https://github.com/Jorricks/DutyOverview"
 
     @abstractmethod
-    def sync_person(self, person: Person, session: SASession) -> None:
+    def sync_person(self, person: Person, session: SASession) -> Person:
         pass
 
     @abstractmethod
-    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> None:
+    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> Calendar:
         pass
 
     @abstractmethod

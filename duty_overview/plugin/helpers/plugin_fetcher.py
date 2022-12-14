@@ -8,13 +8,13 @@ from functools import lru_cache
 from typing import List, Optional
 
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
-from duty_overview.plugin.standard_plugin import StandardPlugin
+from duty_overview.plugin.example.example_plugin import ExamplePlugin
 
 logger = logging.getLogger(__file__)
 
 
 def get_plugin() -> AbstractPlugin:
-    return _get_plugin() or StandardPlugin()
+    return _get_plugin() or ExamplePlugin()
 
 
 @lru_cache

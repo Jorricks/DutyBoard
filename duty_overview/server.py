@@ -15,7 +15,7 @@ from tzlocal import get_localzone
 from duty_overview.alchemy import add_sqladmin, queries, settings
 from duty_overview.alchemy.session import create_session
 from duty_overview.models import generate_fake_data
-from duty_overview.plugin import plugin_fetcher
+from duty_overview.plugin.helpers import plugin_fetcher
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
 from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
 

@@ -67,6 +67,9 @@ doc = [
 dev = [
     "pre-commit >= 2.19.0, < 3.0.0",
 ]
+ldap = [
+    "ldap3 >= 2.9.1"
+]
 
 
 [project.urls]

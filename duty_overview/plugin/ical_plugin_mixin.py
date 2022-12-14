@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import logging
 from typing import List, Optional
 
@@ -15,12 +14,11 @@ from duty_overview.alchemy.session import create_session
 from duty_overview.models.calendar import Calendar
 from duty_overview.models.on_call_event import OnCallEvent
 from duty_overview.models.person import Person
-from duty_overview.plugin.standard_plugin import StandardPlugin
 
 logger = logging.getLogger(__name__)
 
 
-class ICalPlugin(StandardPlugin):
+class ICalPluginMixin:
     @staticmethod
     def _get_events_for_upcoming_month(icalendar_url: str, event_prefix: str, limit: int = 10) -> List[VEvent]:
         """Gets the calendar events for the upcoming 4 weeks."""
@@ -63,7 +61,9 @@ class ICalPlugin(StandardPlugin):
                 raise ValueError(f"We just added Person {ldap=} {email=} and we already can't find him anymore..")
             return result.uid
 
-    def _create_on_call_event(self, calendar: Calendar, v_event: VEvent, person_uid: int) -> OnCallEvent:
+    def _create_on_call_event(
+        self, calendar: Calendar, v_event: VEvent, person_uid: int
+    ) -> OnCallEvent:
         return OnCallEvent(
             calendar_uid=calendar,
             start_event_utc=v_event.start,
@@ -71,7 +71,7 @@ class ICalPlugin(StandardPlugin):
             person_uid=person_uid,
         )
 
-    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> None:
+    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> Calendar:
         items_to_insert: List[OnCallEvent] = []
         session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
         event: VEvent
@@ -84,3 +84,4 @@ class ICalPlugin(StandardPlugin):
             on_call_event: OnCallEvent = self._create_on_call_event(calendar, event, person_uid=person_uid)
             items_to_insert.append(on_call_event)
         session.bulk_save_objects(items_to_insert)
+        return calendar

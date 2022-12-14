@@ -7,11 +7,11 @@ from duty_overview.alchemy.sqlalchemy_types import UtcDateTime
 class Person(Base):
     __table_args__ = (
         Index("person_last_update_utc", "last_update_utc"),
-        UniqueConstraint("ldap", "email", name="ldap_email_combination_must_be_unique"),
+        UniqueConstraint("username", "email", name="username_email_combination_must_be_unique"),
     )
     __tablename__ = "person"
     uid = Column(Integer, primary_key=True, autoincrement=True, unique=True)
-    ldap = Column(String(50), nullable=True)
+    username = Column(String(50), nullable=True)
     email = Column(String(50), nullable=True)
     img_filename = Column(String(100), nullable=True)
     extra_attributes_json = Column(String(100000), nullable=True, comment="Extra attributes represented as a json.")
@@ -20,4 +20,4 @@ class Person(Base):
     sync = Column(Boolean(), default=True, nullable=False)
 
     def __repr__(self) -> str:
-        return f"Person(ldap='{self.ldap}', email='{self.email}')"
+        return f"Person(username='{self.username}', email='{self.email}')"
