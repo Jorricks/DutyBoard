@@ -2,3 +2,5 @@ venv/
 .flake8
 .gitignore
 .pre-commit-config.yaml
+docker_prod_venv/
+docker_venv/
