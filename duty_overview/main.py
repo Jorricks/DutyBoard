@@ -1,11 +1,18 @@
 import logging
 import subprocess
+import sys
 from pathlib import Path
 
 import click
+from duty_overview import worker_loop
 
-
-logger = logging.getLogger(__file__)
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.DEBUG,
+    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+    datefmt='%m-%d %H:%M'
+)
+logger = logging.getLogger(__name__)
 
 
 @click.group()
@@ -15,7 +22,8 @@ def cli():
 
 @cli.command()
 def worker():
-    click.echo("Starting the worker")
+    logger.info("Starting the worker")
+    worker_loop.enter_loop()
 
 
 @cli.command()
@@ -23,7 +31,7 @@ def worker():
 @click.option('--port', default="80", type=int, help="The port to listen for.")
 @click.option('--reload', is_flag=True, type=bool, help='Auto reload when changes are made to the source repository.')
 def webserver(host: str, port: int, reload: bool):
-    click.echo("Starting the webserver")
+    logger.info("Starting the webserver")
     command = f"uvicorn duty_overview.server:app --host {host} --port {port}"
     if reload:
         command += " --reload"

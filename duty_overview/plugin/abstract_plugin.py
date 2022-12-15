@@ -5,8 +5,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import List, Optional
 
-from duty_overview.alchemy.session import create_session
-from duty_overview.models.on_call_event import OnCallEvent
 from sqlalchemy.orm import Session as SASession
 
 from duty_overview.models.calendar import Calendar
@@ -21,11 +19,15 @@ class AbstractPlugin(ABC):
     background_color_hex: str = "#3C9C2D"
     text_color_hex: str = "white"
     absolute_path_to_company_logo_png: Path | None = None
+    # Path on the back-end to the user images folder.
     absolute_path_to_user_images_folder: Path | None = None
     category_order: List[str] = []
     duty_calendar_configurations: List[DutyCalendarConfig] = []
     enable_admin_button: bool = True
     git_repository_url: Optional[str] = "https://github.com/Jorricks/DutyOverview"
+
+    def __init__(self, *args, **kwargs):
+        super(AbstractPlugin, self).__init__(*args, **kwargs)
 
     @abstractmethod
     def sync_person(self, person: Person, session: SASession) -> Person:

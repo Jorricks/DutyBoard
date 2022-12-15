@@ -39,15 +39,15 @@ class ICalPluginMixin:
         session: SASession
         with create_session() as session:
             if "@" in value:
-                result = session.query(Person).filter(Person.ldap == value).first()
-            else:
                 result = session.query(Person).filter(Person.email == value).first()
+            else:
+                result = session.query(Person).filter(Person.username == value).first()
             if result:
                 return result.uid
             ldap = None if "@" in value else value
             email = value if "@" in value else None
             person = Person(
-                ldap=ldap,
+                username=ldap,
                 email=email,
                 img_filename=None,
                 extra_attributes_json=None,
@@ -55,8 +55,9 @@ class ICalPluginMixin:
                 sync=True
             )
             session.add(person)
+        # This extra call is needed to fetch the UID that is automatically created for the Person.
         with create_session() as session:
-            result = session.query(Person).filter(Person.ldap == ldap).filter(Person.email == email).first()
+            result = session.query(Person).filter(Person.username == ldap).filter(Person.email == email).first()
             if result is None:
                 raise ValueError(f"We just added Person {ldap=} {email=} and we already can't find him anymore..")
             return result.uid
@@ -65,7 +66,7 @@ class ICalPluginMixin:
         self, calendar: Calendar, v_event: VEvent, person_uid: int
     ) -> OnCallEvent:
         return OnCallEvent(
-            calendar_uid=calendar,
+            calendar_uid=calendar.uid,
             start_event_utc=v_event.start,
             end_event_utc=v_event.end,
             person_uid=person_uid,
@@ -76,10 +77,13 @@ class ICalPluginMixin:
         session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
         event: VEvent
         for event in self._get_events_for_upcoming_month(calendar.icalendar_url, event_prefix or ""):
-            person_information_str: Optional[str] = event.summary.value
-            if not person_information_str:
-                raise ValueError(f"{event.summary.value=} should not be None.")
-            person_information_str = person_information_str[len(event_prefix or ""):]
+            # First attempt attendee. If that is not set, we look at the title/summary of the event.
+            person_unique_identifier: Optional[str] = event.attendee[0].value if any(event.attendee) else None
+            if person_unique_identifier is None:
+                person_unique_identifier: Optional[str] = event.summary.value
+                if not person_unique_identifier:
+                    raise ValueError(f"{event.summary.value=} should not be None.")
+            person_information_str = person_unique_identifier[len(event_prefix or ""):]
             person_uid: int = self._get_or_create_person(person_information_str)
             on_call_event: OnCallEvent = self._create_on_call_event(calendar, event, person_uid=person_uid)
             items_to_insert.append(on_call_event)

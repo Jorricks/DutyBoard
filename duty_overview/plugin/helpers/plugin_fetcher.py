@@ -5,16 +5,22 @@ import logging
 import os
 import sys
 from functools import lru_cache
-from typing import List, Optional
+from inspect import isclass
+from typing import List, Optional, Type
 
+from duty_overview.exceptions import PluginLoadingException
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
 from duty_overview.plugin.example.example_plugin import ExamplePlugin
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 def get_plugin() -> AbstractPlugin:
-    return _get_plugin() or ExamplePlugin()
+    loaded_plugin = _get_plugin()
+    if loaded_plugin is None:
+        logger.warning("Loaded the ExamplePlugin. This is probably not what you want!")
+        return ExamplePlugin()
+    return _get_plugin()
 
 
 @lru_cache
@@ -25,21 +31,30 @@ def _get_plugin() -> Optional[AbstractPlugin]:
     file_path = os.environ["DUTY_OVERVIEW_PLUGIN_LOCATION"]
 
     if not os.path.isfile(file_path):
-        return None
+        raise PluginLoadingException(f"{file_path=} is not a file. Please set the plugin location correctly.")
     mod_name, file_ext = os.path.splitext(os.path.split(file_path)[-1])
     if file_ext != ".py":
-        return None
+        raise PluginLoadingException(f"{file_path=} must be a Python file. Please set the plugin correctly.")
     try:
         loader = importlib.machinery.SourceFileLoader(mod_name, file_path)
         spec = importlib.util.spec_from_loader(mod_name, loader)  # type: ignore
         if spec is None:
-            raise ImportError(f"Unable to import {mod_name}.")
+            raise PluginLoadingException(f"Unable to import {mod_name}.")
         mod = importlib.util.module_from_spec(spec)
         sys.modules[spec.name] = mod
         loader.exec_module(mod)
-        logger.debug("Importing plugin module %s", file_path)
-        list_with_plugins: List[AbstractPlugin] = [m for m in mod.__dict__.values() if isinstance(m, AbstractPlugin)]
-        return list_with_plugins[0] if any(list_with_plugins) else None
+        logger.info("Importing plugin module %s", file_path)
+        list_with_plugins: List[Type[AbstractPlugin]] = [
+            m for m in mod.__dict__.values() if isclass(m) and issubclass(m, AbstractPlugin) and m != AbstractPlugin
+        ]
+        if not any(list_with_plugins):
+            raise PluginLoadingException(f"{file_path} does not contain any classes that implement the AbstractPlugin.")
+        if len(list_with_plugins) > 1:
+            raise PluginLoadingException(f"{file_path} contains multiple AbstractPlugin implementations.")
+        your_plugin = list_with_plugins[0]
+        return your_plugin()
+    except PluginLoadingException:
+        raise
     except Exception as e:
         logger.exception("Failed to import plugin %s", file_path)
-        raise ValueError(f"Unable to import plugin {file_path}") from e
+        raise PluginLoadingException(f"Unable to import plugin {file_path}") from e

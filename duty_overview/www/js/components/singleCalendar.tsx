@@ -61,7 +61,7 @@ const SingleCalendar = ({ calendar, persons }: Props) => {
           </List>
         </Box>
         <Box width={{base: "auto", md: "30%"}}>
-          <Heading size={"xl"}>
+          <Heading size={"md"}>
             <div>
               <PersonComponent person={firstPerson} />
             </div>

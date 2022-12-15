@@ -5,8 +5,8 @@ from pydantic import BaseModel
 
 class _Person(BaseModel):
     uid: int
-    username: str
-    email: str
+    username: Optional[str]
+    email: Optional[str]
     img_filename: Optional[str]
     extra_attributes: Dict[str, Any]
     last_update: str
@@ -56,8 +56,8 @@ class _ExtraInfoOnPerson(BaseModel):
 
 class PersonResponse(BaseModel):
     uid: str
-    ldap: str
-    email: str
+    username: Optional[str]
+    email: Optional[str]
     img_filename: Optional[str]
     extra_attributes: List[_ExtraInfoOnPerson]
     last_update: str

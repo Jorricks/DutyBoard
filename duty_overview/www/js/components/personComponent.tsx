@@ -17,13 +17,32 @@ import { FaInfoCircle } from "react-icons/fa";
 import DynamicFAIcon from "./dynamicFAIcon";
 import useGetPerson from "../api/useGetPerson";
 
-const ExtraInfoComponent = ({ information, icon, iconColor, url }: ExtraInfoOnPerson) => {
-  //@Jorrick ToDo add URL to the equation
+export interface DrawInfoOnPerson {
+  information: string;
+  icon: string;
+  iconColor: string;
+}
+
+
+const ExtraInfoComponent = ({ information, icon, iconColor }: DrawInfoOnPerson) => {
   return (
     <Box p={2} style={{ display: "flex", alignItems: "center" }}>
       <DynamicFAIcon icon={icon} color={iconColor} style={{ display: "inline-block" }} />
       <Text style={{ display: "inline-block", marginLeft: "10px" }}>{information}</Text>
     </Box>
+  );
+};
+
+const URLExtraInfoComponent = ({ information, icon, iconColor, url }: ExtraInfoOnPerson) => {
+  return (
+      <>
+        {url ?
+            <a href={url} target="_blank">
+              <ExtraInfoComponent information={information} icon={icon} iconColor={iconColor}/>
+            </a>
+            : <ExtraInfoComponent information={information} icon={icon} iconColor={iconColor}/>
+        }
+      </>
   );
 };
 
@@ -47,7 +66,7 @@ const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
           </Box>
         }
         {apiPerson?.extraAttributes.map((extraAttribute: ExtraInfoOnPerson, index) => (
-          <ExtraInfoComponent {...extraAttribute} key={index} />
+          <URLExtraInfoComponent {...extraAttribute} key={index} />
         ))}
       </PopoverBody>
       <PopoverFooter>
@@ -57,6 +76,10 @@ const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
       </PopoverFooter>
     </>
   );
+};
+
+const capitalizeFirst = str => {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
 const PersonComponent = ({ person }: { person: Person }) => {
@@ -72,7 +95,9 @@ const PersonComponent = ({ person }: { person: Person }) => {
             <>
               <PopoverTrigger>
                 <Box style={{ cursor: "pointer" }}>
-                  <Text mr="10px" style={{ display: "inline-block" }}>{person.username ?? person.email}</Text>
+                  <Text mr="10px" style={{ display: "inline-block" }}>
+                      {capitalizeFirst(person.username) ?? person.email}
+                  </Text>
                   <Text style={{ display: "inline-block", verticalAlign: "middle", fontSize: "20px" }}>
                     <FaInfoCircle />
                   </Text>

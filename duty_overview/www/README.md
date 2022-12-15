@@ -49,7 +49,7 @@ found 0 vulnerabilities
 - [x] Add button to link to repository.
 - [x] Add button to admin page (and make it optional).
 - [x] Reintroduce webpack server with docker (as this gives more debug options).
-- [ ] Add image option.
+- [x] Add image option.
 - [x] Change favicon to duty icon.
 - [ ] (Optional) Ability to add heads up notification.
 - [ ] (Optional) Create loader icon on page load.

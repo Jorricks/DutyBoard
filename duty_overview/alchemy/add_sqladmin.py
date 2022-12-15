@@ -36,9 +36,9 @@ class AppBuilderDateTimeAwareSelector(DateTimeField):
 
 
 class PersonAdmin(ModelView, model=Person):  # type: ignore
-    column_searchable_list = [Person.ldap, Person.email, Person.sync]
-    column_sortable_list = [Person.uid, Person.ldap, Person.email, Person.last_update_utc, Person.sync]
-    column_list = [Person.uid, Person.ldap, Person.email, Person.img_filename, Person.last_update_utc, Person.sync]
+    column_searchable_list = [Person.username, Person.email, Person.sync]
+    column_sortable_list = [Person.uid, Person.username, Person.email, Person.last_update_utc, Person.sync]
+    column_list = [Person.uid, Person.username, Person.email, Person.img_filename, Person.last_update_utc, Person.sync]
     form_overrides = dict(last_update_utc=AppBuilderDateTimeAwareSelector)
 
 
@@ -86,7 +86,7 @@ class OnCallEventAdmin(ModelView, model=OnCallEvent):  # type: ignore
     form_include_pk = True
     form_ajax_refs = {
         "person": {
-            "fields": ("ldap", "email"),
+            "fields": ("username", "email"),
         }
     }
 

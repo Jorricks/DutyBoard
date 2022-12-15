@@ -1,5 +1,5 @@
-import getpass
 import json
+import logging
 import os
 from functools import wraps
 from pathlib import Path
@@ -9,6 +9,9 @@ from sqlalchemy.orm import Session as SASession
 from duty_overview.models.person import Person
 from ldap3 import Connection, Server, SUBTREE
 from ldap3.core import exceptions
+
+
+logger = logging.getLogger(__name__)
 
 
 def ldap_rebind(func):
@@ -88,24 +91,27 @@ class LdapBaseClient:
 
 
 class LDAPPluginMixin:
+    # LDAP settings
     LDAP_URL: ClassVar[str] = "ldaps://some.ldap.server.com:636"
     LDAP_DOMAIN_COMPONENTS: ClassVar[str] = "dc=your,dc=com"
     LDAP_USER_ORGANIZATIONAL_UNIT: ClassVar[str] = "ou=People"
+    # This should be the same as you mention in your Plugin.
     LOCATION_TO_STORE_PHOTOS: ClassVar[Path] = Path("/tmp/photos")
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.client = LdapBaseClient(
             url=self.LDAP_URL,
             domain_components=self.LDAP_DOMAIN_COMPONENTS,
             user_organizational_unit=self.LDAP_USER_ORGANIZATIONAL_UNIT,
             full_quantified_username=os.environ["LDAP_FULL_QUANTIFIED_USERNAME"],
-            password=os.environ["LDAP_PASSWORD"] if "LDAP_PASSWORD" in os.environ else getpass.getpass("password"),
+            password=os.environ["LDAP_PASSWORD"],
             auto_referrals=False
         )
+        super(LDAPPluginMixin, self).__init__(*args, **kwargs)
 
     def _write_image_attribute_to_file(
         self, person: Person, person_attributes: Mapping[str, List[str]]
-    ) -> Optional[Path]:
+    ) -> Optional[str]:
         if "jpegPhoto" not in person_attributes:
             return None
 
@@ -113,7 +119,7 @@ class LDAPPluginMixin:
         with open(filepath, "wb") as file:
             img_as_b64: bytes = person_attributes["jpegPhoto"][0]  # type: ignore
             file.write(img_as_b64)
-        return filepath
+        return filepath.name
 
     def _extract_user_info(self, username: str) -> Tuple[str, Mapping[str, Union[str, List[str]]]]:
         result = self.client.get_user(username)
@@ -125,19 +131,28 @@ class LDAPPluginMixin:
         dn, attributes = person_ldap_details
         return dn, attributes
 
-    def sync_person(self, person: Person, session: SASession) -> Person:
-        dn, attributes = self._extract_user_info(person.ldap or person.email)
-        Person.ldap = attributes["uid"][0]
-        Person.email = attributes["mail"][0]
-        Person.img_filename = self._write_image_attribute_to_file(person, attributes)
-
-        extra_attributes = {
-            "fullName": attributes["cn"][0],
-            "location": attributes["l"][0],
-            "manager": attributes["manager"][0],
-            "marker": ",".join(attributes["marker"]),  # List[str]
+    def _get_extra_attributes(
+        self, username: str, attributes: Mapping[str, Union[str, List[str]]]
+    ) -> Dict[str, Dict[str, str]]:
+        """You can use any FontAwesome icons listed here; https://react-icons.github.io/react-icons/icons?name=fa"""
+        return {
+            "fullName": {
+                "information": attributes["cn"][0],
+                "icon": "FaUserCircle",
+            },
+            "location": {
+                "information": attributes["l"][0],
+                "icon": "FaMapMarkerAlt",
+            },
         }
-        Person.extra_attributes_json = json.dumps(extra_attributes)
+
+    def sync_person(self, person: Person, session: SASession) -> Person:
+        dn, attributes = self._extract_user_info(person.username or person.email)
+        person.username = dn.split("=")[1].split(",")[0]  # uid=abc,ou= -> extracts abc
+        person.email = attributes["mail"][0]
+        person.img_filename = self._write_image_attribute_to_file(person, attributes)
+        person.extra_attributes_json = json.dumps(self._get_extra_attributes(person.username, attributes))
+        logger.debug(f"Updating references of {person}.")
         return person
 
 

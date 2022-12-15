@@ -50,12 +50,13 @@ docker-compose -f docker-compose.dev.yaml down
 - [x] Parse iCalendars
 - [x] Create calendar config for usage in Configs
 - [x] Create calendar config to Database syncer
-- [ ] Create docker image
-- [ ] Create docker compose
+- [x] Create docker image
+- [x] Create docker compose
+- [x] Add extra pre-commit hooks
+- [ ] Add improved GZIP handler
+- [ ] Add Gitlab pipelines
 - [ ] Create kustomize example
-- [ ] Add extra pre-commit hooks
 - [ ] (Optional) Implement announcement calendar
 
 ## Extra pre-commit hooks;
 - [ ] Automated run of generate_typescript_api.py.
-- [ ] Docker run to generate new compiled javascript files or other files?

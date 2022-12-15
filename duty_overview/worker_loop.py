@@ -1,8 +1,11 @@
 import logging
 import time
 import traceback
-from typing import Optional, List
+from typing import Optional
 
+from sqlalchemy.exc import SQLAlchemyError
+
+from duty_overview.alchemy import settings, queries
 from pendulum import DateTime
 from sqlalchemy.orm import Session as SASession, Query
 
@@ -13,7 +16,7 @@ from duty_overview.models.person import Person
 from duty_overview.plugin.helpers import plugin_fetcher
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 def get_most_outdated_person(plugin: AbstractPlugin, session: SASession) -> Optional[Person]:
@@ -62,15 +65,17 @@ def ensure_person_uniqueness(new_person: Person, session: SASession) -> Person:
 
 def update_all_outdated_persons(plugin: AbstractPlugin) -> None:
     person: Optional[Person] = None
-    try:
-        while True:
-            with create_session() as session:
+    while True:
+        with create_session() as session:
+            try:
                 person = get_most_outdated_person(plugin=plugin, session=session)
-                logger.info(f"Updating {person}.")
                 if person is None:
+                    logger.debug("Nothing to update here :).")
                     break
+                logger.info(f"Updating {person}.")
                 try:
                     person = plugin.sync_person(person=person, session=session)
+                    logger.debug(f"Successfully executed plugins sync_person().")
                     person = ensure_person_uniqueness(new_person=person, session=session)
                     person.error_msg = None
                 except Exception:
@@ -78,42 +83,54 @@ def update_all_outdated_persons(plugin: AbstractPlugin) -> None:
                     person.error_msg = traceback.format_exc()
                 finally:
                     person.last_update_utc = DateTime.utcnow()
-            logger.debug(f"Successfully updated {person}.")
-            time.sleep(1)
-    except Exception:
-        logger.exception(f"Failed to update {person} in the database? Maybe there is some database error?")
+                    session.merge(person)
+            except Exception:
+                logger.exception(f"Failed to update {person} in the database? Maybe there is some database error?")
+        logger.info("Successfully finished updating person.")
 
 
 def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
     calendar: Optional[Calendar] = None
-    try:
-        while True:
-            with create_session() as session:
+    for _ in range(3):  # Update at most x calendars before we resort to updating persons.
+        with create_session() as session:
+            try:
                 calendar = get_most_outdated_calendar(plugin=plugin, session=session)
-                logger.info(f"Updating {calendar}.")
                 if calendar is None:
+                    logger.debug("Nothing to update here :).")
                     break
+                logger.info(f"Updating {calendar}.")
                 try:
                     calendar = plugin.sync_calendar(calendar=calendar, event_prefix=None, session=session)
+                    logger.debug(f"Successfully executed plugins sync_calendar().")
                     calendar.error_msg = None
                 except Exception:
                     logger.exception(f"Failed to update {calendar}.")
                     calendar.error_msg = traceback.format_exc()
                 finally:
                     calendar.last_update_utc = DateTime.utcnow()
-            logger.debug(f"Successfully updated {calendar}.")
-            time.sleep(1)
-    except Exception:
-        logger.exception(f"Failed to update {calendar} in the database? Maybe there is some database error?")
+                    session.merge(calendar)
+                logger.debug(f"Successfully updated {calendar}.")
+            except Exception:
+                logger.exception(f"Failed to update {calendar} in the database? Maybe there is some database error?")
+        logger.info("Successfully finished updating calendar.")
 
 
 def enter_loop():
-    # @ToDo(jorrick) sync based on the plugins present.
+    settings.configure_orm()
     plugin: AbstractPlugin = plugin_fetcher.get_plugin()
+
+    logger.info("Updating plugin calendars in the database.")
+    with create_session() as session:
+        queries.sync_duty_calendar_configurations_to_postgres(session, plugin.duty_calendar_configurations)
+
     while True:
-        logger.info("Updating persons.")
-        update_all_outdated_persons(plugin=plugin)
-        time.sleep(30)
-        logger.info("Updating calendars.")
-        update_all_outdated_calendars(plugin=plugin)
-        time.sleep(30)
+        try:
+            logger.info("Starting another update pass.")
+            update_all_outdated_calendars(plugin=plugin)
+            time.sleep(1)
+            update_all_outdated_persons(plugin=plugin)
+            time.sleep(1)
+        except SQLAlchemyError:
+            logger.exception("Error occurred when updating the database.")
+            time.sleep(1)
+

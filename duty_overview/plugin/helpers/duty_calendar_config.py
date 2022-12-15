@@ -18,8 +18,8 @@ class DutyCalendarConfig:
     icalendar_url: str = field(validator=[validators.instance_of(str), validators.max_len(500)])
     # The category this duty belongs in (this is what menu item it is shown for)
     category: str | None = field(default="default", validator=[validators.instance_of(str), validators.max_len(50)])
-    # Priority of order. The higher the number, the earlier this calendar shows up.
-    order: int = field(default=999, validator=[validators.instance_of(int), validators.ge(0), validators.le(9999999)])
+    # Priority of order. The lower the number, the earlier this calendar shows up.
+    order: int = field(default=99999, validator=[validators.instance_of(int), validators.ge(0), validators.le(9999999)])
     # Prefix before user LDAP or user email is mentioned. Example prefix; 'duty:' when calendar event; 'duty: thomas'
     event_prefix: str | None = field(
         default=None, validator=validators.optional([validators.instance_of(str), validators.max_len(50)])

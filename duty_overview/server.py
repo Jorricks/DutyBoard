@@ -1,4 +1,6 @@
+import logging
 import os
+import sys
 from typing import Dict, List, Set
 
 import pytz
@@ -18,6 +20,14 @@ from duty_overview.models import generate_fake_data
 from duty_overview.plugin.helpers import plugin_fetcher
 from duty_overview.plugin.abstract_plugin import AbstractPlugin
 from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.DEBUG,
+    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+    datefmt='%m-%d %H:%M'
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 app.add_middleware(GZipMiddleware, minimum_size=1000)

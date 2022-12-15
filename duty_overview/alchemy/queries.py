@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session as SASession
 from duty_overview.models.calendar import Calendar
 from duty_overview.models.on_call_event import OnCallEvent
 from duty_overview.models.person import Person
-from duty_overview.plugin.duty_calendar_config import DutyCalendarConfig
+from duty_overview.plugin.helpers.duty_calendar_config import DutyCalendarConfig
 from duty_overview.response_types import _Calendar, _Events, _ExtraInfoOnPerson, _Person, PersonResponse
 
 
@@ -62,7 +62,7 @@ def get_persons(session: SASession, all_person_uids: Set[int], timezone: BaseTzI
     return {
         a_person.uid: _Person(
             uid=a_person.uid,
-            ldap=a_person.ldap,
+            username=a_person.username,
             email=a_person.email,
             img_filename=a_person.img_filename,
             extra_attributes={},
@@ -107,7 +107,7 @@ def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> Per
 
     return PersonResponse(
         uid=person.uid,
-        ldap=person.ldap,
+        username=person.username,
         email=person.email,
         img_filename=person.img_filename,
         extra_attributes=parse_extra_attributes(person_uid, extra_attributes_str=person.extra_attributes_json),
@@ -127,20 +127,20 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
         calendar_db_instance.icalendar_url = calendar.icalendar_url
         calendar_db_instance.event_prefix = calendar.event_prefix
         session.merge(calendar_db_instance)
-
-    calendar_db_instance = Calendar(
-        uid=calendar.uid,
-        name=calendar.name,
-        description=calendar.description,
-        category=calendar.category,
-        order=calendar.order,
-        icalendar_url=calendar.icalendar_url,
-        event_prefix=calendar.event_prefix,
-        error_msg=None,
-        last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
-        sync=True,
-    )
-    session.add(calendar_db_instance)
+    else:
+        calendar_db_instance = Calendar(
+            uid=calendar.uid,
+            name=calendar.name,
+            description=calendar.description,
+            category=calendar.category,
+            order=calendar.order,
+            icalendar_url=calendar.icalendar_url,
+            event_prefix=calendar.event_prefix,
+            error_msg=None,
+            last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
+            sync=True,
+        )
+        session.add(calendar_db_instance)
 
 
 def sync_duty_calendar_configurations_to_postgres(
