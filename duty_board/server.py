@@ -14,12 +14,12 @@ from starlette.responses import FileResponse, HTMLResponse
 from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
 
-from duty_overview.alchemy import add_sqladmin, queries, settings
-from duty_overview.alchemy.session import create_session
-from duty_overview.models import generate_fake_data
-from duty_overview.plugin.helpers import plugin_fetcher
-from duty_overview.plugin.abstract_plugin import AbstractPlugin
-from duty_overview.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
+from duty_board.alchemy import add_sqladmin, queries, settings
+from duty_board.alchemy.session import create_session
+from duty_board.models import generate_fake_data
+from duty_board.plugin.helpers import plugin_fetcher
+from duty_board.plugin.abstract_plugin import AbstractPlugin
+from duty_board.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -44,8 +44,9 @@ admin: Admin
 if settings.SQL_ALCHEMY_CONN:
     settings.configure_orm()
     plugin = plugin_fetcher.get_plugin()
-    app.mount("/dist", StaticFiles(directory="duty_overview/www/dist"), name="dist")
-    app.mount("/static", StaticFiles(directory="duty_overview/www/static"), name="static")
+    if os.environ.get("NODE_ENV") != "development":
+        app.mount("/dist", StaticFiles(directory="duty_board/www/dist"), name="dist")
+    app.mount("/static", StaticFiles(directory="duty_board/www/static"), name="static")
     app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
     admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
 if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
@@ -106,9 +107,9 @@ def thumbnail_image():
 
 @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
 async def accept_all():
-    return FileResponse("duty_overview/www/dist/index.html")
+    return FileResponse("duty_board/www/dist/index.html")
 
 
 # @app.get("/duty", response_class=HTMLResponse)
 # async def get_schedule():
-#     return FileResponse("duty_overview/www/dist/index.html")
+#     return FileResponse("duty_board/www/dist/index.html")

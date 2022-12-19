@@ -5,16 +5,16 @@ from typing import Optional
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from duty_overview.alchemy import settings, queries
+from duty_board.alchemy import settings, queries
 from pendulum import DateTime
 from sqlalchemy.orm import Session as SASession, Query
 
-from duty_overview.alchemy.session import create_session
-from duty_overview.models.calendar import Calendar
-from duty_overview.models.on_call_event import OnCallEvent
-from duty_overview.models.person import Person
-from duty_overview.plugin.helpers import plugin_fetcher
-from duty_overview.plugin.abstract_plugin import AbstractPlugin
+from duty_board.alchemy.session import create_session
+from duty_board.models.calendar import Calendar
+from duty_board.models.on_call_event import OnCallEvent
+from duty_board.models.person import Person
+from duty_board.plugin.helpers import plugin_fetcher
+from duty_board.plugin.abstract_plugin import AbstractPlugin
 
 logger = logging.getLogger(__name__)
 

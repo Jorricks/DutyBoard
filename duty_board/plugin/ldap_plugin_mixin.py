@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, List, Literal, Mapping, Optional, Tuple, Final, Dict, Union, ClassVar
 
 from sqlalchemy.orm import Session as SASession
-from duty_overview.models.person import Person
+from duty_board.models.person import Person
 from ldap3 import Connection, Server, SUBTREE
 from ldap3.core import exceptions
 

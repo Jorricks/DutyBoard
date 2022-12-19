@@ -92,7 +92,7 @@ export default function Footer() {
         >
           <Text>© 2022 All rights reserved</Text>
           <Stack direction={"row"} spacing={6}>
-            <SocialButton label={"Github"} href={"https://github.com/Jorricks/DutyOverview"}>
+            <SocialButton label={"Github"} href={"https://github.com/Jorricks/DutyBoard"}>
               <FaGithub />
             </SocialButton>
           </Stack>

@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 import click
-from duty_overview import worker_loop
+from duty_board import worker_loop
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -32,7 +32,7 @@ def worker():
 @click.option('--reload', is_flag=True, type=bool, help='Auto reload when changes are made to the source repository.')
 def webserver(host: str, port: int, reload: bool):
     logger.info("Starting the webserver")
-    command = f"uvicorn duty_overview.server:app --host {host} --port {port}"
+    command = f"uvicorn duty_board.server:app --host {host} --port {port}"
     if reload:
         command += " --reload"
 

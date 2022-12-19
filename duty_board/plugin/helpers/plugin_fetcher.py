@@ -8,9 +8,9 @@ from functools import lru_cache
 from inspect import isclass
 from typing import List, Optional, Type
 
-from duty_overview.exceptions import PluginLoadingException
-from duty_overview.plugin.abstract_plugin import AbstractPlugin
-from duty_overview.plugin.example.example_plugin import ExamplePlugin
+from duty_board.exceptions import PluginLoadingException
+from duty_board.plugin.abstract_plugin import AbstractPlugin
+from duty_board.plugin.example.example_plugin import ExamplePlugin
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +25,10 @@ def get_plugin() -> AbstractPlugin:
 
 @lru_cache
 def _get_plugin() -> Optional[AbstractPlugin]:
-    if "DUTY_OVERVIEW_PLUGIN_LOCATION" not in os.environ:
+    if "DUTY_BOARD_PLUGIN_LOCATION" not in os.environ:
         return None
 
-    file_path = os.environ["DUTY_OVERVIEW_PLUGIN_LOCATION"]
+    file_path = os.environ["DUTY_BOARD_PLUGIN_LOCATION"]
 
     if not os.path.isfile(file_path):
         raise PluginLoadingException(f"{file_path=} is not a file. Please set the plugin location correctly.")

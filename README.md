@@ -1,4 +1,4 @@
-# DutyOverview
+# DutyBoard
 Overview of Duty calendars using iCalendar
 
 
@@ -6,37 +6,16 @@ Overview of Duty calendars using iCalendar
 
 ### Installing
 ```shell
+pip3 install --upgrade pip
 pip3 install -e ."[dev, test]"
 ```
 
-### Database
-Initial start
-```shell
-docker run -p 5432:5432 --name pgduty -e POSTGRES_PASSWORD=mysecretpassword -d postgres
-```
-Stopping
-```shell
-docker stop pgduty
-```
-Starting a stopped instance
-```shell
-docker start pgduty
-```
-Starting over with a wiped database
-```shell
-docker stop pgduty; docker rm pgduty
-```
+### Docker compose setup
+#### Docker dev setup
+There are two docker compose files setups. The first is purely for development. Here we have a webpack-dev-server running the node.js code inside the container. The front-end automatically connects to the Python FastAPI container for API calls. In this case, you want to use the front-end provided by the node.js container at http://localhost:8080. This setup automatically reloads the FastAPI server on Python code changes and the node.js server on any typescript/css changes.
 
-### Starting application
-```
-docker start pgduty
-export SQL_ALCHEMY_CONNECTION="postgresql://postgres:mysecretpassword@127.0.0.1:5432/postgres"
-export DUTY_OVERVIEW_SECRET_KEY="RANDOM_SECRET_KEY"
-export CREATE_DUMMY_RECORDS="1"
-uvicorn duty_overview.server:app --reload
-```
+Note: The first run will create the python venv & install all node modules. This will take some time.
 
-## Docker compose dev setup
 Starting up
 ```shell
 docker-compose -f docker-compose.dev.yaml up -d
@@ -44,6 +23,22 @@ docker-compose -f docker-compose.dev.yaml up -d
 Shutting down
 ```shell
 docker-compose -f docker-compose.dev.yaml down
+```
+
+#### Docker production setup
+Once you are sure of your changes, you can test them out with the production setup. Here the node container only compiles the code into the `duty_board/www/dist` folder, which is then served through the Python FastAPI container.
+Now you want to use the FastAPI url at http://localhost:8001.
+Note: It might take some time for the `dist` folder to become present and thereby throw an error in the FastAPI before it is ready. Simply, restarting it should be enough.
+
+Note: The first run will create the python venv. This will take some time.
+
+Starting up
+```shell
+docker-compose -f docker-compose.prod.yaml up -d
+```
+Shutting down
+```shell
+docker-compose -f docker-compose.prod.yaml down
 ```
 
 ## @ToDos:
@@ -54,8 +49,8 @@ docker-compose -f docker-compose.dev.yaml down
 - [x] Create docker compose
 - [x] Add extra pre-commit hooks
 - [ ] Add improved GZIP handler
-- [ ] Add Gitlab pipelines
-- [ ] Create kustomize example
+- [ ] Add Github pipelines
+- [ ] (Optional) Create kustomize example
 - [ ] (Optional) Implement announcement calendar
 
 ## Extra pre-commit hooks;

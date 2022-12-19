@@ -2,9 +2,9 @@ from pathlib import Path
 
 from sqlalchemy.orm import Session as SASession
 
-from duty_overview.models.person import Person
-from duty_overview.plugin.abstract_plugin import AbstractPlugin
-from duty_overview.plugin.ical_plugin_mixin import ICalPluginMixin
+from duty_board.models.person import Person
+from duty_board.plugin.abstract_plugin import AbstractPlugin
+from duty_board.plugin.ical_plugin_mixin import ICalPluginMixin
 
 
 class ExamplePlugin(ICalPluginMixin, AbstractPlugin):

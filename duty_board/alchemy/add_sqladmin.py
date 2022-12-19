@@ -12,15 +12,15 @@ from sqladmin.fields import DateTimeField
 from sqlalchemy.orm import session as SASession
 from starlette.requests import Request
 
-from duty_overview.alchemy import settings
-from duty_overview.alchemy.session import create_session
-from duty_overview.alchemy.settings import Base
-from duty_overview.alchemy.sqlalchemy_types import utc
-from duty_overview.models.calendar import Calendar
-from duty_overview.models.on_call_event import OnCallEvent
-from duty_overview.models.person import Person
-from duty_overview.models.token import Token
-from duty_overview.plugin.abstract_plugin import AbstractPlugin
+from duty_board.alchemy import settings
+from duty_board.alchemy.session import create_session
+from duty_board.alchemy.settings import Base
+from duty_board.alchemy.sqlalchemy_types import utc
+from duty_board.models.calendar import Calendar
+from duty_board.models.on_call_event import OnCallEvent
+from duty_board.models.person import Person
+from duty_board.models.token import Token
+from duty_board.plugin.abstract_plugin import AbstractPlugin
 
 loop = asyncio.get_event_loop()
 
@@ -113,7 +113,7 @@ def add_sqladmin(app: FastAPI, plugin: AbstractPlugin) -> Admin:
 
 class MyBackend(AuthenticationBackend):
     def __init__(self, plugin: AbstractPlugin, *args, **kwargs):
-        super().__init__(secret_key=os.environ["DUTY_OVERVIEW_SECRET_KEY"])
+        super().__init__(secret_key=os.environ["DUTY_BOARD_SECRET_KEY"])
         self.plugin = plugin
 
     @staticmethod

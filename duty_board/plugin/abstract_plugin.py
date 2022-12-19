@@ -7,9 +7,9 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session as SASession
 
-from duty_overview.models.calendar import Calendar
-from duty_overview.models.person import Person
-from duty_overview.plugin.helpers.duty_calendar_config import DutyCalendarConfig
+from duty_board.models.calendar import Calendar
+from duty_board.models.person import Person
+from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
 
 
 class AbstractPlugin(ABC):
@@ -24,7 +24,7 @@ class AbstractPlugin(ABC):
     category_order: List[str] = []
     duty_calendar_configurations: List[DutyCalendarConfig] = []
     enable_admin_button: bool = True
-    git_repository_url: Optional[str] = "https://github.com/Jorricks/DutyOverview"
+    git_repository_url: Optional[str] = "https://github.com/Jorricks/DutyBoard"
 
     def __init__(self, *args, **kwargs):
         super(AbstractPlugin, self).__init__(*args, **kwargs)

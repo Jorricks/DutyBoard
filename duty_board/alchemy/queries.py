@@ -7,11 +7,11 @@ from pendulum import DateTime, UTC
 from pytz.tzinfo import BaseTzInfo
 from sqlalchemy.orm import Session as SASession
 
-from duty_overview.models.calendar import Calendar
-from duty_overview.models.on_call_event import OnCallEvent
-from duty_overview.models.person import Person
-from duty_overview.plugin.helpers.duty_calendar_config import DutyCalendarConfig
-from duty_overview.response_types import _Calendar, _Events, _ExtraInfoOnPerson, _Person, PersonResponse
+from duty_board.models.calendar import Calendar
+from duty_board.models.on_call_event import OnCallEvent
+from duty_board.models.person import Person
+from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
+from duty_board.response_types import _Calendar, _Events, _ExtraInfoOnPerson, _Person, PersonResponse
 
 
 def format_datetime_for_timezone(dt: datetime.datetime, timezone: BaseTzInfo) -> str:

@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Boolean, Index, Integer
 from sqlalchemy.orm import relationship
 
-from duty_overview.alchemy.settings import Base
-from duty_overview.alchemy.sqlalchemy_types import UtcDateTime
+from duty_board.alchemy.settings import Base
+from duty_board.alchemy.sqlalchemy_types import UtcDateTime
 
 
 class Calendar(Base):

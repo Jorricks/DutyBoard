@@ -10,10 +10,10 @@ from pendulum import DateTime, Duration
 import pytz
 from sqlalchemy.orm import Session as SASession
 
-from duty_overview.alchemy.session import create_session
-from duty_overview.models.calendar import Calendar
-from duty_overview.models.on_call_event import OnCallEvent
-from duty_overview.models.person import Person
+from duty_board.alchemy.session import create_session
+from duty_board.models.calendar import Calendar
+from duty_board.models.on_call_event import OnCallEvent
+from duty_board.models.person import Person
 
 logger = logging.getLogger(__name__)
 
@@ -44,10 +44,10 @@ class ICalPluginMixin:
                 result = session.query(Person).filter(Person.username == value).first()
             if result:
                 return result.uid
-            ldap = None if "@" in value else value
+            username = None if "@" in value else value
             email = value if "@" in value else None
             person = Person(
-                username=ldap,
+                username=username,
                 email=email,
                 img_filename=None,
                 extra_attributes_json=None,
@@ -57,9 +57,9 @@ class ICalPluginMixin:
             session.add(person)
         # This extra call is needed to fetch the UID that is automatically created for the Person.
         with create_session() as session:
-            result = session.query(Person).filter(Person.username == ldap).filter(Person.email == email).first()
+            result = session.query(Person).filter(Person.username == username).filter(Person.email == email).first()
             if result is None:
-                raise ValueError(f"We just added Person {ldap=} {email=} and we already can't find him anymore..")
+                raise ValueError(f"We just added Person {username=} {email=} and we already can't find him anymore..")
             return result.uid
 
     def _create_on_call_event(

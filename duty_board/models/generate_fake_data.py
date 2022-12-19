@@ -6,10 +6,10 @@ from typing import List
 from pendulum import DateTime
 from sqlalchemy.orm import Session as SASession
 
-from duty_overview.alchemy.session import provide_session
-from duty_overview.models.calendar import Calendar
-from duty_overview.models.on_call_event import OnCallEvent
-from duty_overview.models.person import Person
+from duty_board.alchemy.session import provide_session
+from duty_board.models.calendar import Calendar
+from duty_board.models.on_call_event import OnCallEvent
+from duty_board.models.person import Person
 
 
 @provide_session
@@ -53,7 +53,7 @@ def create_calendars(session: SASession) -> None:
 @provide_session
 def create_persons(session: SASession) -> None:
     nr_1 = Person(
-        ldap="jorrick",
+        username="jorrick",
         email="jorricks@gmail.com",
         img_filename="bert.jpeg",
         extra_attributes_json=json.dumps(
@@ -70,7 +70,7 @@ def create_persons(session: SASession) -> None:
         sync=False,
     )
     nr_2 = Person(
-        ldap="bart",
+        username="bart",
         email="bart@gmail.com",
         img_filename="bert.jpeg",
         extra_attributes_json=json.dumps(

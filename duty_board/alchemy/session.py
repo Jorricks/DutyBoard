@@ -19,7 +19,7 @@ from functools import wraps
 from inspect import signature
 from typing import Callable, Generator, TypeVar, cast
 
-from duty_overview.alchemy import settings
+from duty_board.alchemy import settings
 
 
 @contextlib.contextmanager

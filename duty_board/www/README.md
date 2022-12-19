@@ -13,12 +13,12 @@ npx webpack-dev-server
 ## Adding a dependency in docker-compose.dev
 
 ```shell
-(venv) ➜  DutyOverview git:(main) ✗ docker ps
+(venv) ➜  DutyBoard git:(main) ✗ docker ps
 CONTAINER ID   IMAGE                                                  COMMAND                  CREATED        STATUS        PORTS                    NAMES
 dc14c6d027b1   registry.hub.docker.com/library/node:18-slim           "docker-entrypoint.s…"   13 hours ago   Up 13 hours   0.0.0.0:8080->8080/tcp   duty_frontend
 ffd5949d1da1   registry.hub.docker.com/library/python:3.10-slim       "/bin/bash -c 'pytho…"   13 hours ago   Up 13 hours   0.0.0.0:8000->8000/tcp   duty_backend
 32dfb3484317   registry.hub.docker.com/library/postgres:13.3-alpine   "docker-entrypoint.s…"   13 hours ago   Up 13 hours   0.0.0.0:5432->5432/tcp   duty_database
-(venv) ➜  DutyOverview git:(main) ✗ docker exec -it duty_frontend /bin/bash
+(venv) ➜  DutyBoard git:(main) ✗ docker exec -it duty_frontend /bin/bash
 root@dc14c6d027b1:/code# npm install --save-dev html-webpack-plugin
 
 up to date, audited 995 packages in 2s
