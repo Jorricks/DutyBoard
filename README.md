@@ -1,57 +1,55 @@
-# DutyBoard
-Overview of Duty calendars using iCalendar
+<p align="center">
+  <a href="https://github.com/Jorricks/DutyBoard"><img src="https://github.com/Jorricks/DutyBoard/raw/main/docs/duty_board.drawio.png" alt="DutyBoard" width="600px"></a>
+</p>
+<p align="center">
+    <em>Provide a simple, yet extensive overview of your Duty calendars using <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant iCalendars.<br> Verified with PagerDuty, Google & Microsoft outlook Calendars.</em>
+</p>
+<p align="center">
+
+[//]: # (<a href="https://pypi.org/project/DutyBoard" target="_blank">)
+
+[//]: # (    <img src="https://img.shields.io/pypi/v/DutyBoard?color=%2334D058&label=pypi%20package" alt="Package version">)
+
+[//]: # (</a>)
+
+[//]: # (<a href="https://pypi.org/project/DutyBoard" target="_blank">)
+
+[//]: # (    <img src="https://img.shields.io/pypi/pyversions/DutyBoard.svg?color=%2334D058" alt="Supported Python versions">)
+
+[//]: # (</a>)
+</p>
 
 
-## Development
+---
 
-### Installing
-```shell
-pip3 install --upgrade pip
-pip3 install -e ."[dev, test]"
-```
+**Source Code**: [https://github.com/Jorricks/DutyBoard](https://github.com/Jorricks/DutyBoard)
 
-### Docker compose setup
-#### Docker dev setup
-There are two docker compose files setups. The first is purely for development. Here we have a webpack-dev-server running the node.js code inside the container. The front-end automatically connects to the Python FastAPI container for API calls. In this case, you want to use the front-end provided by the node.js container at http://localhost:8080. This setup automatically reloads the FastAPI server on Python code changes and the node.js server on any typescript/css changes.
 
-Note: The first run will create the python venv & install all node modules. This will take some time.
+## Features
+- 🚀 Extendable Plugin structure allowing you to tune calendars & enrich duty officers information with for example LDAP.
+- 📈 Full <a href="https://www.ietf.org/rfc/rfc5545.txt">RFC 5545</a> compliant iCalendar support, including recurring events, by using [iCal-library](https://jorricks.github.io/iCal-library/).
+- ✨ ***Dynamic web-interface*** with the ability to tune using the plugin structure. Examples would be:
+    1. Different color schemes.
+    2. Your own company logo.
+    3. Icons for extra user information.
+    4. And much much more.
+- 💪 React front-end is pre-compiled and served through FastAPI.
+- 🆎 Fully typed code base.
 
-Starting up
-```shell
-docker-compose -f docker-compose.dev.yaml up -d
-```
-Shutting down
-```shell
-docker-compose -f docker-compose.dev.yaml down
-```
+## Requirements
+Python 3.8+
 
-#### Docker production setup
-Once you are sure of your changes, you can test them out with the production setup. Here the node container only compiles the code into the `duty_board/www/dist` folder, which is then served through the Python FastAPI container.
-Now you want to use the FastAPI url at http://localhost:8001.
-Note: It might take some time for the `dist` folder to become present and thereby throw an error in the FastAPI before it is ready. Simply, restarting it should be enough.
+DutyBoard runs using:
+- [FastAPI](https://fastapi.tiangolo.com/) as web service.
+- [iCal-library](https://jorricks.github.io/iCal-library/) for it's integration with iCalendars.
 
-Note: The first run will create the python venv. This will take some time.
+## Plugin structure
+More on this later once it's fully deployed.
 
-Starting up
-```shell
-docker-compose -f docker-compose.prod.yaml up -d
-```
-Shutting down
-```shell
-docker-compose -f docker-compose.prod.yaml down
-```
+## Why this project?
+Larger corporations often have many Duty schedules. This is often to shield team members from ad-hoc work during their work-week or to ensure the platform runs smoothly 24/7. However, exposing Duty schedules is easy at the start, but once you have three schedules, it becomes unclear who is on duty. Hence, a small front-end usually solves this, but that require manual intervention when the schedule changes. This projects aims to solve that by automatically fetching who is on duty from iCalendars
 
-## @ToDos:
-- [x] Parse iCalendars
-- [x] Create calendar config for usage in Configs
-- [x] Create calendar config to Database syncer
-- [x] Create docker image
-- [x] Create docker compose
-- [x] Add extra pre-commit hooks
-- [ ] Add improved GZIP handler
-- [ ] Add Github pipelines
-- [ ] (Optional) Create kustomize example
-- [ ] (Optional) Implement announcement calendar
-
-## Extra pre-commit hooks;
-- [ ] Automated run of generate_typescript_api.py.
+## Ideas for additional features
+- Support quoted property parameters containing special characters.
+- Support the new Properties for iCalendar (RFC 7986).
+- Support CalDev (RFC 4791).
