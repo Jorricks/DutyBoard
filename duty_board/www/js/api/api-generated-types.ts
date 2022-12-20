@@ -29,9 +29,9 @@ export interface PersonResponse {
   /** Uid */
   uid: string;
   /** Username */
-  username: string;
+  username?: string;
   /** Email */
-  email: string;
+  email?: string;
   /** Img Filename */
   imgFilename?: string;
   /** Extra Attributes */
@@ -119,9 +119,9 @@ export interface Person {
   /** Uid */
   uid: number;
   /** Username */
-  username: string;
+  username?: string;
   /** Email */
-  email: string;
+  email?: string;
   /** Img Filename */
   imgFilename?: string;
   /** Extra Attributes */

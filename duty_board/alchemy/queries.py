@@ -11,7 +11,7 @@ from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
 from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
-from duty_board.response_types import _Calendar, _Events, _ExtraInfoOnPerson, _Person, PersonResponse
+from duty_board.web_helpers.response_types import _Calendar, _Events, _ExtraInfoOnPerson, _Person, PersonResponse
 
 
 def format_datetime_for_timezone(dt: datetime.datetime, timezone: BaseTzInfo) -> str:
@@ -22,7 +22,7 @@ def format_datetime_for_timezone(dt: datetime.datetime, timezone: BaseTzInfo) ->
 def _get_events_ending_from_now_onwards(
     session: SASession, all_encountered_person_uids: Set[int], timezone: BaseTzInfo
 ) -> Dict[str, List[_Events]]:
-    result: List[OnCallEvent] = session.query(OnCallEvent).filter(OnCallEvent.end_event_utc >= DateTime.utcnow()).all()
+    result = session.query(OnCallEvent).filter(OnCallEvent.end_event_utc >= DateTime.utcnow()).all()
     mapped: Dict[str, List[_Events]] = defaultdict(list)
     for calendar_event in result:
         mapped[calendar_event.calendar_uid].append(
@@ -40,7 +40,7 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
     events: Dict[str, List[_Events]] = _get_events_ending_from_now_onwards(
         session=session, all_encountered_person_uids=all_encountered_person_uids, timezone=timezone
     )
-    result: List[Calendar] = session.query(Calendar).order_by(Calendar.order).all()
+    result = session.query(Calendar).order_by(Calendar.order).all()
     return [
         _Calendar(
             uid=single_calendar.uid,
@@ -58,7 +58,7 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
 
 
 def get_persons(session: SASession, all_person_uids: Set[int], timezone: BaseTzInfo) -> Dict[int, _Person]:
-    result: List[Person] = session.query(Person).where(Person.uid.in_(all_person_uids))
+    result = session.query(Person).where(Person.uid.in_(all_person_uids))
     return {
         a_person.uid: _Person(
             uid=a_person.uid,
@@ -101,7 +101,7 @@ def parse_extra_attributes(person_uid: int, extra_attributes_str: Optional[str])
 
 
 def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> PersonResponse:
-    person: Optional[Person] = session.query(Person).where(Person.uid == person_uid).first()
+    person = session.query(Person).where(Person.uid == person_uid).first()
     if person is None:
         raise ValueError(f"Invalid {person_uid=} passed.")
 
@@ -118,7 +118,7 @@ def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> Per
 
 
 def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig) -> None:
-    calendar_db_instance: Optional[Calendar] = session.query(Calendar).where(Calendar.uid == calendar.uid).first()
+    calendar_db_instance = session.query(Calendar).where(Calendar.uid == calendar.uid).first()
     if calendar_db_instance is not None:
         calendar_db_instance.name = calendar.name
         calendar_db_instance.description = calendar.description

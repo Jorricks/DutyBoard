@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Any, Dict
 
 from fastapi.openapi.utils import get_openapi
-from server import app
+
+from duty_board.server import app
 
 
 def to_camel_case(snake_str: str) -> str:
@@ -50,6 +51,6 @@ with open("openapi.json", "w") as f:
 # consider removing --axios and adding --no-client.
 output_folder = "./js/api"
 output_file = "api-generated-types.ts"
-cmd = f"npx swagger-typescript-api -p ../openapi.json -o {output_folder} -n {output_file} --no-client"
-subprocess.run(cmd, cwd=Path.cwd() / "www", shell=True)
+cmd = f"npx swagger-typescript-api -p ../web_helpers/openapi.json -o {output_folder} -n {output_file} --no-client"
+subprocess.run(cmd, cwd=Path.cwd().parent / "www", shell=True)
 os.remove(Path.cwd() / "openapi.json")

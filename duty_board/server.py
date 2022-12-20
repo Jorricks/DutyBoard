@@ -9,7 +9,6 @@ from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
 from sqladmin import Admin
 from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware.gzip import GZipMiddleware
 from starlette.responses import FileResponse, HTMLResponse
 from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
@@ -17,20 +16,20 @@ from tzlocal import get_localzone
 from duty_board.alchemy import add_sqladmin, queries, settings
 from duty_board.alchemy.session import create_session
 from duty_board.models import generate_fake_data
-from duty_board.plugin.helpers import plugin_fetcher
 from duty_board.plugin.abstract_plugin import AbstractPlugin
-from duty_board.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
+from duty_board.plugin.helpers import plugin_fetcher
+from duty_board.web_helpers.gzip_static_files import GZIPStaticFiles
+from duty_board.web_helpers.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
 
 logging.basicConfig(
     stream=sys.stdout,
     level=logging.DEBUG,
-    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-    datefmt='%m-%d %H:%M'
+    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+    datefmt="%m-%d %H:%M",
 )
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
-app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,8 +43,7 @@ admin: Admin
 if settings.SQL_ALCHEMY_CONN:
     settings.configure_orm()
     plugin = plugin_fetcher.get_plugin()
-    if os.environ.get("NODE_ENV") != "development":
-        app.mount("/dist", StaticFiles(directory="duty_board/www/dist"), name="dist")
+    app.mount("/dist", GZIPStaticFiles(directory="duty_board/www/dist", check_dir=False), name="dist")
     app.mount("/static", StaticFiles(directory="duty_board/www/static"), name="static")
     app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
     admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
