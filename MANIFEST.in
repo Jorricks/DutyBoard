@@ -1,0 +1,6 @@
+graft duty_board/plugin/example
+graft duty_board/www/static
+graft duty_board/www/user_images
+graft duty_board/www/dist
+recursive-exclude duty_board/www/dist *.map *.map.gz
+recursive-exclude duty_board/www/node_modules *

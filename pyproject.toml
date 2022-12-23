@@ -1,11 +1,11 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools >=65.0.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
-name = "duty-overview"
+name = "duty-board"
 authors = [{name = "Jorrick Sleijster", email = "jorricks3@gmail.com"}]
-readme = "README.md"
+description = "Package to display an overview of all active Duty rosters you have at your Company using iCalendars."
 license = {file = "LICENSE"}
 classifiers = [
     "Intended Audience :: Information Technology",
@@ -29,9 +29,10 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 
 ]
-dynamic = ["version", "description"]
+dynamic = ["version", "readme"]
 requires-python = ">=3.8"
 dependencies = [
     "attrs >= 22.1.0",
@@ -72,8 +73,8 @@ ldap = [
 
 
 [project.urls]
-Home = "https://jorricks.github.io/DutyBoard"
-Documentation = "https://jorricks.github.io/DutyBoard"
+Home = "https://github.com/Jorricks/DutyBoard"
+Documentation = "https://github.com/Jorricks/DutyBoard"
 Source = "https://github.com/Jorricks/DutyBoard"
 PullRequests = "https://github.com/Jorricks/DutyBoard/pulls"
 Issues = "https://github.com/Jorricks/DutyBoard/issues"
@@ -81,8 +82,22 @@ Issues = "https://github.com/Jorricks/DutyBoard/issues"
 [project.scripts]
 dutyBoard = "duty_board.main:cli"
 
-[tool.flit.module]
-name = "duty_board"
+[tool.setuptools]
+packages = ["duty_board"]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "duty_board.__version__"}
+readme = {file = "README.md"}
+
+#[tool.setuptools.package-data]
+#"duty_board.www.dist" = ["*.js", "*.js.map"]
+#"duty_board" = [
+#    "duty_board/www/dist",
+#    "duty_board/www/static",
+#    "duty_board/www/user_images",
+#    "duty_board/plugin/example"
+#]
 
 
 [tool.black]
