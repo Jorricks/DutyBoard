@@ -1,13 +1,11 @@
-from sqlalchemy import Column, String, Boolean, Integer, Index, UniqueConstraint
+from sqlalchemy import Boolean, Column, Index, Integer, String
 
 from duty_board.alchemy.settings import Base
 from duty_board.alchemy.sqlalchemy_types import UtcDateTime
 
 
 class Person(Base):
-    __table_args__ = (
-        Index("person_last_update_utc", "last_update_utc"),
-    )
+    __table_args__ = (Index("person_last_update_utc", "last_update_utc"),)
     __tablename__ = "person"
     uid = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     username = Column(String(50), nullable=True, unique=True)

@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 def get_plugin() -> AbstractPlugin:
     loaded_plugin = _get_plugin()
     if loaded_plugin is None:
-        logger.warning("Loaded the ExamplePlugin. This is probably not what you want!")
+        logger.warning("Loading the ExamplePlugin as you did not specify a Plugin. This is probably not what you want!")
         return ExamplePlugin()
-    return _get_plugin()
+    return loaded_plugin
 
 
 @lru_cache

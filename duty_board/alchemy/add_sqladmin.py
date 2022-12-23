@@ -142,7 +142,12 @@ class MyBackend(AuthenticationBackend):
 
     async def login(self, request: Request) -> bool:
         form = await request.form()
-        username, password = form["username"], form["password"]
+        username = form["username"]
+        password = form["password"]
+        if not isinstance(username, str) or not isinstance(password, str):
+            raise ValueError(
+                f"Got interesting types for {username=} and {password=}, {type(username)=}, {type(password)=}"
+            )
 
         if not await self.plugin.admin_login_attempt(username=username, password=password):
             return False

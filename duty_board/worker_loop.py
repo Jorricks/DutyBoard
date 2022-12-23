@@ -3,18 +3,18 @@ import time
 import traceback
 from typing import Optional
 
-from sqlalchemy.exc import SQLAlchemyError
-
-from duty_board.alchemy import settings, queries
 from pendulum import DateTime
-from sqlalchemy.orm import Session as SASession, Query
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Query
+from sqlalchemy.orm import Session as SASession
 
+from duty_board.alchemy import queries, settings
 from duty_board.alchemy.session import create_session
 from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
-from duty_board.plugin.helpers import plugin_fetcher
 from duty_board.plugin.abstract_plugin import AbstractPlugin
+from duty_board.plugin.helpers import plugin_fetcher
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +22,7 @@ logger = logging.getLogger(__name__)
 def get_most_outdated_person(plugin: AbstractPlugin, session: SASession) -> Optional[Person]:
     update_persons_with_last_update_before: DateTime = DateTime.utcnow() - plugin.person_update_frequency
     return (
-        session
-        .query(Person)
+        session.query(Person)
         .where(Person.last_update_utc <= update_persons_with_last_update_before)
         .order_by(Person.last_update_utc)
         .first()
@@ -33,8 +32,7 @@ def get_most_outdated_person(plugin: AbstractPlugin, session: SASession) -> Opti
 def get_most_outdated_calendar(plugin: AbstractPlugin, session: SASession) -> Optional[Calendar]:
     update_calendars_with_last_update_before: DateTime = DateTime.utcnow() - plugin.calendar_update_frequency
     return (
-        session
-        .query(Calendar)
+        session.query(Calendar)
         .where(Calendar.last_update_utc <= update_calendars_with_last_update_before)
         .order_by(Calendar.last_update_utc)
         .first()
@@ -48,8 +46,7 @@ def ensure_person_uniqueness(new_person: Person, session: SASession) -> Person:
     UIDS.
     """
     query: Query = (
-        session
-        .query(Person)
+        session.query(Person)
         .filter(Person.uid != new_person.uid)
         .filter(Person.username == new_person.username)
         .filter(Person.email == new_person.email)
@@ -75,7 +72,7 @@ def update_all_outdated_persons(plugin: AbstractPlugin) -> None:
                 logger.info(f"Updating {person}.")
                 try:
                     person = plugin.sync_person(person=person, session=session)
-                    logger.debug(f"Successfully executed plugins sync_person().")
+                    logger.debug("Successfully executed plugins sync_person().")
                     person = ensure_person_uniqueness(new_person=person, session=session)
                     person.error_msg = None
                 except Exception:
@@ -101,7 +98,7 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
                 logger.info(f"Updating {calendar}.")
                 try:
                     calendar = plugin.sync_calendar(calendar=calendar, event_prefix=None, session=session)
-                    logger.debug(f"Successfully executed plugins sync_calendar().")
+                    logger.debug("Successfully executed plugins sync_calendar().")
                     calendar.error_msg = None
                 except Exception:
                     logger.exception(f"Failed to update {calendar}.")
@@ -133,4 +130,3 @@ def enter_loop():
         except SQLAlchemyError:
             logger.exception("Error occurred when updating the database.")
             time.sleep(1)
-

@@ -4,8 +4,9 @@ from typing import Any, Callable
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
+from sqlalchemy.orm import declarative_base, scoped_session
 from sqlalchemy.orm import Session as SASession
+from sqlalchemy.orm import sessionmaker
 
 log = logging.getLogger(__name__)
 SQL_ALCHEMY_CONN: str = os.environ.get("SQL_ALCHEMY_CONNECTION", "")
@@ -76,7 +77,7 @@ def create_tables_if_not_present():
     from duty_board.models.person import Person
     from duty_board.models.token import Token
 
-    Person.__table__.create(bind=engine, checkfirst=True)
-    Calendar.__table__.create(bind=engine, checkfirst=True)
-    OnCallEvent.__table__.create(bind=engine, checkfirst=True)
-    Token.__table__.create(bind=engine, checkfirst=True)
+    Person.__table__.create(bind=get_engine(), checkfirst=True)
+    Calendar.__table__.create(bind=get_engine(), checkfirst=True)
+    OnCallEvent.__table__.create(bind=get_engine(), checkfirst=True)
+    Token.__table__.create(bind=get_engine(), checkfirst=True)

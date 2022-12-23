@@ -3,13 +3,13 @@ import logging
 import os
 from functools import wraps
 from pathlib import Path
-from typing import Any, List, Literal, Mapping, Optional, Tuple, Final, Dict, Union, ClassVar
+from typing import Any, ClassVar, Dict, Final, List, Literal, Mapping, Optional, Tuple, Union
 
-from sqlalchemy.orm import Session as SASession
-from duty_board.models.person import Person
 from ldap3 import Connection, Server, SUBTREE
 from ldap3.core import exceptions
+from sqlalchemy.orm import Session as SASession
 
+from duty_board.models.person import Person
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,7 @@ def ldap_rebind(func):
             ldap_instance.connection.unbind()
             ldap_instance.connection.bind()
             return func(ldap_instance, *args, **kwargs)
+
     return wrapper
 
 
@@ -105,12 +106,12 @@ class LDAPPluginMixin:
             user_organizational_unit=self.LDAP_USER_ORGANIZATIONAL_UNIT,
             full_quantified_username=os.environ["LDAP_FULL_QUANTIFIED_USERNAME"],
             password=os.environ["LDAP_PASSWORD"],
-            auto_referrals=False
+            auto_referrals=False,
         )
         super(LDAPPluginMixin, self).__init__(*args, **kwargs)
 
     def _write_image_attribute_to_file(
-        self, person: Person, person_attributes: Mapping[str, List[str]]
+        self, person: Person, person_attributes: Mapping[str, Union[str, List[str]]]
     ) -> Optional[str]:
         if "jpegPhoto" not in person_attributes:
             return None
@@ -162,7 +163,9 @@ if __name__ == "__main__":
     example_person = Person(ldap="some_username")
     plugin = LDAPPluginMixin()
     from sqlalchemy.orm import create_session
+
     with create_session() as session:
         plugin.sync_person(example_person, session=session)
         import pprint
+
         pprint.pprint(example_person)

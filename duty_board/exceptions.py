@@ -1,4 +1,2 @@
-
-
 class PluginLoadingException(Exception):
     pass

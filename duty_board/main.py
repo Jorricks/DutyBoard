@@ -4,13 +4,14 @@ import sys
 from pathlib import Path
 
 import click
+
 from duty_board import worker_loop
 
 logging.basicConfig(
     stream=sys.stdout,
     level=logging.DEBUG,
-    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-    datefmt='%m-%d %H:%M'
+    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+    datefmt="%m-%d %H:%M",
 )
 logger = logging.getLogger(__name__)
 
@@ -27,9 +28,9 @@ def worker():
 
 
 @cli.command()
-@click.option('--host', default="0.0.0.0", help="The IP address range to listen for.")
-@click.option('--port', default="80", type=int, help="The port to listen for.")
-@click.option('--reload', is_flag=True, type=bool, help='Auto reload when changes are made to the source repository.')
+@click.option("--host", default="0.0.0.0", help="The IP address range to listen for.")
+@click.option("--port", default="80", type=int, help="The port to listen for.")
+@click.option("--reload", is_flag=True, type=bool, help="Auto reload when changes are made to the source repository.")
 def webserver(host: str, port: int, reload: bool):
     logger.info("Starting the webserver")
     command = f"uvicorn duty_board.server:app --host {host} --port {port}"

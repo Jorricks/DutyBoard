@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Index, Integer
+from sqlalchemy import Boolean, Column, Index, Integer, String
 from sqlalchemy.orm import relationship
 
 from duty_board.alchemy.settings import Base
@@ -6,9 +6,7 @@ from duty_board.alchemy.sqlalchemy_types import UtcDateTime
 
 
 class Calendar(Base):
-    __table_args__ = (
-        Index("calendar_last_update_utc", "last_update_utc"),
-    )
+    __table_args__ = (Index("calendar_last_update_utc", "last_update_utc"),)
     __tablename__ = "calendar"
     uid = Column(String(50), primary_key=True, nullable=False)
     name = Column(String(200), nullable=False)
