@@ -83,20 +83,10 @@ dutyBoard = "duty_board.main:cli"
 
 [tool.setuptools]
 packages = ["duty_board"]
-include-package-data = true
 
 [tool.setuptools.dynamic]
 version = {attr = "duty_board.__version__"}
 readme = {file = "README.md"}
-
-#[tool.setuptools.package-data]
-#"duty_board.www.dist" = ["*.js", "*.js.map"]
-#"duty_board" = [
-#    "duty_board/www/dist",
-#    "duty_board/www/static",
-#    "duty_board/www/user_images",
-#    "duty_board/plugin/example"
-#]
 
 
 [tool.black]
