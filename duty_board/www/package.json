@@ -1,6 +1,6 @@
 {
   "name": "duty-overview-app",
-  "version": " .1.0",
+  "version": "1.0",
   "private": true,
   "scripts": {
     "test": "jest",
