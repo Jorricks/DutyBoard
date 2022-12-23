@@ -65,7 +65,6 @@ dev = [
     "pytype >= 2022.6.30",
     "types-pytz >= 2022.6.0.1",
     "types-tzlocal >= 4.2.2.0",
-    "types-SQLAlchemy >= 1.4.53.19",
 ]
 ldap = [
     "ldap3 >= 2.9.1"
