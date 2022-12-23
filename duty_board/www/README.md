@@ -1,16 +1,8 @@
 # React front-end with FastAPI back-end
 
-This code is highly inspired by the Apache Airflow codebase.
+It is highly encouraged you use the docker-compose setup for local development.
 
-## Development
-
-You can run the react front-end with
-
-```shell
-npx webpack-dev-server
-```
-
-## Adding a dependency in docker-compose.dev
+## Adding a dependency using the docker-compose.dev setup.
 
 ```shell
 (venv) ➜  DutyBoard git:(main) ✗ docker ps
@@ -36,20 +28,6 @@ found 0 vulnerabilities
 3. Wait for the dist folder to be filled with `report.html`
 4. Open the `report.html` in your favorite browser.
 
-## ToDo list
-
-- [x] Update menu items based on categories.
-- [x] Show image of company.
-- [x] Implement react router.
-- [x] Only display categories of selected category.
-- [x] Create dropdown for calendar.
-- [x] Implement Person view.
-- [x] Integrate ReactJS with our FastAPI.
-- [x] Fix inconsistent UI.
-- [x] Add button to link to repository.
-- [x] Add button to admin page (and make it optional).
-- [x] Reintroduce webpack server with docker (as this gives more debug options).
-- [x] Add image option.
-- [x] Change favicon to duty icon.
+## Improvement ideas
 - [ ] (Optional) Ability to add heads up notification.
 - [ ] (Optional) Create loader icon on page load.

@@ -50,6 +50,5 @@ More on this later once it's fully deployed.
 Larger corporations often have many Duty schedules. This is often to shield team members from ad-hoc work during their work-week or to ensure the platform runs smoothly 24/7. However, exposing Duty schedules is easy at the start, but once you have three schedules, it becomes unclear who is on duty. Hence, a small front-end usually solves this, but that require manual intervention when the schedule changes. This projects aims to solve that by automatically fetching who is on duty from iCalendars
 
 ## Ideas for additional features
-- Support quoted property parameters containing special characters.
-- Support the new Properties for iCalendar (RFC 7986).
-- Support CalDev (RFC 4791).
+- Implement announcement calendar.
+- Implement extra plugin sync functionality, e.g. Workday integration.

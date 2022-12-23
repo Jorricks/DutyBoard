@@ -10,9 +10,8 @@ Happy to have you onboard and interested to develop DutyBoard to the next level.
 - [x] Create docker compose
 - [x] Add extra pre-commit hooks
 - [x] Add improved GZIP handler
-- [ ] Add Github pipelines
+- [x] Add Github pipelines
 - [ ] (Optional) Create kustomize example
-- [ ] (Optional) Implement announcement calendar
 
 ## Extra pre-commit hooks;
 - [ ] Automated run of generate_typescript_api.py.
