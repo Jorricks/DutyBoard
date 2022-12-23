@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "duty-board"
 authors = [{name = "Jorrick Sleijster", email = "jorricks3@gmail.com"}]
 description = "Package to display an overview of all active Duty rosters you have at your Company using iCalendars."
+readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = [
     "Intended Audience :: Information Technology",
@@ -32,7 +33,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 
 ]
-dynamic = ["version", "readme"]
+dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
     "attrs >= 22.1.0",
@@ -86,7 +87,7 @@ packages = ["duty_board"]
 
 [tool.setuptools.dynamic]
 version = {attr = "duty_board.__version__"}
-readme = {file = "README.md"}
+#readme = {file = "README.md"}
 
 
 [tool.black]
