@@ -42,6 +42,7 @@ dependencies = [
     "pendulum >= 2.0.0",
     "psycopg2-binary >= 2.9.0",
     "pytz >= 2022.6",
+    "requests >= 2.28.1",
     "sqladmin >= 0.8.0",
     "sqlalchemy >= 1.4.40, < 2.0.0",
     "tzlocal >= 4.2",
@@ -82,13 +83,15 @@ Issues = "https://github.com/Jorricks/DutyBoard/issues"
 [project.scripts]
 dutyBoard = "duty_board.main:cli"
 
-[tool.setuptools]
-packages = ["duty_board"]
-
 [tool.setuptools.dynamic]
 version = {attr = "duty_board.__version__"}
 #readme = {file = "README.md"}
 
+[tool.setuptools.packages.find]
+where = ["."]  # list of folders that contain the packages (["."] by default)
+include = ["duty_board*"]  # package names should match these glob patterns (["*"] by default)
+exclude = []  # exclude packages matching these glob patterns (empty by default)
+namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
 [tool.black]
 line-length=120
