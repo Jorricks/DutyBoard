@@ -4,6 +4,7 @@ import logging
 from typing import List, Optional
 
 import pytz
+import requests  # type: ignore
 from ical_library import client
 from ical_library.ical_components import VCalendar, VEvent
 from ical_library.timeline import Timeline
@@ -20,12 +21,18 @@ logger = logging.getLogger(__name__)
 
 class ICalPluginMixin:
     @staticmethod
-    def _get_events_for_upcoming_month(icalendar_url: str, event_prefix: str, limit: int = 10) -> List[VEvent]:
+    def _get_icalendar(icalendar_url: str) -> str:
+        response = requests.get(icalendar_url, timeout=5.0)
+        response.raise_for_status()
+        return response.text
+
+    def _get_events_for_upcoming_month(self, icalendar_url: str, event_prefix: str, limit: int = 10) -> List[VEvent]:
         """Gets the calendar events for the upcoming 4 weeks."""
         logger.info(f"Loading {icalendar_url}, this might take some time.")
         now = DateTime.now()
         month_from_now = now + Duration(days=7 * 4)
-        calendar: VCalendar = client.parse_icalendar_url(icalendar_url)
+        calendar_txt: str = self._get_icalendar(icalendar_url=icalendar_url)
+        calendar: VCalendar = client.parse_lines_into_calendar(calendar_txt)
         # timeline is ordered by start date.
         timeline: Timeline = calendar.get_limited_timeline(now, month_from_now)
         return [
