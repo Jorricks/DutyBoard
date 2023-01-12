@@ -96,7 +96,7 @@ const PersonComponent = ({ person }: { person: Person }) => {
               <PopoverTrigger>
                 <Box style={{ cursor: "pointer" }}>
                   <Text mr="10px" style={{ display: "inline-block" }}>
-                      {capitalizeFirst(person.username) ?? person.email}
+                      {person.username != undefined ? capitalizeFirst(person.username) : person.email}
                   </Text>
                   <Text style={{ display: "inline-block", verticalAlign: "middle", fontSize: "20px" }}>
                     <FaInfoCircle />

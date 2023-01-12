@@ -63,7 +63,7 @@ const SingleCalendar = ({ calendar, persons }: Props) => {
         <Box width={{base: "auto", md: "30%"}}>
           <Heading size={"md"}>
             <div>
-              {firstPerson === undefined
+              {firstPerson == undefined
                   ? <p>Unknown</p>
                   : <PersonComponent person={firstPerson} />
               }
