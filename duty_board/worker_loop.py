@@ -4,6 +4,7 @@ import traceback
 from typing import Optional
 
 from pendulum import DateTime
+from sqlalchemy import or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Query
 from sqlalchemy.orm import Session as SASession
@@ -39,24 +40,35 @@ def get_most_outdated_calendar(plugin: AbstractPlugin, session: SASession) -> Op
     )
 
 
-def ensure_person_uniqueness(new_person: Person, session: SASession) -> Person:
+def ensure_person_uniqueness(new_person: Person) -> Person:
     """
     This function ensures we don't have 1000 users with the except same username and or email.
     If there is a new person object with the same username and email, we wipe the old person object and replace the
-    UIDS.
+    UIDS. This requires to be done in a separate session to prevent duplicate key issues.
     """
-    query: Query = (
-        session.query(Person)
-        .filter(Person.uid != new_person.uid)
-        .filter(Person.username == new_person.username)
-        .filter(Person.email == new_person.email)
-    )
-    for same_person in query.all():
-        logger.warning(f"Deleting {same_person=} in favor of {new_person=}.")
-        session.delete(same_person)
-        new_values = {"person_uid": new_person.uid}
-        session.query(OnCallEvent).filter(OnCallEvent.person_uid == same_person.uid).update(new_values)
-        logger.info(f"Also updated all references of {same_person.uid=} to {new_person.uid=} in OnCallEvents table.")
+    with create_session() as extra_session:
+        # Required to expunge, otherwise the commit will also update new_person and will raise a DuplicateKeyIndexError.
+        extra_session.expunge(new_person)
+        query: Query = extra_session.query(Person).filter(Person.uid != new_person.uid)
+        if new_person.username and new_person.email:
+            query = query.filter(or_(Person.username == new_person.username, Person.email == new_person.email))
+        elif new_person.username:
+            query = query.filter(Person.username == new_person.username)
+        elif new_person.email:
+            query = query.filter(Person.email == new_person.email)
+        else:
+            raise ValueError(f"{new_person.uid=} has both {new_person.username=} and {new_person.email=} as None.")
+
+        result = query.all()
+        logger.debug(f"Found {len(result)=}, {result=}.")
+
+        for same_person in result:
+            logger.info(f"Updating all references of {same_person.uid=} to {new_person.uid=} in OnCallEvents table.")
+            new_values = {"person_uid": new_person.uid}
+            extra_session.query(OnCallEvent).filter(OnCallEvent.person_uid == same_person.uid).update(new_values)
+            logger.warning(f"Deleting {same_person.uid=} {same_person=} in favor of {new_person.uid=} {new_person=}.")
+            extra_session.delete(same_person)
+            extra_session.commit()
     return new_person
 
 
@@ -73,7 +85,7 @@ def update_all_outdated_persons(plugin: AbstractPlugin) -> None:
                 try:
                     person = plugin.sync_person(person=person, session=session)
                     logger.debug("Successfully executed plugins sync_person().")
-                    person = ensure_person_uniqueness(new_person=person, session=session)
+                    person = ensure_person_uniqueness(new_person=person)
                     person.error_msg = None
                 except Exception:
                     logger.exception(f"Failed to update {person}.")
