@@ -14,7 +14,7 @@ interface Props {
 // Huge credits to https://blog.logrocket.com/create-collapsible-react-components-react-collapsed/
 const SingleCalendar = ({ calendar, persons }: Props) => {
   const firstEvent = calendar.events.length > 0 ? calendar.events[0] : undefined;
-  const firstPersonUid = firstEvent.personUid ?? undefined;
+  const firstPersonUid = firstEvent?.personUid ?? undefined;
   const firstPerson = firstPersonUid ? persons.get(firstPersonUid.toString()) : undefined;
 
   const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({ duration: 500 });
@@ -50,20 +50,23 @@ const SingleCalendar = ({ calendar, persons }: Props) => {
               <Box color="green.500" style={{ display: "inline-block" }} mr={3}>
                 <FaCalendarCheck />
               </Box>
-              <Box style={{ display: "inline-block" }}>{firstEvent.startEvent ?? "unknown"}</Box>
+              <Box style={{ display: "inline-block" }}>{firstEvent?.startEvent ?? "unknown"}</Box>
             </ListItem>
             <ListItem key="abc">
               <Box color="green.500" style={{ display: "inline-block" }} mr={3}>
                 <FaCalendarTimes />
               </Box>
-              <Box style={{ display: "inline-block" }}>{firstEvent.endEvent ?? "unknown"}</Box>
+              <Box style={{ display: "inline-block" }}>{firstEvent?.endEvent ?? "unknown"}</Box>
             </ListItem>
           </List>
         </Box>
         <Box width={{base: "auto", md: "30%"}}>
           <Heading size={"md"}>
             <div>
-              <PersonComponent person={firstPerson} />
+              {firstPerson === undefined
+                  ? <p>Unknown</p>
+                  : <PersonComponent person={firstPerson} />
+              }
             </div>
           </Heading>
         </Box>
