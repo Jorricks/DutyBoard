@@ -37,7 +37,7 @@ def webserver(host: str, port: int, reload: bool):
     if reload:
         command += " --reload"
 
-    cwd = str(Path(__file__).absolute())
+    cwd = str(Path(__file__).parent.absolute())
     with subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, shell=True, text=True, cwd=cwd
     ) as process:

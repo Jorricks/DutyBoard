@@ -51,7 +51,7 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
             last_update=format_datetime_for_timezone(single_calendar.last_update_utc, timezone),
             error_msg=single_calendar.error_msg or "",
             sync=single_calendar.sync,
-            events=events.get(single_calendar.uid),
+            events=events.get(single_calendar.uid) or [],
         )
         for single_calendar in result
     ]

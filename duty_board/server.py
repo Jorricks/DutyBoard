@@ -1,10 +1,11 @@
 import logging
 import os
 import sys
-from typing import Dict, List, Set
+from pathlib import Path
+from typing import Dict, Final, List, Set
 
 import pytz
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
 from sqladmin import Admin
@@ -40,11 +41,13 @@ app.add_middleware(
 plugin: AbstractPlugin
 admin: Admin
 
+CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
+print(f"{CURRENT_DIR=}")
 if settings.SQL_ALCHEMY_CONN:
     settings.configure_orm()
     plugin = plugin_fetcher.get_plugin()
-    app.mount("/dist", GZIPStaticFiles(directory="duty_board/www/dist", check_dir=False), name="dist")
-    app.mount("/static", StaticFiles(directory="duty_board/www/static"), name="static")
+    app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
+    app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
     app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
     admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
 if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
@@ -100,12 +103,12 @@ def thumbnail_image():
     file_path = plugin.absolute_path_to_company_logo_png
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type="image/jpeg", filename="company_logo.png")
-    return {"error": f"{file_path=} not found!"}
+    raise HTTPException(status_code=500, detail="Company logo could not be found.")
 
 
 @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
 async def accept_all():
-    return FileResponse("duty_board/www/dist/index.html")
+    return FileResponse(CURRENT_DIR / "www" / "dist" / "index.html")
 
 
 # @app.get("/duty", response_class=HTMLResponse)

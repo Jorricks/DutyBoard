@@ -34,7 +34,7 @@ class AbstractPlugin(ABC):
         pass
 
     @abstractmethod
-    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> Calendar:
+    def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:
         pass
 
     @abstractmethod

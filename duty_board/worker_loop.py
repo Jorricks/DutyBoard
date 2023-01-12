@@ -97,7 +97,7 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
                     break
                 logger.info(f"Updating {calendar}.")
                 try:
-                    calendar = plugin.sync_calendar(calendar=calendar, event_prefix=None, session=session)
+                    calendar = plugin.sync_calendar(calendar=calendar, session=session)
                     logger.debug("Successfully executed plugins sync_calendar().")
                     calendar.error_msg = None
                 except Exception:

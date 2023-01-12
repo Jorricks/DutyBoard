@@ -6,6 +6,7 @@ from typing import List, Optional
 import pytz
 import requests  # type: ignore
 from ical_library import client
+from ical_library.help_modules import dt_utils
 from ical_library.ical_components import VCalendar, VEvent
 from ical_library.timeline import Timeline
 from pendulum import DateTime, Duration
@@ -75,16 +76,16 @@ class ICalPluginMixin:
     def _create_on_call_event(self, calendar: Calendar, v_event: VEvent, person_uid: int) -> OnCallEvent:
         return OnCallEvent(
             calendar_uid=calendar.uid,
-            start_event_utc=v_event.start,
-            end_event_utc=v_event.end,
+            start_event_utc=dt_utils.convert_time_object_to_aware_datetime(v_event.start),
+            end_event_utc=dt_utils.convert_time_object_to_aware_datetime(v_event.start),
             person_uid=person_uid,
         )
 
-    def sync_calendar(self, calendar: Calendar, event_prefix: str | None, session: SASession) -> Calendar:
+    def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:
         items_to_insert: List[OnCallEvent] = []
         session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
         event: VEvent
-        for event in self._get_events_for_upcoming_month(calendar.icalendar_url, event_prefix or ""):
+        for event in self._get_events_for_upcoming_month(calendar.icalendar_url, calendar.event_prefix or ""):
             # First attempt attendee. If that is not set, we look at the title/summary of the event.
             person_unique_identifier: Optional[str] = None
             if event.attendee is not None and any(event.attendee):
@@ -94,7 +95,7 @@ class ICalPluginMixin:
                 person_unique_identifier = event.summary.value
                 if not person_unique_identifier:
                     raise ValueError(f"{event.summary.value=} should not be None.")
-            person_information_str = person_unique_identifier[len(event_prefix or "") :]
+            person_information_str = person_unique_identifier[len(calendar.event_prefix or "") :]
             person_uid: int = self._get_or_create_person(person_information_str)
             on_call_event: OnCallEvent = self._create_on_call_event(calendar, event, person_uid=person_uid)
             items_to_insert.append(on_call_event)
