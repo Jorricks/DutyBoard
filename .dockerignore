@@ -1,6 +1,11 @@
 venv/
+.idea/
 .flake8
 .gitignore
 .pre-commit-config.yaml
 docker_prod_venv/
 docker_venv/
+.mypy_cache/
+.github/
+duty_board/www/node_modules
+duty_board/www/dist
