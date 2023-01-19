@@ -89,7 +89,7 @@ class ICalPluginMixin:
             # First attempt attendee. If that is not set, we look at the title/summary of the event.
             person_unique_identifier: Optional[str] = None
             if event.attendee is not None and any(event.attendee):
-                person_unique_identifier = event.attendee[0].value
+                person_unique_identifier = (event.attendee[0].value or "").replace("mailto:", "") or None
             if person_unique_identifier is None:
                 assert event.summary is not None and event.summary.value is not None  # for Mypy :)
                 person_unique_identifier = event.summary.value
