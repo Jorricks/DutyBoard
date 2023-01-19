@@ -27,15 +27,15 @@ def worker():
     worker_loop.enter_loop()
 
 
-@cli.command()
+@cli.command(name="webserver", context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
 @click.option("--host", default="0.0.0.0", help="The IP address range to listen for.")
 @click.option("--port", default="80", type=int, help="The port to listen for.")
-@click.option("--reload", is_flag=True, type=bool, help="Auto reload when changes are made to the source repository.")
-def webserver(host: str, port: int, reload: bool):
-    logger.info("Starting the webserver")
+@click.pass_context
+def webserver(ctx, host: str, port: int):
     command = f"uvicorn duty_board.server:app --host {host} --port {port}"
-    if reload:
-        command += " --reload"
+    if ctx.args:
+        command += " " + " ".join(ctx.args)
+    logger.info(f"Starting webserver with {command=}")
 
     cwd = str(Path(__file__).parent.absolute())
     with subprocess.Popen(
