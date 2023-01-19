@@ -24,12 +24,13 @@ class GZIPStaticFiles(StaticFiles):
         request_headers = Headers(scope=scope)
 
         pathlib_path = Path(full_path)
-        if (pathlib_path.parent / f"{pathlib_path.name}.gz").exists():
+        pathlib_path_gz = pathlib_path.parent / f"{pathlib_path.name}.gz"
+        if pathlib_path_gz.exists():
             gzip_headers = {"content-encoding": "gzip"}
             response = FileResponse(
                 str(full_path) + ".gz",
                 status_code=status_code,
-                stat_result=stat_result,
+                stat_result=os.stat(pathlib_path_gz),
                 method=method,
                 headers=gzip_headers,
             )
