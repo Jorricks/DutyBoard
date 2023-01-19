@@ -95,7 +95,9 @@ class ICalPluginMixin:
                 person_unique_identifier = event.summary.value
                 if not person_unique_identifier:
                     raise ValueError(f"{event.summary.value=} should not be None.")
-            person_information_str = person_unique_identifier[len(calendar.event_prefix or "") :]
+                person_information_str: str = person_unique_identifier[len(calendar.event_prefix or "") :]
+            else:
+                person_information_str = person_unique_identifier
             person_uid: int = self._get_or_create_person(person_information_str)
             on_call_event: OnCallEvent = self._create_on_call_event(calendar, event, person_uid=person_uid)
             items_to_insert.append(on_call_event)
