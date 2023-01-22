@@ -121,8 +121,3 @@ def favicon_ico():
 @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
 async def accept_all():
     return FileResponse(CURRENT_DIR / "www" / "dist" / "index.html")
-
-
-# @app.get("/duty", response_class=HTMLResponse)
-# async def get_schedule():
-#     return FileResponse("duty_board/www/dist/index.html")
