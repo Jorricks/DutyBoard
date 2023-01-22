@@ -77,7 +77,7 @@ class ICalPluginMixin:
         return OnCallEvent(
             calendar_uid=calendar.uid,
             start_event_utc=dt_utils.convert_time_object_to_aware_datetime(v_event.start),
-            end_event_utc=dt_utils.convert_time_object_to_aware_datetime(v_event.start),
+            end_event_utc=dt_utils.convert_time_object_to_aware_datetime(v_event.end),
             person_uid=person_uid,
         )
 
