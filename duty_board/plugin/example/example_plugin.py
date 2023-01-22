@@ -8,6 +8,7 @@ from duty_board.plugin.ical_plugin_mixin import ICalPluginMixin
 
 
 class ExamplePlugin(ICalPluginMixin, AbstractPlugin):
+    absolute_path_to_favicon_ico = Path(__file__).resolve().parent / "favicon.ico"
     absolute_path_to_company_logo_png = Path(__file__).resolve().parent / "example_logo.png"
     absolute_path_to_user_images_folder = Path(__file__).resolve().parent.parent.parent / "www" / "user_images"
     category_order = ["Big Data", "Infrastructure"]

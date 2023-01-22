@@ -18,6 +18,7 @@ class AbstractPlugin(ABC):
     calendar_update_frequency: datetime.timedelta = datetime.timedelta(days=1)
     background_color_hex: str = "#3C9C2D"
     text_color_hex: str = "white"
+    absolute_path_to_favicon_ico: Path | None = None
     absolute_path_to_company_logo_png: Path | None = None
     # Path on the back-end to the user images folder.
     absolute_path_to_user_images_folder: Path | None = None

@@ -99,10 +99,22 @@ async def get_person(person_uid: int, timezone: str):
     response_description="Returns a thumbnail image from a larger image",
     responses={200: {"description": "Company logo", "content": {"image/png": {}}}},
 )
-def thumbnail_image():
+def company_logo():
     file_path = plugin.absolute_path_to_company_logo_png
     if os.path.exists(file_path):
-        return FileResponse(file_path, media_type="image/jpeg", filename="company_logo.png")
+        return FileResponse(file_path, media_type="image/png", filename="company_logo.png")
+    raise HTTPException(status_code=500, detail="Company logo could not be found.")
+
+
+@app.get(
+    "/favicon.ico",
+    response_description="Returns the favicon",
+    responses={200: {"description": "Favicon", "content": {"image/x-icon": {}}}},
+)
+def favicon_ico():
+    file_path = plugin.absolute_path_to_favicon_ico
+    if os.path.exists(file_path):
+        return FileResponse(file_path, media_type="image/x-icon", filename="favicon.ico")
     raise HTTPException(status_code=500, detail="Company logo could not be found.")
 
 
