@@ -34,7 +34,8 @@ def convert_dict_from_snake_to_camel(given_value: Any) -> Any:
     raise ValueError(f"Unexpected value {given_value=}.")
 
 
-with open("openapi.json", "w") as f:
+path_to_openapi = Path.cwd().parent / "www" / "openapi.json"
+with open(path_to_openapi, "w") as f:
     openapi_definition: Dict[str, Any] = get_openapi(
         title=app.title,
         version=app.version,
@@ -47,10 +48,14 @@ with open("openapi.json", "w") as f:
     pprint.pprint(openapi_definition)
     openapi_camel_case = convert_dict_from_snake_to_camel(openapi_definition)
     json.dump(openapi_camel_case, f)
+    print(f"Written openapi.json to {str(path_to_openapi)}.")
 
 # consider removing --axios and adding --no-client.
 output_folder = "./js/api"
 output_file = "api-generated-types.ts"
-cmd = f"npx swagger-typescript-api -p ../web_helpers/openapi.json -o {output_folder} -n {output_file} --no-client"
+cmd = f"npx swagger-typescript-api -p openapi.json -o {output_folder} -n {output_file} --no-client"
+# cmd = "ls -ll"
+docker_run_cmd = f"docker run -v .:/code registry.hub.docker.com/library/node:18-slim {cmd}"
 subprocess.run(cmd, cwd=Path.cwd().parent / "www", shell=True)
-os.remove(Path.cwd() / "openapi.json")
+os.remove(path_to_openapi)
+print("Removed openapi.json again.")
