@@ -11,7 +11,13 @@ from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
 from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
-from duty_board.web_helpers.response_types import _Calendar, _Events, _ExtraInfoOnPerson, _Person, PersonResponse
+from duty_board.web_helpers.response_types import (
+    _Calendar,
+    _Events,
+    _ExtraInfoOnPerson,
+    _PersonEssentials,
+    PersonResponse,
+)
 
 
 def format_datetime_for_timezone(dt: datetime.datetime, timezone: BaseTzInfo) -> str:
@@ -57,18 +63,13 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
     ]
 
 
-def get_persons(session: SASession, all_person_uids: Set[int], timezone: BaseTzInfo) -> Dict[int, _Person]:
+def get_peoples_essentials(session: SASession, all_person_uids: Set[int]) -> Dict[int, _PersonEssentials]:
     result = session.query(Person).where(Person.uid.in_(all_person_uids))
     return {
-        a_person.uid: _Person(
+        a_person.uid: _PersonEssentials(
             uid=a_person.uid,
             username=a_person.username,
             email=a_person.email,
-            img_filename=a_person.img_filename,
-            extra_attributes={},
-            last_update=format_datetime_for_timezone(a_person.last_update_utc, timezone),
-            error_msg=a_person.error_msg or "",
-            sync=a_person.sync,
         )
         for a_person in result
     }
@@ -110,6 +111,8 @@ def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> Per
         username=person.username,
         email=person.email,
         img_filename=person.img_filename,
+        img_width=person.img_width,
+        img_height=person.img_height,
         extra_attributes=parse_extra_attributes(person_uid, extra_attributes_str=person.extra_attributes_json),
         last_update=format_datetime_for_timezone(person.last_update_utc, timezone),
         error_msg=person.error_msg or "",

@@ -4,13 +4,13 @@ import axios, { AxiosResponse } from "axios";
 import useErrorToast from "../utils/useErrorToast";
 import { PersonResponse } from "./api-generated-types";
 
-const useGetSchedule = ({ personUid }: { personUid: number }) => {
+const useGetPerson = ({ personUid }: { personUid: number }) => {
   const errorToast = useErrorToast();
   const timezoneValue = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const params = { person_uid: personUid, timezone: timezoneValue };
   return useQuery(
-    ["useGetSchedule", personUid],
+    ["useGetPerson", personUid],
     () =>
       axios.get<AxiosResponse, PersonResponse>("/get_person", {
         params: params
@@ -25,4 +25,4 @@ const useGetSchedule = ({ personUid }: { personUid: number }) => {
   );
 };
 
-export default useGetSchedule;
+export default useGetPerson;

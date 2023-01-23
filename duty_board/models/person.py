@@ -11,6 +11,8 @@ class Person(Base):
     username = Column(String(50), nullable=True, unique=True)
     email = Column(String(50), nullable=True, unique=True)
     img_filename = Column(String(100), nullable=True)
+    img_width = Column(Integer, nullable=True)
+    img_height = Column(Integer, nullable=True)
     extra_attributes_json = Column(String(100000), nullable=True, comment="Extra attributes represented as a json.")
     error_msg = Column(String(9999), nullable=True, comment="If any, the error of the latest sync attempt.")
     last_update_utc = Column(UtcDateTime(), nullable=False)

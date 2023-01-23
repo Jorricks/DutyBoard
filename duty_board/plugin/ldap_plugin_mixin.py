@@ -1,3 +1,4 @@
+import io
 import json
 import logging
 import os
@@ -7,6 +8,7 @@ from typing import Any, ClassVar, Dict, Final, List, Literal, Mapping, Optional,
 
 from ldap3 import Connection, Server, SUBTREE
 from ldap3.core import exceptions
+from PIL import Image
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.person import Person
@@ -112,15 +114,16 @@ class LDAPPluginMixin:
 
     def _write_image_attribute_to_file(
         self, person: Person, person_attributes: Mapping[str, Union[str, List[str]]]
-    ) -> Optional[str]:
+    ) -> Optional[Tuple[str, int, int]]:
         if "jpegPhoto" not in person_attributes:
             return None
 
         filepath = self.LOCATION_TO_STORE_PHOTOS / f"{person.uid}.jpg"
+        img_as_b64: bytes = person_attributes["jpegPhoto"][0]  # type: ignore
         with open(filepath, "wb") as file:
-            img_as_b64: bytes = person_attributes["jpegPhoto"][0]  # type: ignore
             file.write(img_as_b64)
-        return filepath.name
+        image = Image.open(io.BytesIO(img_as_b64))
+        return filepath.name, image.width, image.height
 
     def _extract_user_info(self, username: str) -> Tuple[str, Mapping[str, Union[str, List[str]]]]:
         result = self.client.get_user(username)
@@ -151,7 +154,12 @@ class LDAPPluginMixin:
         dn, attributes = self._extract_user_info(person.username or person.email)
         person.username = dn.split("=")[1].split(",")[0]  # uid=abc,ou= -> extracts abc
         person.email = attributes["mail"][0]
-        person.img_filename = self._write_image_attribute_to_file(person, attributes)
+        image_result = self._write_image_attribute_to_file(person, attributes)
+        if image_result:
+            filename, width, height = image_result
+            person.img_filename = filename
+            person.img_width = width
+            person.img_height = height
         person.extra_attributes_json = json.dumps(self._get_extra_attributes(person.username, attributes))
         logger.debug(f"Updating references of {person}.")
         return person

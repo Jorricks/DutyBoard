@@ -81,3 +81,36 @@
   word-wrap: normal;
   line-height: 1.5;
 }
+
+.circular--landscape {
+  display: block;
+  position: relative;
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.circular--landscape img {
+  width: auto;
+  height: 100%;
+  margin-left: -50px;
+  max-width: initial;
+}
+
+.circular--portrait {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.circular--portrait img {
+  width: 100%;
+  height: auto;
+}

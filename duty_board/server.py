@@ -20,7 +20,7 @@ from duty_board.models import generate_fake_data
 from duty_board.plugin.abstract_plugin import AbstractPlugin
 from duty_board.plugin.helpers import plugin_fetcher
 from duty_board.web_helpers.gzip_static_files import GZIPStaticFiles
-from duty_board.web_helpers.response_types import _Calendar, _Config, _Person, CurrentSchedule, PersonResponse
+from duty_board.web_helpers.response_types import _Calendar, _Config, _PersonEssentials, CurrentSchedule, PersonResponse
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -81,8 +81,8 @@ async def get_schedule(timezone: str):
         calendars: List[_Calendar] = queries.get_calendars(
             session=session, all_encountered_person_uids=all_encountered_person_uids, timezone=timezone_object
         )
-        persons: Dict[int, _Person] = queries.get_persons(
-            session=session, all_person_uids=all_encountered_person_uids, timezone=timezone_object
+        persons: Dict[int, _PersonEssentials] = queries.get_peoples_essentials(
+            session=session, all_person_uids=all_encountered_person_uids
         )
         return CurrentSchedule(config=config, calendars=calendars, persons=persons)
 

@@ -12,7 +12,7 @@ import {
   PopoverTrigger
 } from "@chakra-ui/react";
 import * as React from "react";
-import { Events, ExtraInfoOnPerson, Person } from "../api/api-generated-types";
+import { ExtraInfoOnPerson, PersonEssentials, PersonResponse } from "../api/api-generated-types";
 import { FaInfoCircle } from "react-icons/fa";
 import DynamicFAIcon from "./dynamicFAIcon";
 import useGetPerson from "../api/useGetPerson";
@@ -35,16 +35,32 @@ const ExtraInfoComponent = ({ information, icon, iconColor }: DrawInfoOnPerson) 
 
 const URLExtraInfoComponent = ({ information, icon, iconColor, url }: ExtraInfoOnPerson) => {
   return (
-      <>
-        {url ?
-            <a href={url} target="_blank">
-              <ExtraInfoComponent information={information} icon={icon} iconColor={iconColor}/>
-            </a>
-            : <ExtraInfoComponent information={information} icon={icon} iconColor={iconColor}/>
-        }
-      </>
+    <>
+      {url ?
+        <a href={url} target="_blank">
+          <ExtraInfoComponent information={information} icon={icon} iconColor={iconColor}/>
+        </a>
+        : <ExtraInfoComponent information={information} icon={icon} iconColor={iconColor}/>
+      }
+    </>
   );
 };
+
+const PersonImage = ({person}: {person: PersonResponse}) => {
+  {/* Inspiration from https://www.webfx.com/blog/web-design/circular-images-css/. Thanks William Craig! */}
+  return (
+    <div>
+      {person.imgHeight != null && person.imgWidth != null && person.imgWidth > person.imgHeight
+        ? <div className="circular--landscape">
+            <img src={process.env.API_ADDRESS + "person_img/" + person.imgFilename} alt={"Profile picture"}/>
+          </div>
+        : <div className="circular--portrait">
+            <img src={process.env.API_ADDRESS + "person_img/" + person.imgFilename} alt={"Profile picture"}/>
+          </div>
+      }
+    </div>
+  )
+}
 
 const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
   const { data: apiPerson } = useGetPerson({ personUid });
@@ -58,11 +74,7 @@ const LazyLoadingPopoverContent = ({ personUid }: { personUid: number }) => {
       <PopoverBody>
         {apiPerson?.imgFilename &&
           <Box mb={"10px"} mt={"10px"}>
-            <img
-              src={process.env.API_ADDRESS + "person_img/" + apiPerson.imgFilename}
-              style={{width: 200, height: 200, borderRadius: 200 / 2, marginLeft: "auto", marginRight: "auto"}}
-              alt={"Profile picture"}
-            />
+            <PersonImage person={apiPerson}/>
           </Box>
         }
         {apiPerson?.extraAttributes.map((extraAttribute: ExtraInfoOnPerson, index) => (
@@ -82,7 +94,7 @@ const capitalizeFirst = str => {
     return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
-const PersonComponent = ({ person }: { person: Person }) => {
+const PersonComponent = ({ person }: { person: PersonEssentials }) => {
   const initRef = React.useRef();
 
   return (

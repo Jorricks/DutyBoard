@@ -15,7 +15,7 @@ export interface CurrentSchedule {
   /** Calendars */
   calendars: Calendar[];
   /** Persons */
-  persons: Record<string, Person>;
+  persons: Record<string, PersonEssentials>;
 }
 
 /** HTTPValidationError */
@@ -34,6 +34,10 @@ export interface PersonResponse {
   email?: string;
   /** Img Filename */
   imgFilename?: string;
+  /** Img Width */
+  imgWidth?: number;
+  /** Img Height */
+  imgHeight?: number;
   /** Extra Attributes */
   extraAttributes: ExtraInfoOnPerson[];
   /** Last Update */
@@ -114,22 +118,12 @@ export interface ExtraInfoOnPerson {
   url?: string;
 }
 
-/** Person */
-export interface Person {
+/** PersonEssentials */
+export interface PersonEssentials {
   /** Uid */
   uid: number;
   /** Username */
   username?: string;
   /** Email */
   email?: string;
-  /** Img Filename */
-  imgFilename?: string;
-  /** Extra Attributes */
-  extraAttributes: object;
-  /** Last Update */
-  lastUpdate: string;
-  /** Error Msg */
-  errorMsg: string;
-  /** Sync */
-  sync: boolean;
 }

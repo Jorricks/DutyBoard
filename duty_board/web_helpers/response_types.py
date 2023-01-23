@@ -1,17 +1,12 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel
 
 
-class _Person(BaseModel):
+class _PersonEssentials(BaseModel):
     uid: int
     username: Optional[str]
     email: Optional[str]
-    img_filename: Optional[str]
-    extra_attributes: Dict[str, Any]
-    last_update: str
-    error_msg: str
-    sync: bool
 
 
 class _Events(BaseModel):
@@ -44,7 +39,7 @@ class _Config(BaseModel):
 class CurrentSchedule(BaseModel):
     config: _Config
     calendars: List[_Calendar]
-    persons: Dict[int, _Person]
+    persons: Dict[int, _PersonEssentials]
 
 
 class _ExtraInfoOnPerson(BaseModel):
@@ -59,6 +54,8 @@ class PersonResponse(BaseModel):
     username: Optional[str]
     email: Optional[str]
     img_filename: Optional[str]
+    img_width: Optional[int]
+    img_height: Optional[int]
     extra_attributes: List[_ExtraInfoOnPerson]
     last_update: str
     error_msg: str
