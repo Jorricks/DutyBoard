@@ -22,7 +22,7 @@ from duty_board.web_helpers.response_types import (
 
 def format_datetime_for_timezone(dt: datetime.datetime, timezone: BaseTzInfo) -> str:
     dt_tz_aware = dt.astimezone(timezone)
-    return dt_tz_aware.strftime("%Y-%m-%d %H:%M:%S")
+    return dt_tz_aware.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
 def _get_events_ending_from_now_onwards(
