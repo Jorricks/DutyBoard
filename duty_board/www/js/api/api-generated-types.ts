@@ -100,6 +100,8 @@ export interface Config {
   announcementBackgroundColor: string;
   /** Announcements */
   announcements: string[];
+  /** Footer Html */
+  footerHtml?: string;
 }
 
 /** Events */

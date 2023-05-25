@@ -24,8 +24,15 @@ class AbstractPlugin(ABC):
     absolute_path_to_user_images_folder: Path | None = None
     category_order: List[str] = []
     duty_calendar_configurations: List[DutyCalendarConfig] = []
-    enable_admin_button: bool = True
+    enable_admin_button: bool = False
     git_repository_url: Optional[str] = "https://github.com/Jorricks/DutyBoard"
+    footer_html: Optional[
+        str
+    ] = """
+    Welcome to DutyBoard. <br>
+    In case you want to know more check <a href="https://github.com/Jorricks/DutyBoard">here</a>.<br>
+    Cheers!
+    """
 
     announcement_background_color_hex: str = "#FF0000"
     announcement_text_color_hex: str = "#FFFFFF"

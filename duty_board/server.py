@@ -71,6 +71,7 @@ def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
         announcement_text_color=plugin.announcement_text_color_hex,
         announcement_background_color=plugin.announcement_background_color_hex,
         announcements=plugin.announcements,
+        footer_html=plugin.footer_html,
         timezone=timezone_object.zone,
     )
 

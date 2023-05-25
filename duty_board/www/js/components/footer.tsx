@@ -53,28 +53,12 @@ export default function Footer() {
 
   return (
     <Box bg={config.backgroundColor} color={config.textColor}>
-      <Container as={Stack} maxW={"6xl"} py={4} spacing={4} justify={"center"} align={"center"}>
-        <CompanyLogo maxWidth={250} maxHeight={150} />
-        <Stack direction={"row"} spacing={6}>
-          {config.categories.map((aCategory: string) => (
-            <Link
-              to="/$category"
-              params={{ category: aCategory }}
-              activeProps={{ className: "font-bold" }}
-              key={"footer" + aCategory}
-            >
-              {aCategory}
-            </Link>
-          ))}
-        </Stack>
-        <Container
-          as={Stack}
-          justify={{ base: "center", md: "space-between" }}
-          align={{ base: "center", md: "center" }}
-        >
-          <Text>All dates & times are in your local timezone; {config.timezone}</Text>
+      <Box>
+        <Container as={Stack} maxW={"6xl"} py={4} spacing={4} justify={"center"} align={"center"}>
+          <Box dangerouslySetInnerHTML={{__html: config.footerHtml}} display={"block"} width={"100%"}></Box>
+          <CompanyLogo maxWidth={250} maxHeight={150} />
         </Container>
-      </Container>
+      </Box>
 
       <Box
         borderTopWidth={1}

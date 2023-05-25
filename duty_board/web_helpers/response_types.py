@@ -37,6 +37,7 @@ class _Config(BaseModel):
     announcement_text_color: str
     announcement_background_color: str
     announcements: List[str]
+    footer_html: Optional[str]
 
 
 class CurrentSchedule(BaseModel):
