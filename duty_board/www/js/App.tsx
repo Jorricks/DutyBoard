@@ -12,9 +12,9 @@ import {
   createRouteConfig,
   useMatch
 } from "@tanstack/react-router";
-import PersonComponent from "./components/personComponent";
 import {Component} from "react";
 import AnnouncementBar from "./components/announcementBar";
+import SingleCalendar from "./components/singleCalendar";
 
 const rootRoute = createRouteConfig();
 
@@ -28,12 +28,12 @@ const categoryRoute = rootRoute.createRoute({
   component: Schedule
 });
 
-const personRoute = categoryRoute.createRoute({
-  path: "$personId",
-  component: PersonComponent
+const calendarRoute = categoryRoute.createRoute({
+  path: "$calendarId",
+  component: SingleCalendar
 });
 
-const routeConfig = rootRoute.addChildren([indexRoute, categoryRoute.addChildren([personRoute])]);
+const routeConfig = rootRoute.addChildren([indexRoute, categoryRoute.addChildren([calendarRoute])]);
 
 // Set up a ReactRouter instance
 const router = createReactRouter({

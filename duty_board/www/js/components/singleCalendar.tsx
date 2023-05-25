@@ -5,19 +5,25 @@ import ExpandedCalendarInfo from "./expandedCalendarInfo";
 import { FaCalendarCheck } from "react-icons/fa";
 import { FaCalendarTimes } from "react-icons/fa";
 import PersonComponent from "./personComponent";
+import {useEffect, useState} from "react";
+import {Link, useMatch} from "@tanstack/react-router";
 
 interface Props {
+  category: string;
   calendar: Calendar;
   persons: Map<string, Person>;
 }
 
 // Huge credits to https://blog.logrocket.com/create-collapsible-react-components-react-collapsed/
-const SingleCalendar = ({ calendar, persons }: Props) => {
+const SingleCalendar = ({ category, calendar, persons }: Props) => {
+  const currentRoute = useMatch("/$category/$calendarId", { strict: false });
+
   const firstEvent = calendar.events.length > 0 ? calendar.events[0] : undefined;
   const firstPersonUid = firstEvent?.personUid ?? undefined;
   const firstPerson = firstPersonUid ? persons.get(firstPersonUid.toString()) : undefined;
 
-  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse({ duration: 500 });
+  const [isExpanded, setExpanded] = useState(currentRoute?.params?.calendarId == calendar.uid)
+  const { getCollapseProps, getToggleProps } = useCollapse({ isExpanded, duration: 500 });
 
   const checked = true;
   const colorTextLight = checked ? "white" : "purple.600";
@@ -25,6 +31,10 @@ const SingleCalendar = ({ calendar, persons }: Props) => {
 
   const colorTextDark = checked ? "white" : "purple.500";
   const bgColorDark = checked ? "purple.400" : "gray.300";
+
+  useEffect(() => {
+    setExpanded(currentRoute?.params?.calendarId == calendar.uid)
+  }, [currentRoute])
 
   return (
     <>
@@ -72,14 +82,27 @@ const SingleCalendar = ({ calendar, persons }: Props) => {
         </Box>
         <Box width={{base: "auto", md: "10%"}}>
           <Stack>
-            <div className="header" {...getToggleProps()}>
-              <Button
-                size="md"
-                color={useColorModeValue(colorTextLight, colorTextDark)}
-                bgColor={useColorModeValue(bgColorLight, bgColorDark)}
-              >
-                {isExpanded ? "Less" : "More"}
-              </Button>
+            <div className="header">
+              {isExpanded
+                  ? <Link to="/$category" params={{ category: category}}>
+                      <Button
+                        size="md"
+                        color={useColorModeValue(colorTextLight, colorTextDark)}
+                        bgColor={useColorModeValue(bgColorLight, bgColorDark)}
+                      >
+                        Less
+                      </Button>
+                    </Link>
+                  : <Link to="/$category/$calendarId" params={{ category: category, calendarId: calendar.uid }}>
+                      <Button
+                        size="md"
+                        color={useColorModeValue(colorTextLight, colorTextDark)}
+                        bgColor={useColorModeValue(bgColorLight, bgColorDark)}
+                      >
+                        More
+                      </Button>
+                    </Link>
+              }
             </div>
           </Stack>
         </Box>

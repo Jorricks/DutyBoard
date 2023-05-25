@@ -8,6 +8,7 @@ module.exports = merge(common, {
   devtool: 'eval-cheap-source-map',
   output: {
     path: path.resolve(__dirname, "dist"), // output folder
+    publicPath: "/"  // This is required, otherwise double linking in URLs won't work ;'(
   },
   plugins: [
       new DefinePlugin({

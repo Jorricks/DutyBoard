@@ -9,10 +9,8 @@ const Schedule = () => {
   const {
     data: { config, calendars, persons }
   } = useGetSchedule();
-  console.log({ data });
   const category = data ? decodeURI(data.params.category) : config.categories[0];
   const personsMap = new Map(Object.entries(persons));
-  console.log({ category });
 
   // Design heavily influenced by https://chakra-templates.dev/page-sections/pricing
   return (
@@ -25,6 +23,7 @@ const Schedule = () => {
               <Divider />
               <SingleCalendar
                 key={"singleCalendarNr" + index}
+                category={category}
                 calendar={calendar}
                 persons={personsMap}
               />
