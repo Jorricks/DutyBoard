@@ -27,6 +27,12 @@ class AbstractPlugin(ABC):
     enable_admin_button: bool = True
     git_repository_url: Optional[str] = "https://github.com/Jorricks/DutyBoard"
 
+    announcement_background_color_hex: str = "#FF0000"
+    announcement_text_color_hex: str = "#FFFFFF"
+    announcements: List[str] = [
+        "This is a debug setup. Please disable this announcement in your plugin by overwriting announcements variable.",
+    ]
+
     def __init__(self, *args, **kwargs):
         super(AbstractPlugin, self).__init__(*args, **kwargs)
 

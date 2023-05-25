@@ -6,8 +6,8 @@ import { CurrentSchedule } from "./api-generated-types";
 
 export const emptyScheduleData: CurrentSchedule = {
   config: {
-    companyColorHex: "#3C9C2D",
-    categories: ["Loading..", "123"]
+    categories: ["Loading..", "123"],
+    announcements: [],
   },
   calendars: [],
   persons: {}

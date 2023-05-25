@@ -13,6 +13,8 @@ import {
   useMatch
 } from "@tanstack/react-router";
 import PersonComponent from "./components/personComponent";
+import {Component} from "react";
+import AnnouncementBar from "./components/announcementBar";
 
 const rootRoute = createRouteConfig();
 
@@ -65,6 +67,7 @@ function App() {
         <RouterProvider router={router}>
           <div>
             <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+              <AnnouncementBar />
               <Navbar />
               <Outlet /> {/* Start rendering router matches */}
               <div style={{ marginTop: "auto" }}>

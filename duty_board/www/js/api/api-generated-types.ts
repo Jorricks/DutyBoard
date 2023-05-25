@@ -94,6 +94,12 @@ export interface Config {
   gitRepositoryUrl?: string;
   /** Enable Admin Button */
   enableAdminButton: boolean;
+  /** Announcement Text Color */
+  announcementTextColor: string;
+  /** Announcement Background Color */
+  announcementBackgroundColor: string;
+  /** Announcements */
+  announcements: string[];
 }
 
 /** Events */

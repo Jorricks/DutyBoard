@@ -68,6 +68,9 @@ def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
         categories=plugin.category_order,
         git_repository_url=plugin.git_repository_url,
         enable_admin_button=plugin.enable_admin_button,
+        announcement_text_color=plugin.announcement_text_color_hex,
+        announcement_background_color=plugin.announcement_background_color_hex,
+        announcements=plugin.announcements,
         timezone=timezone_object.zone,
     )
 

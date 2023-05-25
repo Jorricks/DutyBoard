@@ -34,6 +34,9 @@ class _Config(BaseModel):
     categories: List[str]
     git_repository_url: Optional[str]
     enable_admin_button: bool
+    announcement_text_color: str
+    announcement_background_color: str
+    announcements: List[str]
 
 
 class CurrentSchedule(BaseModel):
