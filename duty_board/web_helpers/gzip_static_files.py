@@ -30,7 +30,7 @@ class GZIPStaticFiles(StaticFiles):
             response = FileResponse(
                 str(full_path) + ".gz",
                 status_code=status_code,
-                stat_result=os.stat(pathlib_path_gz),
+                stat_result=pathlib_path_gz.stat(),
                 method=method,
                 headers=gzip_headers,
             )

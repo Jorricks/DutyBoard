@@ -17,7 +17,7 @@
 import contextlib
 from functools import wraps
 from inspect import signature
-from typing import Callable, cast, Generator, TypeVar
+from typing import Callable, Generator, TypeVar, cast
 
 from duty_board.alchemy import settings
 
@@ -25,7 +25,7 @@ from duty_board.alchemy import settings
 @contextlib.contextmanager
 def create_session() -> Generator[settings.SASession, None, None]:
     """Contextmanager that will create and teardown a session."""
-    if not settings.Session:
+    if not settings.Session:  # type: ignore[truthy-function]
         raise RuntimeError("Session must be set before!")
     session = settings.Session()
     try:
@@ -66,9 +66,8 @@ def provide_session(func: Callable[..., RT]) -> Callable[..., RT]:
     def wrapper(*args, **kwargs) -> RT:
         if "session" in kwargs or session_args_idx < len(args):
             return func(*args, **kwargs)
-        else:
-            with create_session() as session:
-                return func(*args, session=session, **kwargs)
+        with create_session() as session:
+            return func(*args, session=session, **kwargs)
 
     return wrapper
 

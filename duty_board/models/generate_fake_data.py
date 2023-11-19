@@ -66,7 +66,7 @@ def create_persons(session: SASession) -> None:
                     "icon_color": "#2980B9",
                     "url": "https://mattermost.com/jorrick",
                 },
-            }
+            },
         ),
         last_update_utc=DateTime.utcnow(),
         sync=False,
@@ -85,7 +85,7 @@ def create_persons(session: SASession) -> None:
                     "icon_color": "#2980B9",
                     "url": "https://mattermost.com/bart",
                 },
-            }
+            },
         ),
         last_update_utc=DateTime.utcnow(),
         sync=False,

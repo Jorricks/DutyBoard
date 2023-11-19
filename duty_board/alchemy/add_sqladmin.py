@@ -2,7 +2,7 @@ import asyncio
 import os
 import secrets
 import string
-from typing import Optional
+from typing import ClassVar, Dict, Optional
 
 from fastapi import FastAPI
 from pendulum import DateTime
@@ -11,6 +11,7 @@ from sqladmin.authentication import AuthenticationBackend
 from sqladmin.fields import DateTimeField
 from sqlalchemy.orm import session as SASession
 from starlette.requests import Request
+from wtforms.fields.core import Field
 
 from duty_board.alchemy import settings
 from duty_board.alchemy.session import create_session
@@ -39,7 +40,7 @@ class PersonAdmin(ModelView, model=Person):  # type: ignore
     column_searchable_list = [Person.username, Person.email, Person.sync]
     column_sortable_list = [Person.uid, Person.username, Person.email, Person.last_update_utc, Person.sync]
     column_list = [Person.uid, Person.username, Person.email, Person.img_filename, Person.last_update_utc, Person.sync]
-    form_overrides = dict(last_update_utc=AppBuilderDateTimeAwareSelector)
+    form_overrides: ClassVar[Dict[str, Field]] = {"last_update_utc": AppBuilderDateTimeAwareSelector}
 
 
 class CalendarAdmin(ModelView, model=Calendar):  # type: ignore
@@ -66,7 +67,7 @@ class CalendarAdmin(ModelView, model=Calendar):  # type: ignore
         Calendar.last_update_utc,
         Calendar.sync,
     ]
-    form_overrides = dict(last_update_utc=AppBuilderDateTimeAwareSelector)
+    form_overrides: ClassVar[Dict[str, Field]] = {"last_update_utc": AppBuilderDateTimeAwareSelector}
     form_include_pk = True
 
 
@@ -80,14 +81,15 @@ class OnCallEventAdmin(ModelView, model=OnCallEvent):  # type: ignore
     column_sortable_list = [OnCallEvent.calendar_uid, OnCallEvent.start_event_utc, OnCallEvent.end_event_utc]
     column_list = [OnCallEvent.calendar, OnCallEvent.start_event_utc, OnCallEvent.end_event_utc, OnCallEvent.person]
     form_columns = [OnCallEvent.calendar, OnCallEvent.start_event_utc, OnCallEvent.end_event_utc, OnCallEvent.person]
-    form_overrides = dict(
-        start_event_utc=AppBuilderDateTimeAwareSelector, end_event_utc=AppBuilderDateTimeAwareSelector
-    )
+    form_overrides: ClassVar[Dict[str, Field]] = {
+        "start_event_utc": AppBuilderDateTimeAwareSelector,
+        "end_event_utc": AppBuilderDateTimeAwareSelector,
+    }
     form_include_pk = True
     form_ajax_refs = {
         "person": {
             "fields": ("username", "email"),
-        }
+        },
     }
 
 
@@ -112,7 +114,7 @@ def add_sqladmin(app: FastAPI, plugin: AbstractPlugin) -> Admin:
 
 
 class MyBackend(AuthenticationBackend):
-    def __init__(self, plugin: AbstractPlugin, *args, **kwargs):
+    def __init__(self, plugin: AbstractPlugin, *_, **__):
         super().__init__(secret_key=os.environ["DUTY_BOARD_SECRET_KEY"])
         self.plugin = plugin
 
@@ -135,7 +137,7 @@ class MyBackend(AuthenticationBackend):
             token: Optional[Token] = session.query(Token).filter(Token.token == provided_token).first()
             if not token:
                 return False
-            elif token.last_update_utc < DateTime.utcnow() - self.plugin.admin_session_length:
+            if token.last_update_utc < DateTime.utcnow() - self.plugin.admin_session_length:
                 session.delete(token)
                 return False
             return True
@@ -145,8 +147,8 @@ class MyBackend(AuthenticationBackend):
         username = form["username"]
         password = form["password"]
         if not isinstance(username, str) or not isinstance(password, str):
-            raise ValueError(
-                f"Got interesting types for {username=} and {password=}, {type(username)=}, {type(password)=}"
+            raise TypeError(
+                f"Got interesting types for {username=} and {password=}, {type(username)=}, {type(password)=}",
             )
 
         if not await self.plugin.admin_login_attempt(username=username, password=password):

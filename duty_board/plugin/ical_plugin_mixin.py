@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from typing import List, Optional
 
 import pytz
 import requests  # type: ignore
@@ -27,7 +26,7 @@ class ICalPluginMixin:
         response.raise_for_status()
         return response.text
 
-    def _get_events_for_upcoming_month(self, icalendar_url: str, event_prefix: str, limit: int = 10) -> List[VEvent]:
+    def _get_events_for_upcoming_month(self, icalendar_url: str, event_prefix: str, limit: int = 10) -> list[VEvent]:
         """Gets the calendar events for the upcoming 4 weeks."""
         logger.info(f"Loading {icalendar_url}, this might take some time.")
         now = DateTime.now()
@@ -82,16 +81,17 @@ class ICalPluginMixin:
         )
 
     def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:
-        items_to_insert: List[OnCallEvent] = []
+        items_to_insert: list[OnCallEvent] = []
         session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
         event: VEvent
         for event in self._get_events_for_upcoming_month(calendar.icalendar_url, calendar.event_prefix or ""):
             # First attempt attendee. If that is not set, we look at the title/summary of the event.
-            person_unique_identifier: Optional[str] = None
+            person_unique_identifier: str | None = None
             if event.attendee is not None and any(event.attendee):
                 person_unique_identifier = (event.attendee[0].value or "").replace("mailto:", "") or None
             if person_unique_identifier is None:
-                assert event.summary is not None and event.summary.value is not None  # for Mypy :)
+                if event.summary is None or event.summary.value is None:
+                    raise TypeError(f"Unexpected value for {event.summary=}.")  # Make Mypy happy :)
                 person_unique_identifier = event.summary.value
                 if not person_unique_identifier:
                     raise ValueError(f"{event.summary.value=} should not be None.")

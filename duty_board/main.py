@@ -27,8 +27,8 @@ def worker():
     worker_loop.enter_loop()
 
 
-@cli.command(name="webserver", context_settings=dict(ignore_unknown_options=True, allow_extra_args=True))
-@click.option("--host", default="0.0.0.0", help="The IP address range to listen for.")
+@cli.command(name="webserver", context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
+@click.option("--host", default="0.0.0.0", help="The IP address range to listen for.")  # noqa: S104
 @click.option("--port", default="80", type=int, help="The port to listen for.")
 @click.pass_context
 def webserver(ctx, host: str, port: int):
@@ -39,12 +39,18 @@ def webserver(ctx, host: str, port: int):
 
     cwd = str(Path(__file__).parent.absolute())
     with subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, shell=True, text=True, cwd=cwd
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        bufsize=1,
+        shell=True,  # noqa: S602
+        text=True,
+        cwd=cwd,
     ) as process:
         if process.stdout is None:
             raise ValueError("Something went wrong without opening the pipeline.")
         for line in iter(process.stdout.readline, ""):
-            print(line, end="")
+            logger.info(line)
         return_code = process.wait()
         if return_code is not None and return_code != 0:
             raise ChildProcessError(f"Process ended with problems. {return_code=}.")

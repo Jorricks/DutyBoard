@@ -4,9 +4,8 @@ from typing import Any, Callable
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import declarative_base, scoped_session
 from sqlalchemy.orm import Session as SASession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
 
 log = logging.getLogger(__name__)
 SQL_ALCHEMY_CONN: str = os.environ.get("SQL_ALCHEMY_CONNECTION", "")
@@ -36,13 +35,13 @@ def prepare_engine_args():
 def dispose_orm():
     """Properly close pooled database connections"""
     log.debug("Disposing DB connection pool (PID %s)", os.getpid())
-    global engine
-    global Session
+    global engine  # noqa: PLW0603
+    global Session  # noqa: PLW0603
 
-    if Session:
+    if Session:  # type: ignore[truthy-function]
         Session.remove()
         Session = None
-    if engine:
+    if engine:  # type: ignore[truthy-function]
         engine.dispose()
         engine = None
 
@@ -56,8 +55,8 @@ def reconfigure_orm():
 def configure_orm():
     """Configure ORM using SQLAlchemy"""
     log.debug("Setting up DB connection pool (PID %s)", os.getpid())
-    global engine
-    global Session
+    global engine  # noqa: PLW0603
+    global Session  # noqa: PLW0603
     engine_args = prepare_engine_args()
     engine = create_engine(SQL_ALCHEMY_CONN, connect_args={}, **engine_args)
     Session = scoped_session(
@@ -66,7 +65,7 @@ def configure_orm():
             autoflush=False,
             bind=engine,
             expire_on_commit=False,
-        )
+        ),
     )
     create_tables_if_not_present()
 

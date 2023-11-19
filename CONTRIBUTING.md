@@ -30,6 +30,8 @@ The python virtual environment is both in the container and natively on your sys
 ### Installing
 Setting up the python virtual environment locally for your IDE.
 ```shell
+python3.8 -m venv venv/
+source pvenv/bin/activate
 pip3 install --upgrade pip
 pip3 install -e ."[dev, test]"
 ```
