@@ -78,7 +78,7 @@ def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
     )
 
 
-@app.get("/get_schedule", response_model=CurrentSchedule)
+@app.get("/schedule", response_model=CurrentSchedule)
 async def get_schedule(timezone: str):
     timezone_object = _parse_timezone_str(timezone)
     config = _get_config_object(timezone_object)
@@ -96,7 +96,7 @@ async def get_schedule(timezone: str):
         return CurrentSchedule(config=config, calendars=calendars, persons=persons)
 
 
-@app.get("/get_person", response_model=PersonResponse)
+@app.get("/person", response_model=PersonResponse)
 async def get_person(person_uid: int, timezone: str):
     timezone_object = _parse_timezone_str(timezone)
     with create_session() as session:

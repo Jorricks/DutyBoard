@@ -20,7 +20,7 @@ const useGetSchedule = () => {
   const query = useQuery(
     ["useGetSchedule"],
     async () => {
-      return await axios.get<AxiosResponse, CurrentSchedule>("/get_schedule", {
+      return await axios.get<AxiosResponse, CurrentSchedule>("/schedule", {
         params: { timezone: timezoneValue }
       });
     },

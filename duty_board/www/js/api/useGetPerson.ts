@@ -12,7 +12,7 @@ const useGetPerson = ({ personUid }: { personUid: number }) => {
   return useQuery(
     ["useGetPerson", personUid],
     () =>
-      axios.get<AxiosResponse, PersonResponse>("/get_person", {
+      axios.get<AxiosResponse, PersonResponse>("/person", {
         params: params
       }),
     {
