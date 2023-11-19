@@ -12,7 +12,6 @@ from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
 
 
-@provide_session
 def create_calendars(session: SASession) -> None:
     nr_1 = Calendar(
         uid="data_platform_duty",
@@ -50,7 +49,6 @@ def create_calendars(session: SASession) -> None:
     session.merge(nr_3)
 
 
-@provide_session
 def create_persons(session: SASession) -> None:
     nr_1 = Person(
         username="jorrick",
@@ -94,7 +92,6 @@ def create_persons(session: SASession) -> None:
     session.merge(nr_2)
 
 
-@provide_session
 def create_on_call_events(person_uids: List[int], session: SASession) -> None:
     items_to_add = []
     for calendar_uid in ["data_platform_duty", "infrastructure_duty", "machine_learning"]:
@@ -126,12 +123,11 @@ def create_on_call_events(person_uids: List[int], session: SASession) -> None:
     session.bulk_save_objects(items_to_add)
 
 
-@provide_session
 def create_fake_database_rows_if_not_present(session: SASession) -> None:
     if session.query(Calendar).count() < 3:
-        create_calendars()
+        create_calendars(session)
     if session.query(Person).count() < 2:
-        create_persons()
-    person_uids = [uid[0] for uid in session.query(Person).values(Person.uid)]
+        create_persons(session)
+    person_uids = [uid[0] for uid in session.query(Person).with_entities(Person.uid)]
     if session.query(OnCallEvent).count() < 5:
-        create_on_call_events(person_uids)
+        create_on_call_events(person_uids, session)

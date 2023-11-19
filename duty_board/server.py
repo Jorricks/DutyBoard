@@ -43,15 +43,17 @@ admin: Admin
 
 CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
 logger.info(f"{CURRENT_DIR=}")
-if settings.SQL_ALCHEMY_CONN:
-    settings.configure_orm()
-    plugin = plugin_fetcher.get_plugin()
-    app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
-    app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
-    app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
-    admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
+
+settings.configure_orm()
+plugin = plugin_fetcher.get_plugin()
+app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
+app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
+app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
+admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
+
 if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
-    generate_fake_data.create_fake_database_rows_if_not_present()
+    with create_session() as session:
+        generate_fake_data.create_fake_database_rows_if_not_present(session)
 
 
 def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:

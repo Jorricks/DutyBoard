@@ -45,4 +45,4 @@ services:
       - /code/docker_prod_venv
       - /code/duty_board/www/node_modules
     working_dir: /code
-    command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install -e . && alembic upgrade head && uvicorn duty_board.server:app --host 0.0.0.0 --port 8000 --reload"
+    command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install --upgrade pip && pip3 install -e . && alembic upgrade head && uvicorn duty_board.server:app --host 0.0.0.0 --port 8000 --reload"

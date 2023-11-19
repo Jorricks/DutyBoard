@@ -54,7 +54,7 @@ class _ExtraInfoOnPerson(BaseModel):
 
 
 class PersonResponse(BaseModel):
-    uid: str
+    uid: int
     username: Optional[str]
     email: Optional[str]
     img_filename: Optional[str]

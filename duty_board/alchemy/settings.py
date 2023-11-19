@@ -21,14 +21,10 @@ def get_engine() -> Engine:
 def prepare_engine_args():
     """Prepare SQLAlchemy engine args for a postgres connection"""
     return {
-        "executemany_mode": "values",
-        "executemany_values_page_size": 10000,
-        "executemany_batch_page_size": 2000,
-        "pool_size": 5,
+        "pool_size": 10,
         "pool_recycle": 1800,
         "pool_pre_ping": True,
         "max_overflow": 10,
-        "encoding": "utf-8",
     }
 
 
@@ -54,6 +50,7 @@ def reconfigure_orm():
 
 def configure_orm():
     """Configure ORM using SQLAlchemy"""
+    # @ToDo(jorrick) refactor this setup to ignore the options without configure_orm.
     log.debug("Setting up DB connection pool (PID %s)", os.getpid())
     global engine  # noqa: PLW0603
     global Session  # noqa: PLW0603
