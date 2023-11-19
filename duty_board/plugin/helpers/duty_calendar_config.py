@@ -1,33 +1,22 @@
 from typing import Optional
 
-from attrs import define, field, validators
+from pydantic import BaseModel, Field
+from typing_extensions import Annotated
 
 
-@define
-class DutyCalendarConfig:
+class DutyCalendarConfig(BaseModel):
     # A unique identifier that stays the same. When renaming the name object and keeping the same uid, it won't remove
     # all your events & persons in the meantime.
-    uid: str = field(validator=[validators.instance_of(str), validators.max_len(50)])  # type: ignore
+    uid: Annotated[str, Field(max_length=50)]
     # The name shown on the UI.
-    name: str = field(validator=[validators.instance_of(str), validators.max_len(200)])  # type: ignore
+    name: Annotated[str, Field(max_length=200)]
     # A description about who owns what.
-    description: Optional[str] = field(
-        validator=validators.optional([validators.instance_of(str), validators.max_len(5000)]),  # type: ignore
-    )
+    description: Optional[Annotated[str, Field(max_length=5000)]]
     # iCalendar URL. This has to be something our request library can fetch.
-    icalendar_url: str = field(validator=[validators.instance_of(str), validators.max_len(500)])  # type: ignore
+    icalendar_url: Annotated[str, Field(max_length=500)]
     # The category this duty belongs in (this is what menu item it is shown for)
-    category: Optional[str] = field(
-        default="default",
-        validator=[validators.instance_of(str), validators.max_len(50)],
-    )  # type: ignore
+    category: Optional[Annotated[str, Field(max_length=50)]]
     # Priority of order. The lower the number, the earlier this calendar shows up.
-    order: int = field(
-        default=99999,
-        validator=[validators.instance_of(int), validators.ge(0), validators.le(9999999)],
-    )  # type: ignore
+    order: Annotated[int, Field(default=99999, ge=0, le=9999999)]
     # Prefix before user LDAP or user email is mentioned. Example prefix; 'duty:' when calendar event; 'duty: thomas'
-    event_prefix: Optional[str] = field(
-        default=None,
-        validator=validators.optional([validators.instance_of(str), validators.max_len(50)]),  # type: ignore
-    )  # type: ignore
+    event_prefix: Optional[Annotated[str, Field(max_length=50)]]
