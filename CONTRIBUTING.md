@@ -1,22 +1,6 @@
 # Contributing
 Happy to have you onboard and interested to develop DutyBoard to the next level.
 
-
-## @ToDos:
-- [x] Parse iCalendars
-- [x] Create calendar config for usage in Configs
-- [x] Create calendar config to Database syncer
-- [x] Create docker image
-- [x] Create docker compose
-- [x] Add extra pre-commit hooks
-- [x] Add improved GZIP handler
-- [x] Add Github pipelines
-- [ ] (Optional) Create kustomize example
-
-## Extra pre-commit hooks;
-- [ ] Automated run of generate_typescript_api.py.
-
-
 ## Commit messages
 We follow [GitMoji](https://gitmoji.dev/) styled commit messages. This means, you start your commit message with an emoji and follow with a short description. Examples:
 - 🎨 Restructured folder structure
@@ -24,7 +8,7 @@ We follow [GitMoji](https://gitmoji.dev/) styled commit messages. This means, yo
 - 🐛 Uncaught exception on /get_schedule endpoint 
 
 ## Local development
-The entire development environment of node.js is containerized to improve security. It will still download the node.js modules to your hard drive as intermittent storage, but there is no need to execute anything directly from your computer.
+The entire development environment of node.js is containerized. It will still download the node.js modules to your hard drive as intermittent storage, but there is no need to execute anything directly from your computer.
 The python virtual environment is both in the container and natively on your system for your IDE.
 
 ### Installing

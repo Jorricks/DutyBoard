@@ -36,9 +36,11 @@ classifiers = [
 dynamic = ["version"]
 requires-python = ">=3.8"
 dependencies = [
+    "alembic >=1.12.1, < 2.0.0",
     "attrs >= 22.1.0",
     "fastapi >= 0.87.0",
     "ical-library >= 0.1.0",
+    "itsdangerous >= 2.1.2",
     "pendulum >= 2.0.0",
     "psycopg2-binary >= 2.9.0",
     "pytz >= 2022.6",
@@ -127,7 +129,7 @@ select = [
 ]
 
 [tool.ruff.per-file-ignores]
-"duty_board/alembic/env.py" = ["INP001"]  # Do not error about missing __init__.py
+"duty_board/alembic/**" = ["INP001"]  # Do not error about missing __init__.py
 "duty_board/alchemy/add_sqladmin.py" = ["RUF012"]  # Ignore missing ClassVar annotation.
 "duty_board/models/generate_fake_data.py"= ["S311", "PLR2004"]  # Allow pseudo-random & magic values
 "duty_board/web_helpers/generate_typescript_api.py" = ["T201", "T203"]
@@ -138,7 +140,7 @@ max-complexity = 10
 
 [tool.ruff.lint.isort]
 known-first-party = ["duty_board"]
-section-order=["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+section-order=["STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 
 [tool.mypy]
 python_version = "3.8"
