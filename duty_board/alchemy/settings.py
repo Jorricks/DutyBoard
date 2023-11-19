@@ -67,16 +67,3 @@ def configure_orm():
             expire_on_commit=False,
         ),
     )
-    create_tables_if_not_present()
-
-
-def create_tables_if_not_present():
-    from duty_board.models.calendar import Calendar
-    from duty_board.models.on_call_event import OnCallEvent
-    from duty_board.models.person import Person
-    from duty_board.models.token import Token
-
-    Person.__table__.create(bind=get_engine(), checkfirst=True)
-    Calendar.__table__.create(bind=get_engine(), checkfirst=True)
-    OnCallEvent.__table__.create(bind=get_engine(), checkfirst=True)
-    Token.__table__.create(bind=get_engine(), checkfirst=True)

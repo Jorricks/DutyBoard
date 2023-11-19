@@ -8,6 +8,8 @@ services:
       - 5432:5432
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - ./.data/dev-postgres-db:/var/lib/postgresql/data
 
   frontend:
     container_name: duty_frontend
@@ -37,10 +39,10 @@ services:
       - CREATE_DUMMY_RECORDS=1
     volumes:
       - ./:/code
-      - ./docker_venv:/venv
+      - ./.data/docker_venv:/venv
       # Prevent docker_venv from being synced into the container twice; https://stackoverflow.com/a/37898591/2277445
       - /code/docker_venv
       - /code/docker_prod_venv
       - /code/duty_board/www/node_modules
     working_dir: /code
-    command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install -e . && uvicorn duty_board.server:app --host 0.0.0.0 --port 8000 --reload"
+    command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install -e . && alembic upgrade head && uvicorn duty_board.server:app --host 0.0.0.0 --port 8000 --reload"

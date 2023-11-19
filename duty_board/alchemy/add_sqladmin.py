@@ -15,7 +15,6 @@ from wtforms.fields.core import Field
 
 from duty_board.alchemy import settings
 from duty_board.alchemy.session import create_session
-from duty_board.alchemy.settings import Base
 from duty_board.alchemy.sqlalchemy_types import utc
 from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
@@ -101,9 +100,6 @@ class TokenAdmin(ModelView, model=Token):  # type: ignore
 
 
 def add_sqladmin(app: FastAPI, plugin: AbstractPlugin) -> Admin:
-    # Create the tables if that was not done already
-    Base.metadata.create_all(settings.get_engine())
-
     authentication_backend = MyBackend(plugin=plugin)
     admin = Admin(app=app, engine=settings.get_engine(), authentication_backend=authentication_backend)
     admin.add_view(PersonAdmin)
