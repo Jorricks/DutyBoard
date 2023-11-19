@@ -124,7 +124,7 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
         logger.info("Successfully finished updating calendar.")
 
 
-def enter_loop():
+def enter_loop() -> None:
     settings.configure_orm()
     plugin: AbstractPlugin = plugin_fetcher.get_plugin()
 

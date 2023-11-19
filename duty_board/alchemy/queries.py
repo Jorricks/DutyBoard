@@ -3,7 +3,7 @@ import json
 from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
-from pendulum import DateTime, UTC
+from pendulum import UTC, DateTime
 from pytz.tzinfo import BaseTzInfo
 from sqlalchemy.orm import Session as SASession
 
@@ -12,11 +12,11 @@ from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
 from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
 from duty_board.web_helpers.response_types import (
+    PersonResponse,
     _Calendar,
     _Events,
     _ExtraInfoOnPerson,
     _PersonEssentials,
-    PersonResponse,
 )
 
 
@@ -26,7 +26,9 @@ def format_datetime_for_timezone(dt: datetime.datetime, timezone: BaseTzInfo) ->
 
 
 def _get_events_ending_from_now_onwards(
-    session: SASession, all_encountered_person_uids: Set[int], timezone: BaseTzInfo
+    session: SASession,
+    all_encountered_person_uids: Set[int],
+    timezone: BaseTzInfo,
 ) -> Dict[str, List[_Events]]:
     result = session.query(OnCallEvent).filter(OnCallEvent.end_event_utc >= DateTime.utcnow()).all()
     mapped: Dict[str, List[_Events]] = defaultdict(list)
@@ -36,7 +38,7 @@ def _get_events_ending_from_now_onwards(
                 start_event=format_datetime_for_timezone(calendar_event.start_event_utc, timezone),
                 end_event=format_datetime_for_timezone(calendar_event.end_event_utc, timezone),
                 person_uid=calendar_event.person_uid,
-            )
+            ),
         )
         all_encountered_person_uids.add(calendar_event.person_uid)
     return mapped
@@ -44,7 +46,9 @@ def _get_events_ending_from_now_onwards(
 
 def get_calendars(session: SASession, all_encountered_person_uids: Set[int], timezone: BaseTzInfo) -> List[_Calendar]:
     events: Dict[str, List[_Events]] = _get_events_ending_from_now_onwards(
-        session=session, all_encountered_person_uids=all_encountered_person_uids, timezone=timezone
+        session=session,
+        all_encountered_person_uids=all_encountered_person_uids,
+        timezone=timezone,
     )
     result = session.query(Calendar).order_by(Calendar.order).all()
     return [
@@ -81,22 +85,22 @@ def parse_extra_attributes(person_uid: int, extra_attributes_str: Optional[str])
 
     extra_attributes_list = json.loads(extra_attributes_str)
     if not isinstance(extra_attributes_list, dict):
-        raise ValueError(f"Expected extra_attributes field to be a dict for {person_uid=}.")
+        raise TypeError(f"Expected extra_attributes field to be a dict for {person_uid=}.")
 
     result_list: List[_ExtraInfoOnPerson] = []
     value: Dict[str, str]
     for key, value in extra_attributes_list.items():
         if not isinstance(value, dict):
-            raise ValueError(f"Expected extra_attributes[{key}] field to be a dict for {person_uid=}.")
-        if "information" not in value.keys():
+            raise TypeError(f"Expected extra_attributes[{key}] field to be a dict for {person_uid=}.")
+        if "information" not in value:
             raise ValueError(f"Missing required extra_attributes[{key}][information] for {person_uid=}.")
         result_list.append(
             _ExtraInfoOnPerson(
-                information=value.get("information"),
+                information=value["information"],
                 icon=value.get("icon", "FaMinus"),
                 icon_color=value.get("icon_color", "black"),
                 url=value.get("url", None),
-            )
+            ),
         )
     return result_list
 
@@ -147,7 +151,8 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
 
 
 def sync_duty_calendar_configurations_to_postgres(
-    session: SASession, duty_calendar_configurations: List[DutyCalendarConfig]
+    session: SASession,
+    duty_calendar_configurations: List[DutyCalendarConfig],
 ) -> None:
     for duty_calendar_config in duty_calendar_configurations:
         _create_or_update_calendar(session, duty_calendar_config)

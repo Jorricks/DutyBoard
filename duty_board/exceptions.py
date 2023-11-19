@@ -1,2 +1,2 @@
-class PluginLoadingException(Exception):
+class PluginLoadingError(Exception):
     pass

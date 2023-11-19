@@ -1,6 +1,7 @@
 import datetime
+from typing import Any, Optional
 
-import pendulum as pendulum
+import pendulum
 from sqlalchemy import DateTime, TypeDecorator
 
 utc = pendulum.tz.timezone("UTC")
@@ -26,16 +27,16 @@ class UtcDateTime(TypeDecorator):
 
     cache_ok = True
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value: Optional[datetime.datetime], dialect: Any):  # noqa: ARG002
         if value is not None:
             if not isinstance(value, datetime.datetime):
                 raise TypeError("expected datetime.datetime, not " + repr(value))
-            elif value.tzinfo is None:
+            if value.tzinfo is None:
                 raise ValueError("naive datetime is disallowed")
             return value.astimezone(utc)
         return None
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value: Optional[datetime.datetime], dialect: Any):  # noqa: ARG002
         """
         Processes DateTimes from the DB making sure it is always
         returning UTC. Not using timezone.convert_to_utc as that
@@ -44,9 +45,5 @@ class UtcDateTime(TypeDecorator):
         in the database.
         """
         if value is not None:
-            if value.tzinfo is None:
-                value = value.replace(tzinfo=utc)
-            else:
-                value = value.astimezone(utc)
-
+            value = value.replace(tzinfo=utc) if value.tzinfo is None else value.astimezone(utc)
         return value

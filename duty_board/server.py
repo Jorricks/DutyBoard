@@ -20,7 +20,7 @@ from duty_board.models import generate_fake_data
 from duty_board.plugin.abstract_plugin import AbstractPlugin
 from duty_board.plugin.helpers import plugin_fetcher
 from duty_board.web_helpers.gzip_static_files import GZIPStaticFiles
-from duty_board.web_helpers.response_types import _Calendar, _Config, _PersonEssentials, CurrentSchedule, PersonResponse
+from duty_board.web_helpers.response_types import CurrentSchedule, PersonResponse, _Calendar, _Config, _PersonEssentials
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -42,7 +42,7 @@ plugin: AbstractPlugin
 admin: Admin
 
 CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
-print(f"{CURRENT_DIR=}")
+logger.info(f"{CURRENT_DIR=}")
 if settings.SQL_ALCHEMY_CONN:
     settings.configure_orm()
     plugin = plugin_fetcher.get_plugin()
@@ -72,7 +72,7 @@ def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
         announcement_background_color=plugin.announcement_background_color_hex,
         announcements=plugin.announcements,
         footer_html=plugin.footer_html,
-        timezone=timezone_object.zone,
+        timezone=str(timezone_object),
     )
 
 
@@ -83,10 +83,13 @@ async def get_schedule(timezone: str):
     with create_session() as session:
         all_encountered_person_uids: Set[int] = set()
         calendars: List[_Calendar] = queries.get_calendars(
-            session=session, all_encountered_person_uids=all_encountered_person_uids, timezone=timezone_object
+            session=session,
+            all_encountered_person_uids=all_encountered_person_uids,
+            timezone=timezone_object,
         )
         persons: Dict[int, _PersonEssentials] = queries.get_peoples_essentials(
-            session=session, all_person_uids=all_encountered_person_uids
+            session=session,
+            all_person_uids=all_encountered_person_uids,
         )
         return CurrentSchedule(config=config, calendars=calendars, persons=persons)
 
@@ -105,7 +108,7 @@ async def get_person(person_uid: int, timezone: str):
 )
 def company_logo():
     file_path = plugin.absolute_path_to_company_logo_png
-    if os.path.exists(file_path):
+    if file_path.is_file():
         return FileResponse(file_path, media_type="image/png", filename="company_logo.png")
     raise HTTPException(status_code=500, detail="Company logo could not be found.")
 
@@ -117,7 +120,7 @@ def company_logo():
 )
 def favicon_ico():
     file_path = plugin.absolute_path_to_favicon_ico
-    if os.path.exists(file_path):
+    if file_path.is_file():
         return FileResponse(file_path, media_type="image/x-icon", filename="favicon.ico")
     raise HTTPException(status_code=500, detail="Company logo could not be found.")
 

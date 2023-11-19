@@ -1,5 +1,4 @@
 import json
-import os
 import subprocess
 from pathlib import Path
 from typing import Any, Dict
@@ -35,7 +34,7 @@ def convert_dict_from_snake_to_camel(given_value: Any) -> Any:
 
 
 path_to_openapi = Path.cwd().parent / "www" / "openapi.json"
-with open(path_to_openapi, "w") as f:
+with path_to_openapi.open("w") as f:
     openapi_definition: Dict[str, Any] = get_openapi(
         title=app.title,
         version=app.version,
@@ -48,7 +47,7 @@ with open(path_to_openapi, "w") as f:
     pprint.pprint(openapi_definition)
     openapi_camel_case = convert_dict_from_snake_to_camel(openapi_definition)
     json.dump(openapi_camel_case, f)
-    print(f"Written openapi.json to {str(path_to_openapi)}.")
+    print(f"Written openapi.json to {path_to_openapi!s}.")
 
 # consider removing --axios and adding --no-client.
 output_folder = "./js/api"
@@ -56,6 +55,6 @@ output_file = "api-generated-types.ts"
 cmd = f"npx swagger-typescript-api -p openapi.json -o {output_folder} -n {output_file} --no-client"
 # cmd = "ls -ll"
 docker_run_cmd = f"docker run -v .:/code registry.hub.docker.com/library/node:18-slim {cmd}"
-subprocess.run(cmd, cwd=Path.cwd().parent / "www", shell=True)
-os.remove(path_to_openapi)
+subprocess.run(cmd, cwd=Path.cwd().parent / "www", shell=True, check=True)  # noqa: S602
+path_to_openapi.unlink()
 print("Removed openapi.json again.")

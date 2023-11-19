@@ -57,10 +57,8 @@ doc = [
     "termynal >= 0.2.0, < 1.0.0",
 ]
 dev = [
-    "black >= 22.6.0, < 23.0.0",
-    "flake8 >= 4.0.0, < 5.0.0",
-    "isort >= 5.10.1, < 6.0.0",
-    "mypy == 0.910",
+    "ruff >= 0.1.4, < 1.0.0",
+    "mypy >= 1.6.1,<2.0.0",
     "pre-commit >= 2.19.0, < 3.0.0",
     "pytest >= 6.2.4, < 7.0.0",
     "pytest-cov >= 2.12.0, < 4.0.0",
@@ -93,18 +91,54 @@ include = ["duty_board*"]  # package names should match these glob patterns (["*
 exclude = []  # exclude packages matching these glob patterns (empty by default)
 namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
-[tool.black]
-line-length=120
-target-version=['py38']
 
-[tool.isort]
-line_length = 120
-multi_line_output = 3
-force_alphabetical_sort_within_sections = "True"
-force_sort_within_sections = "False"
-known_dutyboard = ["duty_board"]
-sections=["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER", "DUTYBOARD"]
-profile = "black"
+[tool.ruff]
+fix = true
+ignore = ["E501", "TRY003", "ERA001", "N812"]
+line-length = 120
+target-version  = "py38"
+select = [
+    'F',   # pyflakes
+    'E',   # pycodestlyes errors
+    'W',   # pycodestyles warnings
+    'I',   # isort
+    'N',   # PEP8-naming
+    'UP',  # pyupgrade
+    'S',   # flake8-bandit
+    'B',   # flake8-bugbear
+    'COM', # flake8-commas
+    'C4',  # flake8-comprehensions
+    'T10', # flake8-debugger
+    'DTZ', # flake8-datetimez
+    'INP', # flake8-no-pep420
+    'PIE', # flake8-pie
+    'T20', # flake8-print
+    'PT',  # flake8-pytest
+    'Q',   # flake8-quotes
+    'RET', # flake8-return
+    'SIM', # flake8-simplify
+    'ARG', # flake8-unused-arguments
+    'PTH', # flake8-use-pathlib
+    'ERA', # eradicate (discuss)
+    'PL',  # pylint
+    'TRY', # tryceratops
+    'RUF', # ruff
+    'C'    # Macarbe
+]
+
+[tool.ruff.per-file-ignores]
+"duty_board/alembic/env.py" = ["INP001"]  # Do not error about missing __init__.py
+"duty_board/alchemy/add_sqladmin.py" = ["RUF012"]  # Ignore missing ClassVar annotation.
+"duty_board/models/generate_fake_data.py"= ["S311", "PLR2004"]  # Allow pseudo-random & magic values
+"duty_board/web_helpers/generate_typescript_api.py" = ["T201", "T203"]
+"tests/*" = ["S101", "PLR2004", "T201"] # assert is allowed in test files
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.isort]
+known-first-party = ["duty_board"]
+section-order=["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 
 [tool.mypy]
 python_version = "3.8"
