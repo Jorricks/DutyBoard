@@ -1,11 +1,10 @@
 import json
+import pprint
 import subprocess
 from pathlib import Path
 from typing import Any, Dict
 
-from fastapi.openapi.utils import get_openapi
-
-from duty_board.server import app
+import requests
 
 
 def to_camel_case(snake_str: str) -> str:
@@ -33,28 +32,31 @@ def convert_dict_from_snake_to_camel(given_value: Any) -> Any:
     raise ValueError(f"Unexpected value {given_value=}.")
 
 
-path_to_openapi = Path.cwd().parent / "www" / "openapi.json"
-with path_to_openapi.open("w") as f:
-    openapi_definition: Dict[str, Any] = get_openapi(
-        title=app.title,
-        version=app.version,
-        openapi_version=app.openapi_version,
-        description=app.description,
-        routes=app.routes,
-    )
-    import pprint
+def write_to_openapi(path_to_openapi: Path) -> None:
+    with path_to_openapi.open("w") as f:
+        result = requests.get("http://127.0.0.1:8000/openapi.json", timeout=5)
+        openapi_definition: Dict[str, Any] = result.json()
+        pprint.pprint(openapi_definition)
+        openapi_camel_case = convert_dict_from_snake_to_camel(openapi_definition)
+        json.dump(openapi_camel_case, f)
 
-    pprint.pprint(openapi_definition)
-    openapi_camel_case = convert_dict_from_snake_to_camel(openapi_definition)
-    json.dump(openapi_camel_case, f)
+
+def generate_typescript_client() -> None:
+    output_folder = "./js/api"
+    output_file = "api-generated-types.ts"
+    cmd = f"npx swagger-typescript-api -p openapi.json -o {output_folder} -n {output_file} --no-client"
+    docker_run_cmd = f'docker exec duty_frontend /bin/bash -c "{cmd}"'
+    subprocess.run(docker_run_cmd, cwd=Path.cwd().parent / "www", shell=True, check=True)  # noqa: S602
+
+
+def run() -> None:
+    path_to_openapi = Path.cwd().parent / "www" / "openapi.json"
+    write_to_openapi(path_to_openapi)
     print(f"Written openapi.json to {path_to_openapi!s}.")
+    generate_typescript_client()
+    path_to_openapi.unlink()
+    print("Removed openapi.json again.")
 
-# consider removing --axios and adding --no-client.
-output_folder = "./js/api"
-output_file = "api-generated-types.ts"
-cmd = f"npx swagger-typescript-api -p openapi.json -o {output_folder} -n {output_file} --no-client"
-# cmd = "ls -ll"
-docker_run_cmd = f"docker run -v .:/code registry.hub.docker.com/library/node:18-slim {cmd}"
-subprocess.run(cmd, cwd=Path.cwd().parent / "www", shell=True, check=True)  # noqa: S602
-path_to_openapi.unlink()
-print("Removed openapi.json again.")
+
+if __name__ == "__main__":
+    run()

@@ -1,10 +1,9 @@
 import os
 
 from sqlalchemy import create_engine
+from sqlalchemy.orm import Session as SASession
 from sqlalchemy.orm import sessionmaker
 from tzlocal import get_localzone
-from sqlalchemy.orm import Session as SASession
-
 
 from duty_board.alchemy import queries
 from duty_board.models import generate_fake_data
@@ -22,8 +21,8 @@ def test_get_calendars() -> None:
     with Session.begin() as session:
         _create_fake_data(session)
         person_uids = [person.uid for person in session.query(Person).all()]
-        calendars = queries.get_calendars(
+        queries.get_calendars(
             session=session,
             all_encountered_person_uids=set(person_uids),
-            timezone=get_localzone()
+            timezone=get_localzone(),
         )

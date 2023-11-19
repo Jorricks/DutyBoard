@@ -6,7 +6,6 @@ from typing import List
 from pendulum import DateTime
 from sqlalchemy.orm import Session as SASession
 
-from duty_board.alchemy.session import provide_session
 from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person

@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import logging
+from typing import List, Optional
 
 import pytz
 import requests  # type: ignore
@@ -26,7 +25,7 @@ class ICalPluginMixin:
         response.raise_for_status()
         return response.text
 
-    def _get_events_for_upcoming_month(self, icalendar_url: str, event_prefix: str, limit: int = 10) -> list[VEvent]:
+    def _get_events_for_upcoming_month(self, icalendar_url: str, event_prefix: str, limit: int = 10) -> List[VEvent]:
         """Gets the calendar events for the upcoming 4 weeks."""
         logger.info(f"Loading {icalendar_url}, this might take some time.")
         now = DateTime.now()
@@ -65,12 +64,8 @@ class ICalPluginMixin:
                 sync=True,
             )
             session.add(person)
-        # This extra call is needed to fetch the UID that is automatically created for the Person.
-        with create_session() as session:
-            result = session.query(Person).filter(Person.username == username).filter(Person.email == email).first()
-            if result is None:
-                raise ValueError(f"We just added Person {username=} {email=} and we already can't find him anymore..")
-            return result.uid
+            session.flush()
+            return person.uid
 
     def _create_on_call_event(self, calendar: Calendar, v_event: VEvent, person_uid: int) -> OnCallEvent:
         return OnCallEvent(
@@ -81,12 +76,12 @@ class ICalPluginMixin:
         )
 
     def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:
-        items_to_insert: list[OnCallEvent] = []
+        items_to_insert: List[OnCallEvent] = []
         session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
         event: VEvent
         for event in self._get_events_for_upcoming_month(calendar.icalendar_url, calendar.event_prefix or ""):
             # First attempt attendee. If that is not set, we look at the title/summary of the event.
-            person_unique_identifier: str | None = None
+            person_unique_identifier: Optional[str] = None
             if event.attendee is not None and any(event.attendee):
                 person_unique_identifier = (event.attendee[0].value or "").replace("mailto:", "") or None
             if person_unique_identifier is None:

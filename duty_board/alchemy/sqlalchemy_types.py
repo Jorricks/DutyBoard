@@ -38,11 +38,9 @@ class UtcDateTime(TypeDecorator):
 
     def process_result_value(self, value: Optional[datetime.datetime], dialect: Any):  # noqa: ARG002
         """
-        Processes DateTimes from the DB making sure it is always
-        returning UTC. Not using timezone.convert_to_utc as that
-        converts to configured TIMEZONE while the DB might be
-        running with some other setting. We assume UTC datetimes
-        in the database.
+        Processes DateTimes from the DB making sure it is always returning UTC. Not using timezone.convert_to_utc as
+        that converts to configured TIMEZONE while the DB might be running with some other setting. We assume UTC
+        datetimes in the database.
         """
         if value is not None:
             value = value.replace(tzinfo=utc) if value.tzinfo is None else value.astimezone(utc)

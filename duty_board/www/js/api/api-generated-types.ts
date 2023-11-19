@@ -27,17 +27,17 @@ export interface HTTPValidationError {
 /** PersonResponse */
 export interface PersonResponse {
   /** Uid */
-  uid: string;
+  uid: number;
   /** Username */
-  username?: string;
+  username: string | null;
   /** Email */
-  email?: string;
+  email: string | null;
   /** Img Filename */
-  imgFilename?: string;
+  imgFilename: string | null;
   /** Img Width */
-  imgWidth?: number;
+  imgWidth: number | null;
   /** Img Height */
-  imgHeight?: number;
+  imgHeight: number | null;
   /** Extra Attributes */
   extraAttributes: ExtraInfoOnPerson[];
   /** Last Update */
@@ -51,7 +51,7 @@ export interface PersonResponse {
 /** ValidationError */
 export interface ValidationError {
   /** Location */
-  loc: any[];
+  loc: (string | number)[];
   /** Message */
   msg: string;
   /** Error Type */
@@ -91,7 +91,7 @@ export interface Config {
   /** Categories */
   categories: string[];
   /** Git Repository Url */
-  gitRepositoryUrl?: string;
+  gitRepositoryUrl: string | null;
   /** Enable Admin Button */
   enableAdminButton: boolean;
   /** Announcement Text Color */
@@ -101,7 +101,7 @@ export interface Config {
   /** Announcements */
   announcements: string[];
   /** Footer Html */
-  footerHtml?: string;
+  footerHtml: string | null;
 }
 
 /** Events */
@@ -123,7 +123,7 @@ export interface ExtraInfoOnPerson {
   /** Icon Color */
   iconColor: string;
   /** Url */
-  url?: string;
+  url: string | null;
 }
 
 /** PersonEssentials */
@@ -131,7 +131,7 @@ export interface PersonEssentials {
   /** Uid */
   uid: number;
   /** Username */
-  username?: string;
+  username: string | null;
   /** Email */
-  email?: string;
+  email: string | null;
 }

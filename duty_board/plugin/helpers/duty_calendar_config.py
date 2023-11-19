@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Optional
 
 from attrs import define, field, validators
 
@@ -11,13 +11,13 @@ class DutyCalendarConfig:
     # The name shown on the UI.
     name: str = field(validator=[validators.instance_of(str), validators.max_len(200)])  # type: ignore
     # A description about who owns what.
-    description: str | None = field(
+    description: Optional[str] = field(
         validator=validators.optional([validators.instance_of(str), validators.max_len(5000)]),  # type: ignore
     )
     # iCalendar URL. This has to be something our request library can fetch.
     icalendar_url: str = field(validator=[validators.instance_of(str), validators.max_len(500)])  # type: ignore
     # The category this duty belongs in (this is what menu item it is shown for)
-    category: str | None = field(
+    category: Optional[str] = field(
         default="default",
         validator=[validators.instance_of(str), validators.max_len(50)],
     )  # type: ignore
@@ -27,7 +27,7 @@ class DutyCalendarConfig:
         validator=[validators.instance_of(int), validators.ge(0), validators.le(9999999)],
     )  # type: ignore
     # Prefix before user LDAP or user email is mentioned. Example prefix; 'duty:' when calendar event; 'duty: thomas'
-    event_prefix: str | None = field(
+    event_prefix: Optional[str] = field(
         default=None,
         validator=validators.optional([validators.instance_of(str), validators.max_len(50)]),  # type: ignore
     )  # type: ignore

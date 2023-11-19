@@ -2,9 +2,22 @@ import io
 import json
 import logging
 import os
+import sys
 from functools import wraps
 from pathlib import Path
-from typing import Any, ClassVar, Dict, Final, List, Literal, Mapping, Optional, Tuple, Union
+from typing import (
+    Callable,
+    ClassVar,
+    Dict,
+    Final,
+    List,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from ldap3 import SUBTREE, Connection, Server
 from ldap3.core import exceptions
@@ -13,18 +26,29 @@ from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.person import Person
 
+if sys.version_info[:2] >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
+
+
 logger = logging.getLogger(__name__)
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
-def ldap_rebind(func):
+def ldap_rebind(func: Callable[P, R]):  # type: ignore
     @wraps(func)
-    def wrapper(ldap_instance: "LdapBaseClient", *args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:  # type: ignore
+        ldap_instance: LdapBaseClient = args[0]
+        if not isinstance(ldap_instance, LdapBaseClient):
+            raise TypeError(f"Unexpected first argument; {args[0]}.")
         try:
-            return func(ldap_instance, *args, **kwargs)
+            return func(*args, **kwargs)  # type: ignore
         except (exceptions.LDAPSocketOpenError, exceptions.LDAPSessionTerminatedByServerError):
             ldap_instance.connection.unbind()
             ldap_instance.connection.bind()
-            return func(ldap_instance, *args, **kwargs)
+            return func(*args, **kwargs)  # type: ignore
 
     return wrapper
 

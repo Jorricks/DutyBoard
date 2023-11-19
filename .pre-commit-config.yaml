@@ -32,6 +32,8 @@ repos:
         description: Mypy helps ensure that we use our functions and variables correctly by checking the types.
         entry: mypy
         args:
+          - --install-types
+          - --non-interactive
           - --ignore-missing-imports
           - --scripts-are-modules
         language: system  # By using system, we ensure we use the venv of the user and thus use all installed packages.
