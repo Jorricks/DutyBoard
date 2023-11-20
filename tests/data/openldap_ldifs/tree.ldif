@@ -1,0 +1,66 @@
+# Root creation
+dn: dc=DutyBoard,dc=com
+objectClass: dcObject
+objectClass: organization
+dc: DutyBoard
+o: DutyBoard
+
+dn: ou=People,dc=DutyBoard,dc=com
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Groups,dc=DutyBoard,dc=com
+objectClass: organizationalUnit
+ou: Groups
+
+# User user01 creation
+dn: uid=jan,ou=People,dc=DutyBoard,dc=com
+cn: Jan Schoenmakers
+sn: Bar1
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+userPassword: JansWachtwoord
+uid: user01
+uidNumber: 1000
+gidNumber: 1000
+mail: jan@schoenmaker.nl
+l: Amsterdam, NL
+homeDirectory: /home/jan
+jpegPhoto:< file:///bitnami/openldap_ldifs/jan.jpeg
+
+# User user02 creation
+dn: uid=henk,ou=People,dc=DutyBoard,dc=com
+cn: Henk de Tank
+sn: Bar2
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+userPassword: HENKIETANKIE
+uid: user02
+uidNumber: 1001
+gidNumber: 1001
+mail: henk@tank.nl
+l: Eindhoven de gekste, NL
+homeDirectory: /home/henk
+jpegPhoto:< file:///bitnami/openldap_ldifs/henk.jpeg
+
+# Group creation
+dn: cn=readers,ou=Groups,dc=DutyBoard,dc=com
+cn: readers
+objectClass: groupOfNames
+member: uid=jan,ou=People,dc=DutyBoard,dc=com
+member: uid=henk,ou=People,dc=DutyBoard,dc=com
+
+# groupOfUniqueNames creation, so we can test both ways.
+dn: cn=uniqueReaders,ou=Groups,dc=DutyBoard,dc=com
+cn: uniqueReaders
+objectClass: groupOfUniqueNames
+uniquemember: uid=jan,ou=People,dc=DutyBoard,dc=com
+uniquemember: uid=henk,ou=People,dc=DutyBoard,dc=com
+
+# Admin interface restriction
+dn: cn=admin-interface,ou=Groups,dc=DutyBoard,dc=com
+cn: readers
+objectClass: groupOfNames
+member: uid=jan,ou=People,dc=DutyBoard,dc=com

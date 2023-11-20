@@ -46,3 +46,29 @@ services:
       - /code/duty_board/www/node_modules
     working_dir: /code
     command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install --upgrade pip && pip3 install -e . && alembic upgrade head && uvicorn duty_board.server:app --host 0.0.0.0 --port 8000 --reload"
+
+
+# Use the following query to list all users;
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -s 'one' -b 'ou=People,dc=DutyBoard,dc=com'
+# Use the following query to list all members of group;
+# ldapsearch -x -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "cn=readers,ou=Groups,dc=DutyBoard,dc=com"
+# or;
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=readers)" member
+# And for groupOfUniqueNames
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=uniqueReaders)" uniqueMember
+
+  openldap:
+    image: docker.io/bitnami/openldap:2.6
+    container_name: openldap
+    ports:
+      - '1389:1389'
+      - '1636:1636'
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_ROOT=dc=DutyBoard,dc=com
+      - BITNAMI_DEBUG=true
+      - LDAP_CUSTOM_LDIF_DIR=/bitnami/openldap_ldifs
+    volumes:
+      - ./tests/data/openldap_ldifs:/bitnami/openldap_ldifs
+      - ./.data/openldap_data:/bitnami/openldap
