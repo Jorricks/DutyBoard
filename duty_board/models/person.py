@@ -1,7 +1,7 @@
 from typing import Optional
 
 from pendulum.datetime import DateTime
-from sqlalchemy import ForeignKey, String, UniqueConstraint
+from sqlalchemy import CheckConstraint, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from duty_board.alchemy.settings import Base
@@ -10,11 +10,14 @@ from duty_board.models.person_image import PersonImage
 
 
 class Person(Base):
-    __table_args__ = (UniqueConstraint("image_uid", name="unique_image_uid"),)  # To make sure it remains a one-to-one.
+    __table_args__ = (
+        UniqueConstraint("image_uid", name="unique_image_uid"),  # To make sure it remains a one-to-one.
+        CheckConstraint("NOT(username IS NULL AND email IS NULL)", name="person_double_null"),
+    )  # To make sure it remains a one-to-one.
     __tablename__ = "person"
     uid: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
-    username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, unique=True)
-    email: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, unique=True)
+    username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
     image_uid: Mapped[Optional[int]] = mapped_column(ForeignKey("person_image.uid"), nullable=True)
     image: Mapped[Optional[PersonImage]] = relationship(
