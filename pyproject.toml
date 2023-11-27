@@ -64,8 +64,9 @@ dev = [
     "mypy >= 1.6.1,<2.0.0",
     "pre-commit >= 2.19.0, < 3.0.0",
     "pytest >= 6.2.4, < 7.0.0",
-    "pytest-cov >= 2.12.0, < 4.0.0",
-    "pytype >= 2022.6.30",
+    "pytest-cov >= 4.0.0, < 5.0.0",
+    "pytest-asyncio >= 0.21.1, < 1.0.0",
+    "requests_mock >=1.11.0 , < 2.0.0",
     "sqlalchemy[mypy] >= 2.0.23, < 3.0.0",
     "types-pytz >= 2022.6.0.1",
     "types-tzlocal >= 4.2.2.0",
@@ -136,7 +137,7 @@ select = [
 "duty_board/alchemy/add_sqladmin.py" = ["RUF012"]  # Ignore missing ClassVar annotation.
 "duty_board/models/generate_fake_data.py"= ["S311", "PLR2004"]  # Allow pseudo-random & magic values
 "duty_board/web_helpers/generate_typescript_api.py" = ["T201", "T203"]
-"tests/*" = ["S101", "PLR2004", "T201"] # assert is allowed in test files
+"tests/*" = ["ARG001", "S101", "PLR2004", "T201"] # assert is allowed in test files
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

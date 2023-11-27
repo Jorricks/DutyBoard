@@ -21,7 +21,7 @@ objectClass: inetOrgPerson
 objectClass: posixAccount
 objectClass: shadowAccount
 userPassword: JansWachtwoord
-uid: user01
+uid: jan
 uidNumber: 1000
 gidNumber: 1000
 mail: jan@schoenmaker.nl
@@ -37,7 +37,7 @@ objectClass: inetOrgPerson
 objectClass: posixAccount
 objectClass: shadowAccount
 userPassword: HENKIETANKIE
-uid: user02
+uid: henk
 uidNumber: 1001
 gidNumber: 1001
 mail: henk@tank.nl

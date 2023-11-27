@@ -9,6 +9,7 @@ from duty_board.exceptions import PluginLoadingError
 from duty_board.plugin.example import example_plugin
 from duty_board.plugin.example.example_plugin import ExamplePlugin
 from duty_board.plugin.helpers import plugin_fetcher
+from tests.conftest import set_ldap_env_variables
 
 
 class MyPlugin(ExamplePlugin):
@@ -23,12 +24,13 @@ def __clear_cache() -> None:
 @contextmanager
 def with_set_example_plugin_location(load_my_plugin: bool) -> Generator[None, None, None]:
     try:
-        if load_my_plugin:
-            os.environ["DUTY_BOARD_PLUGIN_LOCATION"] = str(Path(__file__).resolve())
-            os.environ["DUTY_BOARD_PLUGIN_CLASS_NAME"] = "MyPlugin"
-        else:
-            os.environ["DUTY_BOARD_PLUGIN_LOCATION"] = str(Path(example_plugin.__file__).resolve())
-        yield
+        with set_ldap_env_variables():
+            if load_my_plugin:
+                os.environ["DUTY_BOARD_PLUGIN_LOCATION"] = str(Path(__file__).resolve())
+                os.environ["DUTY_BOARD_PLUGIN_CLASS_NAME"] = "MyPlugin"
+            else:
+                os.environ["DUTY_BOARD_PLUGIN_LOCATION"] = str(Path(example_plugin.__file__).resolve())
+            yield
     finally:
         if "DUTY_BOARD_PLUGIN_LOCATION" in os.environ:
             del os.environ["DUTY_BOARD_PLUGIN_LOCATION"]
@@ -48,8 +50,10 @@ def test_get_plugin_with_and_without_env() -> None:
         assert plugin.__class__.__name__ == "ExamplePlugin"
 
     assert plugin_fetcher._get_plugin() is None
-    plugin = plugin_fetcher.get_plugin()
-    assert plugin.__class__.__name__ == "ExamplePlugin"
+
+    with set_ldap_env_variables():
+        plugin = plugin_fetcher.get_plugin()
+        assert plugin.__class__.__name__ == "ExamplePlugin"
 
 
 def test_errors(tmp_path: Path) -> None:

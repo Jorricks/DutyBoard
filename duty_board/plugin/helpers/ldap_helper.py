@@ -15,6 +15,7 @@ from typing import (
 
 from ldap3 import SUBTREE, Connection, Server
 from ldap3.core import exceptions
+from ldap3.core.exceptions import LDAPNoSuchObjectResult
 from pydantic import BaseModel
 
 if sys.version_info[:2] >= (3, 10):
@@ -147,7 +148,10 @@ class LDAPBaseClient:
         attr_list: Optional[List[str]] = None,
         scope: Literal["BASE", "LEVEL", "SUBTREE"] = SUBTREE,
     ) -> Optional[List[Tuple[str, Mapping[str, List[str]]]]]:
-        search_success = self.connection.search(base, filter_str, search_scope=scope, attributes=attr_list)
+        try:
+            search_success = self.connection.search(base, filter_str, search_scope=scope, attributes=attr_list)
+        except LDAPNoSuchObjectResult:
+            return None
         if not search_success or not self.connection.response or not self.connection.response[0]:
             return None
         return [(item["dn"], item["attributes"]) for item in self.connection.response]
@@ -219,7 +223,7 @@ class LDAPBaseClient:
         )
         return self._search(  # type: ignore[no-any-return]
             person_search.search_filter,
-            person_search.base_dn,
+            person_search.person_dn,
             attributes or ["*"],
         )
 

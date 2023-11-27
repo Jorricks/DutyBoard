@@ -1,7 +1,9 @@
+import asyncio
 import io
 import json
 import logging
 import os
+from concurrent.futures import ThreadPoolExecutor
 from typing import (
     Any,
     ClassVar,
@@ -25,10 +27,10 @@ logger = logging.getLogger(__name__)
 
 class LDAPPluginMixin:
     # Basic LDAP settings
-    LDAP_URL: ClassVar[str] = "ldaps://some.ldap.server.com:636"
-    LDAP_BASE_DN: ClassVar[str] = "dc=example,dc=com"
+    LDAP_URL: ClassVar[str] = "ldap://127.0.0.1:1389"
+    LDAP_BASE_DN: ClassVar[str] = "dc=DutyBoard,dc=com"
     LDAP_USER_OU: ClassVar[str] = "People"
-    LDAP_GROUP_OU: ClassVar[Optional[str]] = "Group"
+    LDAP_GROUP_OU: ClassVar[Optional[str]] = "Groups"
     LDAP_ACCOUNT_ATTRIBUTE: ClassVar[str] = "uid"
     LDAP_GROUP_ATTRIBUTE: ClassVar[str] = "cn"  # Group would be cn=a_group,ou=Group,dc=example,dc=com
     # With the above config you'd have:
@@ -38,7 +40,8 @@ class LDAPPluginMixin:
     # To configure who gets access to the admin interface.
     # This can either be `"groupOfUniqueNames", "uniquemember"` or `"groupOfNames", `member`
     LDAP_GROUP_MEMBERSHIP_RELATION: ClassVar[Tuple[str, str]] = "groupOfUniqueNames", "uniquemember"
-    LDAP_ADMIN_GROUP_NAMES: ClassVar[Tuple[str, ...]] = ("admins",)  # cn=a_group,ou=Group,dc=example,dc=com
+    # Allow everyone part of `cn=admin-unique-interface,ou=Group,dc=DutyBoard,dc=com` to login to the admin interface.
+    LDAP_ADMIN_GROUP_NAMES: ClassVar[Tuple[str, ...]] = ("admin-unique-interface",)
 
     def __init__(self, *args: Any, **kwargs: Any):
         self.client = LDAPBaseClient(
@@ -93,7 +96,7 @@ class LDAPPluginMixin:
         }
 
     def sync_person(self, person: Person, session: SASession) -> Person:  # noqa: ARG002
-        filter_string = person.username or person.email
+        filter_string: Optional[str] = person.username or person.email
         if filter_string is None:
             error_msg = f"It's not allowed to have both {person.username=} and {person.email=} be None."
             raise ValueError(error_msg)
@@ -113,6 +116,15 @@ class LDAPPluginMixin:
             person.img_height = height
         logger.debug(f"Updating references of {person}.")
         return person
+
+    def _is_user_in_admin_group(self, username: str) -> bool:
+        return any(self.client.is_user_in_group(username, group) for group in self.LDAP_ADMIN_GROUP_NAMES)
+
+    async def admin_login_attempt(self, username: str, password: str) -> bool:  # noqa: ARG002
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor() as pool:
+            result: bool = await loop.run_in_executor(pool, self._is_user_in_admin_group, username)
+            return result
 
 
 # Left this code here, so you can copy-paste this code to your extension and check whether your setup works.
