@@ -3,7 +3,8 @@ import json
 from collections import defaultdict
 from typing import Dict, List, Optional, Set
 
-from pendulum import UTC, DateTime
+from pendulum.datetime import DateTime
+from pendulum.tz.timezone import UTC
 from pytz.tzinfo import BaseTzInfo
 from sqlalchemy.orm import Session as SASession
 
@@ -114,7 +115,7 @@ def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> Per
         uid=person.uid,
         username=person.username,
         email=person.email,
-        img_filename=person.img_filename,
+        img_filename=str(person.image_uid) if person.image_uid is not None else None,
         img_width=person.img_width,
         img_height=person.img_height,
         extra_attributes=parse_extra_attributes(person_uid, extra_attributes_str=person.extra_attributes_json),
@@ -129,7 +130,7 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
     if calendar_db_instance is not None:
         calendar_db_instance.name = calendar.name
         calendar_db_instance.description = calendar.description
-        calendar_db_instance.category = calendar.category
+        calendar_db_instance.category = calendar.category  # type: ignore[assignment]
         calendar_db_instance.order = calendar.order
         calendar_db_instance.icalendar_url = calendar.icalendar_url
         calendar_db_instance.event_prefix = calendar.event_prefix
@@ -144,7 +145,7 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
             icalendar_url=calendar.icalendar_url,
             event_prefix=calendar.event_prefix,
             error_msg=None,
-            last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
+            last_update_utc=datetime.datetime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
             sync=True,
         )
         session.add(calendar_db_instance)

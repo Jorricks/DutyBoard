@@ -1,13 +1,16 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import pytz
-import requests  # type: ignore
+import requests
 from ical_library import client
 from ical_library.help_modules import dt_utils
-from ical_library.ical_components import VCalendar, VEvent
+from ical_library.ical_components.v_calendar import VCalendar
+from ical_library.ical_components.v_event import VEvent
 from ical_library.timeline import Timeline
-from pendulum import DateTime, Duration
+from pendulum.datetime import DateTime
+from pendulum.duration import Duration
+from sqlalchemy import Select, delete, select
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.alchemy.session import create_session
@@ -29,7 +32,7 @@ class ICalPluginMixin:
         """Gets the calendar events for the upcoming 4 weeks."""
         logger.info(f"Loading {icalendar_url}, this might take some time.")
         now = DateTime.now()
-        month_from_now = now + Duration(days=7 * 4)
+        month_from_now = now + Duration(days=7 * 4)  # type: ignore[no-untyped-call]
         calendar_txt: str = self._get_icalendar(icalendar_url=icalendar_url)
         calendar: VCalendar = client.parse_lines_into_calendar(calendar_txt)
         # timeline is ordered by start date.
@@ -48,9 +51,10 @@ class ICalPluginMixin:
         session: SASession
         with create_session() as session:
             if "@" in value:
-                result = session.query(Person).filter(Person.email == value).first()
+                stmt: Select[Tuple[Person]] = select(Person).where(Person.email == value)
             else:
-                result = session.query(Person).filter(Person.username == value).first()
+                stmt = select(Person).where(Person.username == value)
+            result: Optional[Person] = session.scalar(stmt)
             if result:
                 return result.uid
             username = None if "@" in value else value
@@ -60,7 +64,7 @@ class ICalPluginMixin:
                 email=email,
                 img_filename=None,
                 extra_attributes_json=None,
-                last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),  # type: ignore[no-untyped-call]
                 sync=True,
             )
             session.add(person)
@@ -77,7 +81,8 @@ class ICalPluginMixin:
 
     def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:
         items_to_insert: List[OnCallEvent] = []
-        session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
+        stmt = delete(OnCallEvent).where(OnCallEvent.calendar_uid == calendar.uid)
+        session.execute(stmt)
         event: VEvent
         for event in self._get_events_for_upcoming_month(calendar.icalendar_url, calendar.event_prefix or ""):
             # First attempt attendee. If that is not set, we look at the title/summary of the event.

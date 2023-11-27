@@ -1,6 +1,6 @@
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session as SASession
 from sqlalchemy.orm import sessionmaker
 from tzlocal import get_localzone
@@ -20,7 +20,7 @@ def _create_fake_data(session: SASession) -> None:
 def test_get_calendars() -> None:
     with Session.begin() as session:
         _create_fake_data(session)
-        person_uids = [person.uid for person in session.query(Person).all()]
+        person_uids = [person.uid for person in session.scalars(select(Person)).all()]
         queries.get_calendars(
             session=session,
             all_encountered_person_uids=set(person_uids),

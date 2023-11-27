@@ -2,154 +2,68 @@ import io
 import json
 import logging
 import os
-import sys
-from functools import wraps
-from pathlib import Path
 from typing import (
-    Callable,
+    Any,
     ClassVar,
     Dict,
-    Final,
     List,
-    Literal,
     Mapping,
     Optional,
     Tuple,
-    TypeVar,
     Union,
 )
 
-from ldap3 import SUBTREE, Connection, Server
-from ldap3.core import exceptions
 from PIL import Image
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.person import Person
-
-if sys.version_info[:2] >= (3, 10):
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
-
+from duty_board.models.person_image import PersonImage
+from duty_board.plugin.helpers.ldap_helper import LDAPBaseClient
 
 logger = logging.getLogger(__name__)
-P = ParamSpec("P")
-R = TypeVar("R")
-
-
-def ldap_rebind(func: Callable[P, R]):  # type: ignore
-    @wraps(func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:  # type: ignore
-        ldap_instance: LdapBaseClient = args[0]
-        if not isinstance(ldap_instance, LdapBaseClient):
-            raise TypeError(f"Unexpected first argument; {args[0]}.")
-        try:
-            return func(*args, **kwargs)  # type: ignore
-        except (exceptions.LDAPSocketOpenError, exceptions.LDAPSessionTerminatedByServerError):
-            ldap_instance.connection.unbind()
-            ldap_instance.connection.bind()
-            return func(*args, **kwargs)  # type: ignore
-
-    return wrapper
-
-
-class LdapBaseClient:
-    def __init__(  # noqa: PLR0913
-        self,
-        url: str,
-        domain_components: str,
-        user_organizational_unit: str,
-        full_quantified_username: str,
-        password: str,
-        auto_referrals: bool = False,
-    ):
-        self.url: Final[str] = url
-        self.domain_components: Final[str] = domain_components
-        self.user_organizational_unit: Final[str] = user_organizational_unit
-        self.connection = self._create_connection(full_quantified_username, password, auto_referrals=auto_referrals)
-
-    def get_user(self, user_search_term: str) -> Optional[List[Tuple[str, Mapping[str, List[str]]]]]:
-        if "." and "@" in user_search_term:
-            search_filter = f"(mail={user_search_term})"
-        elif "@" in user_search_term:
-            search_filter = f"(uid={user_search_term.split('@')[0]})"
-        else:
-            search_filter = f"(uid={user_search_term})"
-
-        if self.user_organizational_unit:
-            search_base = f"{self.user_organizational_unit},{self.domain_components}"
-        else:
-            search_base = self.domain_components
-        return self._search(search_filter, search_base, "*")
-
-    def _create_connection(self, bind_dn: str, password: str, auto_referrals: bool) -> Connection:
-        try:
-            server = Server(host=self.url)
-            connection = Connection(
-                server=server,
-                user=bind_dn,
-                password=password,
-                auto_referrals=auto_referrals,
-                raise_exceptions=True,
-            )
-            connection.bind()
-        except exceptions.LDAPInvalidServerError as exc:
-            raise exceptions.LDAPException(f"Unable to connect to ldap url: {self.url}.") from exc
-        except exceptions.LDAPInvalidCredentialsResult as exc:
-            raise exceptions.LDAPException(f"Incorrect credentials for ldap url: {self.url}.") from exc
-        except exceptions.LDAPInvalidDNSyntaxResult as exc:
-            raise exceptions.LDAPException(f"Invalid bind user: {bind_dn}.") from exc
-        if not connection.bound:
-            raise exceptions.LDAPException(f"LDAP not bound for url {self.url}")
-        return connection
-
-    @ldap_rebind
-    def _search(
-        self,
-        filter_str: str,
-        base: str,
-        attr_list: Optional[List[str]] = None,
-        scope: Literal["BASE", "LEVEL", "SUBTREE"] = SUBTREE,
-    ) -> Optional[List[Tuple[str, Mapping[str, List[str]]]]]:
-        search_success = self.connection.search(base, filter_str, search_scope=scope, attributes=attr_list)
-        if not search_success or not self.connection.response or not self.connection.response[0]:
-            return None
-        return [(item["dn"], item["attributes"]) for item in self.connection.response]
 
 
 class LDAPPluginMixin:
-    # LDAP settings
+    # Basic LDAP settings
     LDAP_URL: ClassVar[str] = "ldaps://some.ldap.server.com:636"
-    LDAP_DOMAIN_COMPONENTS: ClassVar[str] = "dc=your,dc=com"
-    LDAP_USER_ORGANIZATIONAL_UNIT: ClassVar[str] = "ou=People"
-    # This should be the same as you mention in your Plugin.
-    LOCATION_TO_STORE_PHOTOS: ClassVar[Path] = Path("/tmp/photos")  # noqa: S108
+    LDAP_BASE_DN: ClassVar[str] = "dc=example,dc=com"
+    LDAP_USER_OU: ClassVar[str] = "People"
+    LDAP_GROUP_OU: ClassVar[Optional[str]] = "Group"
+    LDAP_ACCOUNT_ATTRIBUTE: ClassVar[str] = "uid"
+    LDAP_GROUP_ATTRIBUTE: ClassVar[str] = "cn"  # Group would be cn=a_group,ou=Group,dc=example,dc=com
+    # With the above config you'd have:
+    # - Users -> `uid=abc,ou=People,dc=example,dc=com` = f'{ACCOUNT_ATTRIBUTE}=abc,ou={LDAP_USER_OU},{LDAP_BASE_DN}'.
+    # - Groups -> `cn=folks,ou=Group,dc=example,dc=com` = f'{GROUP_ATTRIBUTE}=folks,ou={LDAP_GROUP_OU},{LDAP_BASE_DN}'
 
-    def __init__(self, *args, **kwargs):
-        self.client = LdapBaseClient(
+    # To configure who gets access to the admin interface.
+    # This can either be `"groupOfUniqueNames", "uniquemember"` or `"groupOfNames", `member`
+    LDAP_GROUP_MEMBERSHIP_RELATION: ClassVar[Tuple[str, str]] = "groupOfUniqueNames", "uniquemember"
+    LDAP_ADMIN_GROUP_NAMES: ClassVar[Tuple[str, ...]] = ("admins",)  # cn=a_group,ou=Group,dc=example,dc=com
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        self.client = LDAPBaseClient(
             url=self.LDAP_URL,
-            domain_components=self.LDAP_DOMAIN_COMPONENTS,
-            user_organizational_unit=self.LDAP_USER_ORGANIZATIONAL_UNIT,
+            base_dn=self.LDAP_BASE_DN,
+            user_organizational_unit=self.LDAP_USER_OU,
+            group_organizational_unit=self.LDAP_GROUP_OU,
+            account_attribute=self.LDAP_ACCOUNT_ATTRIBUTE,
+            group_attribute=self.LDAP_GROUP_ATTRIBUTE,
+            ldap_group_membership_relation=self.LDAP_GROUP_MEMBERSHIP_RELATION,
             full_quantified_username=os.environ["LDAP_FULL_QUANTIFIED_USERNAME"],
             password=os.environ["LDAP_PASSWORD"],
             auto_referrals=False,
         )
         super().__init__(*args, **kwargs)
 
-    def _write_image_attribute_to_file(
-        self,
-        person: Person,
+    @staticmethod
+    def _get_jpeg_photo_from_person(
         person_attributes: Mapping[str, Union[str, List[str]]],
-    ) -> Optional[Tuple[str, int, int]]:
+    ) -> Optional[Tuple[bytes, int, int]]:
         if "jpegPhoto" not in person_attributes:
             return None
-
-        filepath = self.LOCATION_TO_STORE_PHOTOS / f"{person.uid}.jpg"
         img_as_b64: bytes = person_attributes["jpegPhoto"][0]  # type: ignore
-        with filepath.open("wb") as file:
-            file.write(img_as_b64)
         image = Image.open(io.BytesIO(img_as_b64))
-        return filepath.name, image.width, image.height
+        return img_as_b64, image.width, image.height
 
     def _extract_user_info(self, username: str) -> Tuple[str, Mapping[str, Union[str, List[str]]]]:
         result = self.client.get_user(username)
@@ -179,16 +93,24 @@ class LDAPPluginMixin:
         }
 
     def sync_person(self, person: Person, session: SASession) -> Person:  # noqa: ARG002
-        dn, attributes = self._extract_user_info(person.username or person.email)
+        filter_string = person.username or person.email
+        if filter_string is None:
+            error_msg = f"It's not allowed to have both {person.username=} and {person.email=} be None."
+            raise ValueError(error_msg)
+        dn, attributes = self._extract_user_info(filter_string)
         person.username = dn.split("=")[1].split(",")[0]  # uid=abc,ou= -> extracts abc
         person.email = attributes["mail"][0]
-        image_result = self._write_image_attribute_to_file(person, attributes)
+        person.extra_attributes_json = json.dumps(self._get_extra_attributes(person.username, attributes))
+
+        image_result = self._get_jpeg_photo_from_person(attributes)
         if image_result:
-            filename, width, height = image_result
-            person.img_filename = filename
+            image_in_bytes, width, height = image_result
+            if person.image is None:
+                person.image = PersonImage(image_in_bytes=image_in_bytes)
+            else:
+                person.image.image_in_bytes = image_in_bytes
             person.img_width = width
             person.img_height = height
-        person.extra_attributes_json = json.dumps(self._get_extra_attributes(person.username, attributes))
         logger.debug(f"Updating references of {person}.")
         return person
 
@@ -196,7 +118,7 @@ class LDAPPluginMixin:
 # Left this code here, so you can copy-paste this code to your extension and check whether your setup works.
 # This requires you to set the `LDAP_FULL_QUANTIFIED_USERNAME` and `LDAP_PASSWORD` environment variables though.
 if __name__ == "__main__":
-    example_person = Person(ldap="some_username")
+    example_person = Person(username="some_username")
     plugin = LDAPPluginMixin()
     from sqlalchemy.orm import create_session
 

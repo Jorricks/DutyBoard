@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from typing import Any, Optional
 
 import pendulum
@@ -7,7 +7,7 @@ from sqlalchemy import DateTime, TypeDecorator
 utc = pendulum.tz.timezone("UTC")
 
 
-class UtcDateTime(TypeDecorator):
+class UtcDateTime(TypeDecorator):  # type: ignore[type-arg]
     """
     Almost equivalent to :class:`~sqlalchemy.types.DateTime` with
     ``timezone=True`` option, but it differs from that by:
@@ -27,16 +27,16 @@ class UtcDateTime(TypeDecorator):
 
     cache_ok = True
 
-    def process_bind_param(self, value: Optional[datetime.datetime], dialect: Any):  # noqa: ARG002
+    def process_bind_param(self, value: Optional[datetime], dialect: Any) -> Optional[datetime]:  # noqa: ARG002
         if value is not None:
-            if not isinstance(value, datetime.datetime):
+            if not isinstance(value, datetime):
                 raise TypeError("expected datetime.datetime, not " + repr(value))
             if value.tzinfo is None:
                 raise ValueError("naive datetime is disallowed")
             return value.astimezone(utc)
         return None
 
-    def process_result_value(self, value: Optional[datetime.datetime], dialect: Any):  # noqa: ARG002
+    def process_result_value(self, value: Optional[datetime], dialect: Any) -> Optional[datetime]:  # noqa: ARG002
         """
         Processes DateTimes from the DB making sure it is always returning UTC. Not using timezone.convert_to_utc as
         that converts to configured TIMEZONE while the DB might be running with some other setting. We assume UTC

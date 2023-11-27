@@ -1,7 +1,7 @@
 import datetime
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import ClassVar, List, Optional
+from typing import Any, ClassVar, List, Optional
 
 from sqlalchemy.orm import Session as SASession
 
@@ -16,8 +16,8 @@ class AbstractPlugin(ABC):
     calendar_update_frequency: ClassVar[datetime.timedelta] = datetime.timedelta(days=1)
     background_color_hex: ClassVar[str] = "#3C9C2D"
     text_color_hex: ClassVar[str] = "white"
-    absolute_path_to_favicon_ico: ClassVar[Optional[Path]] = None
-    absolute_path_to_company_logo_png: ClassVar[Optional[Path]] = None
+    absolute_path_to_favicon_ico: ClassVar[Path] = Path(__file__).resolve().parent / "example" / "favicon.ico"
+    absolute_path_to_company_logo_png: ClassVar[Path] = Path(__file__).resolve().parent / "example" / "example_logo.png"
     # Path on the back-end to the user images folder.
     absolute_path_to_user_images_folder: ClassVar[Optional[Path]] = None
     category_order: ClassVar[List[str]] = []
@@ -36,7 +36,7 @@ class AbstractPlugin(ABC):
         "This is a debug setup. Please disable this announcement in your plugin by overwriting announcements variable.",
     ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
     @abstractmethod

@@ -18,7 +18,7 @@ class _Events(BaseModel):
 class _Calendar(BaseModel):
     uid: str
     name: str
-    description: str
+    description: Optional[str]
     category: str
     order: int
     last_update: str

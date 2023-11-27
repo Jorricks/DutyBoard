@@ -36,6 +36,7 @@ repos:
           - --non-interactive
           - --ignore-missing-imports
           - --scripts-are-modules
+          - --strict
         language: system  # By using system, we ensure we use the venv of the user and thus use all installed packages.
         types:
           - python

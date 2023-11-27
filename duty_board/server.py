@@ -14,7 +14,7 @@ from starlette.responses import FileResponse, HTMLResponse
 from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
 
-from duty_board.alchemy import add_sqladmin, queries, settings
+from duty_board.alchemy import add_sqladmin, queries
 from duty_board.alchemy.session import create_session
 from duty_board.models import generate_fake_data
 from duty_board.plugin.abstract_plugin import AbstractPlugin
@@ -44,7 +44,6 @@ admin: Admin
 CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
 logger.info(f"{CURRENT_DIR=}")
 
-settings.configure_orm()
 plugin = plugin_fetcher.get_plugin()
 app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
@@ -79,7 +78,7 @@ def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
 
 
 @app.get("/schedule", response_model=CurrentSchedule)
-async def get_schedule(timezone: str):
+async def get_schedule(timezone: str) -> CurrentSchedule:
     timezone_object = _parse_timezone_str(timezone)
     config = _get_config_object(timezone_object)
     with create_session() as session:
@@ -97,7 +96,7 @@ async def get_schedule(timezone: str):
 
 
 @app.get("/person", response_model=PersonResponse)
-async def get_person(person_uid: int, timezone: str):
+async def get_person(person_uid: int, timezone: str) -> PersonResponse:
     timezone_object = _parse_timezone_str(timezone)
     with create_session() as session:
         return queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
@@ -108,7 +107,7 @@ async def get_person(person_uid: int, timezone: str):
     response_description="Returns a thumbnail image from a larger image",
     responses={200: {"description": "Company logo", "content": {"image/png": {}}}},
 )
-def company_logo():
+def company_logo() -> FileResponse:
     file_path = plugin.absolute_path_to_company_logo_png
     if file_path.is_file():
         return FileResponse(file_path, media_type="image/png", filename="company_logo.png")
@@ -120,7 +119,7 @@ def company_logo():
     response_description="Returns the favicon",
     responses={200: {"description": "Favicon", "content": {"image/x-icon": {}}}},
 )
-def favicon_ico():
+def favicon_ico() -> FileResponse:
     file_path = plugin.absolute_path_to_favicon_ico
     if file_path.is_file():
         return FileResponse(file_path, media_type="image/x-icon", filename="favicon.ico")
@@ -128,5 +127,5 @@ def favicon_ico():
 
 
 @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
-async def accept_all():
+async def accept_all() -> FileResponse:
     return FileResponse(CURRENT_DIR / "www" / "dist" / "index.html")

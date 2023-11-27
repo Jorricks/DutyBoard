@@ -65,6 +65,7 @@ dev = [
     "pytest >= 6.2.4, < 7.0.0",
     "pytest-cov >= 2.12.0, < 4.0.0",
     "pytype >= 2022.6.30",
+    "sqlalchemy[mypy] >= 2.0.23, < 3.0.0",
     "types-pytz >= 2022.6.0.1",
     "types-tzlocal >= 4.2.2.0",
 ]
@@ -97,7 +98,7 @@ namespaces = false  # to disable scanning PEP 420 namespaces (true by default)
 
 [tool.ruff]
 fix = true
-ignore = ["E501", "TRY003", "ERA001", "N812"]
+ignore = ["E501", "TRY003", "ERA001", "N812", "COM812"]
 line-length = 120
 target-version  = "py38"
 select = [
@@ -141,12 +142,13 @@ max-complexity = 10
 
 [tool.ruff.lint.isort]
 known-first-party = ["duty_board"]
-section-order=["STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+section-order=["future", "standard-library", "third-party", "first-party", "local-folder"]
 
 [tool.mypy]
 python_version = "3.8"
 ignore_missing_imports = "True"
 scripts_are_modules = "True"
+plugins = ["sqlalchemy.ext.mypy.plugin"]
 
 [[tool.mypy.overrides]]
 module = [

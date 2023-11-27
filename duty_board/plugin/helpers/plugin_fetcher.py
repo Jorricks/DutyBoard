@@ -37,7 +37,7 @@ def _get_plugin() -> Optional[AbstractPlugin]:
         raise PluginLoadingError(f"{file_path=} must be a Python file. Please set the plugin correctly.")
     try:
         loader = importlib.machinery.SourceFileLoader(file_path.stem, str(file_path))
-        spec = importlib.util.spec_from_loader(file_path.stem, loader)  # type: ignore
+        spec = importlib.util.spec_from_loader(file_path.stem, loader)
         if spec is None:
             raise PluginLoadingError(f"Unable to import {file_path.stem}.")  # noqa: TRY301
         mod = importlib.util.module_from_spec(spec)

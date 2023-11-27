@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import click
+from click import Context
 
 from duty_board import worker_loop
 
@@ -17,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 
 @cli.command()
-def worker():
+def worker() -> None:
     logger.info("Starting the worker")
     worker_loop.enter_loop()
 
@@ -31,7 +32,7 @@ def worker():
 @click.option("--host", default="0.0.0.0", help="The IP address range to listen for.")  # noqa: S104
 @click.option("--port", default="80", type=int, help="The port to listen for.")
 @click.pass_context
-def webserver(ctx, host: str, port: int):
+def webserver(ctx: Context, host: str, port: int) -> None:
     command = f"uvicorn duty_board.server:app --host {host} --port {port}"
     if ctx.args:
         command += " " + " ".join(ctx.args)

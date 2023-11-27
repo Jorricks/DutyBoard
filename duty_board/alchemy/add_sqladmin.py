@@ -2,14 +2,15 @@ import asyncio
 import os
 import secrets
 import string
-from typing import ClassVar, Dict, Optional
+from typing import Any, ClassVar, Dict, List, Optional
 
 from fastapi import FastAPI
-from pendulum import DateTime
+from pendulum.datetime import DateTime
 from sqladmin import Admin, ModelView
 from sqladmin.authentication import AuthenticationBackend
 from sqladmin.fields import DateTimeField
-from sqlalchemy.orm import session as SASession
+from sqlalchemy import select
+from sqlalchemy.orm import Session as SASession
 from starlette.requests import Request
 from wtforms.fields.core import Field
 
@@ -28,21 +29,21 @@ loop = asyncio.get_event_loop()
 class AppBuilderDateTimeAwareSelector(DateTimeField):
     """This is a DateTimePicker"""
 
-    def process_formdata(self, valuelist):
+    def process_formdata(self, valuelist: List[Any]) -> None:
         """This solves the issue with editing a record. Here the timezone would show up. We don't want that!"""
         super().process_formdata(valuelist)
-        if self.data is not None:
-            self.data = self.data.astimezone(utc)
+        if self.data is not None:  # type: ignore[has-type]
+            self.data = self.data.astimezone(utc)  # type: ignore[has-type]
 
 
-class PersonAdmin(ModelView, model=Person):  # type: ignore
+class PersonAdmin(ModelView, model=Person):
     column_searchable_list = [Person.username, Person.email, Person.sync]
     column_sortable_list = [Person.uid, Person.username, Person.email, Person.last_update_utc, Person.sync]
-    column_list = [Person.uid, Person.username, Person.email, Person.img_filename, Person.last_update_utc, Person.sync]
+    column_list = [Person.uid, Person.username, Person.email, Person.last_update_utc, Person.sync]
     form_overrides: ClassVar[Dict[str, Field]] = {"last_update_utc": AppBuilderDateTimeAwareSelector}
 
 
-class CalendarAdmin(ModelView, model=Calendar):  # type: ignore
+class CalendarAdmin(ModelView, model=Calendar):
     column_searchable_list = [Calendar.uid, Calendar.name, Calendar.sync, Calendar.category]
     column_sortable_list = [
         Calendar.uid,
@@ -70,7 +71,7 @@ class CalendarAdmin(ModelView, model=Calendar):  # type: ignore
     form_include_pk = True
 
 
-class OnCallEventAdmin(ModelView, model=OnCallEvent):  # type: ignore
+class OnCallEventAdmin(ModelView, model=OnCallEvent):
     column_searchable_list = [
         OnCallEvent.calendar_uid,
         OnCallEvent.start_event_utc,
@@ -92,7 +93,7 @@ class OnCallEventAdmin(ModelView, model=OnCallEvent):  # type: ignore
     }
 
 
-class TokenAdmin(ModelView, model=Token):  # type: ignore
+class TokenAdmin(ModelView, model=Token):
     can_create = False
     can_edit = False
     can_delete = True
@@ -101,7 +102,7 @@ class TokenAdmin(ModelView, model=Token):  # type: ignore
 
 def add_sqladmin(app: FastAPI, plugin: AbstractPlugin) -> Admin:
     authentication_backend = MyBackend(plugin=plugin)
-    admin = Admin(app=app, engine=settings.get_engine(), authentication_backend=authentication_backend)
+    admin = Admin(app=app, engine=settings.engine, authentication_backend=authentication_backend)
     admin.add_view(PersonAdmin)
     admin.add_view(CalendarAdmin)
     admin.add_view(OnCallEventAdmin)
@@ -110,7 +111,7 @@ def add_sqladmin(app: FastAPI, plugin: AbstractPlugin) -> Admin:
 
 
 class MyBackend(AuthenticationBackend):
-    def __init__(self, plugin: AbstractPlugin, *_, **__):
+    def __init__(self, plugin: AbstractPlugin, *_: Any, **__: Any):
         super().__init__(secret_key=os.environ["DUTY_BOARD_SECRET_KEY"])
         self.plugin = plugin
 
@@ -118,19 +119,25 @@ class MyBackend(AuthenticationBackend):
     def create_token(username: str) -> str:
         session: SASession
         with create_session() as session:
-            session.query(Token).where(Token.username == username).delete()
-        with create_session() as session:
-            new_token = Token(
-                token="".join(secrets.choice(string.ascii_lowercase) for i in range(50)),
-                username=username,
-                last_update_utc=DateTime.utcnow(),
-            )
-            session.merge(new_token)
-        return new_token.token
+            stmt = select(Token).where(Token.username == username)
+            current_token: Optional[Token] = session.scalar(stmt)
+            if current_token is not None:
+                current_token.token = "".join(secrets.choice(string.ascii_lowercase) for i in range(50))
+                current_token.last_update_utc = DateTime.utcnow()
+            else:
+                current_token = Token(
+                    token="".join(secrets.choice(string.ascii_lowercase) for i in range(50)),
+                    username=username,
+                    last_update_utc=DateTime.utcnow(),
+                )
+                session.merge(current_token)
+        return current_token.token
 
     def verify_token(self, provided_token: str) -> bool:
+        session: SASession
         with create_session() as session:
-            token: Optional[Token] = session.query(Token).filter(Token.token == provided_token).first()
+            stmt = select(Token).where(Token.token == provided_token)
+            token: Optional[Token] = session.scalar(stmt)
             if not token:
                 return False
             if token.last_update_utc < DateTime.utcnow() - self.plugin.admin_session_length:

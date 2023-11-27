@@ -1,15 +1,14 @@
 import logging
 import time
 import traceback
-from typing import Optional
+from typing import Optional, Sequence, Tuple
 
-from pendulum import DateTime
-from sqlalchemy import or_
+from pendulum.datetime import DateTime
+from sqlalchemy import Select, Update, or_, select, update
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Query
 from sqlalchemy.orm import Session as SASession
 
-from duty_board.alchemy import queries, settings
+from duty_board.alchemy import queries
 from duty_board.alchemy.session import create_session
 from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
@@ -22,22 +21,24 @@ logger = logging.getLogger(__name__)
 
 def get_most_outdated_person(plugin: AbstractPlugin, session: SASession) -> Optional[Person]:
     update_persons_with_last_update_before: DateTime = DateTime.utcnow() - plugin.person_update_frequency
-    return (
-        session.query(Person)
+    stmt = (
+        select(Person)
         .where(Person.last_update_utc <= update_persons_with_last_update_before)
         .order_by(Person.last_update_utc)
-        .first()
+        .limit(1)
     )
+    return session.scalar(stmt)
 
 
 def get_most_outdated_calendar(plugin: AbstractPlugin, session: SASession) -> Optional[Calendar]:
     update_calendars_with_last_update_before: DateTime = DateTime.utcnow() - plugin.calendar_update_frequency
-    return (
-        session.query(Calendar)
+    stmt: Select[Tuple[Calendar]] = (
+        select(Calendar)
         .where(Calendar.last_update_utc <= update_calendars_with_last_update_before)
         .order_by(Calendar.last_update_utc)
-        .first()
+        .limit(1)
     )
+    return session.scalar(stmt)
 
 
 def ensure_person_uniqueness(new_person: Person) -> Person:
@@ -46,26 +47,30 @@ def ensure_person_uniqueness(new_person: Person) -> Person:
     If there is a new person object with the same username and email, we wipe the old person object and replace the
     UIDS. This requires to be done in a separate session to prevent duplicate key issues.
     """
+    extra_session: SASession
     with create_session() as extra_session:
         # Required to expunge, otherwise the commit will also update new_person and will raise a DuplicateKeyIndexError.
         extra_session.expunge(new_person)
-        query: Query = extra_session.query(Person).filter(Person.uid != new_person.uid)
+        query: Select[Tuple[Person]] = select(Person).where(Person.uid != new_person.uid)
         if new_person.username and new_person.email:
-            query = query.filter(or_(Person.username == new_person.username, Person.email == new_person.email))
+            query = query.where(or_(Person.username == new_person.username, Person.email == new_person.email))
         elif new_person.username:
-            query = query.filter(Person.username == new_person.username)
+            query = query.where(Person.username == new_person.username)
         elif new_person.email:
-            query = query.filter(Person.email == new_person.email)
+            query = query.where(Person.email == new_person.email)
         else:
             raise ValueError(f"{new_person.uid=} has both {new_person.username=} and {new_person.email=} as None.")
 
-        result = query.all()
+        result: Sequence[Person] = extra_session.scalars(query).all()
         logger.debug(f"Found {len(result)=}, {result=}.")
 
         for same_person in result:
             logger.info(f"Updating all references of {same_person.uid=} to {new_person.uid=} in OnCallEvents table.")
-            new_values = {"person_uid": new_person.uid}
-            extra_session.query(OnCallEvent).filter(OnCallEvent.person_uid == same_person.uid).update(new_values)
+            # Does this need to be executed somehow?
+            stmt: Update = (
+                update(OnCallEvent).where(OnCallEvent.person_uid == same_person.uid).values(person_uid=new_person.uid)
+            )
+            extra_session.execute(stmt)
             logger.warning(f"Deleting {same_person.uid=} {same_person=} in favor of {new_person.uid=} {new_person=}.")
             extra_session.delete(same_person)
             extra_session.commit()
@@ -125,7 +130,6 @@ def update_all_outdated_calendars(plugin: AbstractPlugin) -> None:
 
 
 def enter_loop() -> None:
-    settings.configure_orm()
     plugin: AbstractPlugin = plugin_fetcher.get_plugin()
 
     logger.info("Updating plugin calendars in the database.")

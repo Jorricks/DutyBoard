@@ -3,7 +3,8 @@ import random
 from datetime import timedelta
 from typing import List
 
-from pendulum import DateTime
+from pendulum.datetime import DateTime
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.calendar import Calendar
@@ -123,10 +124,10 @@ def create_on_call_events(person_uids: List[int], session: SASession) -> None:
 
 
 def create_fake_database_rows_if_not_present(session: SASession) -> None:
-    if session.query(Calendar).count() < 3:
+    if session.query(func.count(Calendar.uid)).scalar() < 3:
         create_calendars(session)
-    if session.query(Person).count() < 2:
+    if session.query(func.count(Person.uid)).scalar() < 2:
         create_persons(session)
-    person_uids = [uid[0] for uid in session.query(Person).with_entities(Person.uid)]
-    if session.query(OnCallEvent).count() < 5:
+    person_uids = [person.uid for person in session.scalars(select(Person)).all()]
+    if session.query(func.count(OnCallEvent.uid)).scalar() < 5:
         create_on_call_events(person_uids, session)

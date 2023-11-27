@@ -1,22 +1,44 @@
-from sqlalchemy import Boolean, Column, Index, Integer, String
+from typing import TYPE_CHECKING, Optional
+
+from pendulum.datetime import DateTime
+from sqlalchemy import ForeignKey, String, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from duty_board.alchemy.settings import Base
 from duty_board.alchemy.sqlalchemy_types import UtcDateTime
 
+if TYPE_CHECKING:
+    from duty_board.models.person_image import PersonImage
+
 
 class Person(Base):
-    __table_args__ = (Index("person_last_update_utc", "last_update_utc"),)
+    __table_args__ = (UniqueConstraint("parent_id"),)  # To make sure it remains a one-to-one.
     __tablename__ = "person"
-    uid = Column(Integer, primary_key=True, autoincrement=True, unique=True)
-    username = Column(String(50), nullable=True, unique=True)
-    email = Column(String(50), nullable=True, unique=True)
-    img_filename = Column(String(100), nullable=True)
-    img_width = Column(Integer, nullable=True)
-    img_height = Column(Integer, nullable=True)
-    extra_attributes_json = Column(String(100000), nullable=True, comment="Extra attributes represented as a json.")
-    error_msg = Column(String(9999), nullable=True, comment="If any, the error of the latest sync attempt.")
-    last_update_utc = Column(UtcDateTime(), nullable=False)
-    sync = Column(Boolean(), default=True, nullable=False)
+    uid: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
+    username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, unique=True)
+    email: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, unique=True)
+
+    image_uid: Mapped[Optional[int]] = mapped_column(ForeignKey("person_image.uid"), nullable=True)
+    image: Mapped[Optional["PersonImage"]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan",
+        single_parent=True,  # delete orphans :)
+    )
+
+    img_width: Mapped[Optional[int]]
+    img_height: Mapped[Optional[int]]
+    extra_attributes_json: Mapped[Optional[str]] = mapped_column(
+        String(100000),
+        nullable=True,
+        comment="Extra attributes represented as a json.",
+    )
+    error_msg: Mapped[Optional[str]] = mapped_column(
+        String(9999),
+        nullable=True,
+        comment="If any, the error of the latest sync attempt.",
+    )
+    last_update_utc: Mapped[DateTime] = mapped_column(UtcDateTime(), nullable=False)
+    sync: Mapped[bool] = mapped_column(default=True)
 
     def __repr__(self) -> str:
         return f"Person(username='{self.username}', email='{self.email}')"
