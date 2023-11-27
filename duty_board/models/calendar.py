@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from pendulum.datetime import DateTime
-from sqlalchemy import Index, String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from duty_board.alchemy.settings import Base
@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 
 class Calendar(Base):
-    __table_args__ = (Index("calendar_last_update_utc", "last_update_utc"),)
     __tablename__ = "calendar"
     uid: Mapped[str] = mapped_column(String(50), primary_key=True, nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)

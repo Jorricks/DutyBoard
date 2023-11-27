@@ -61,6 +61,19 @@ uniquemember: uid=henk,ou=People,dc=DutyBoard,dc=com
 
 # Admin interface restriction
 dn: cn=admin-interface,ou=Groups,dc=DutyBoard,dc=com
-cn: readers
+cn: admin-interface
 objectClass: groupOfNames
 member: uid=jan,ou=People,dc=DutyBoard,dc=com
+
+# Also a groupofUniqueNames
+dn: cn=admin-unique-interface,ou=Groups,dc=DutyBoard,dc=com
+cn: admin-unique-interface
+objectClass: groupOfUniqueNames
+uniquemember: uid=jan,ou=People,dc=DutyBoard,dc=com
+
+# Group with another group as member :O
+dn: cn=recursive-group,ou=Groups,dc=DutyBoard,dc=com
+cn: recursive-group
+objectClass: groupOfUniqueNames
+uniquemember: uid=henk,ou=People,dc=DutyBoard,dc=com
+uniquemember: cn=admin-unique-interface,ou=Groups,dc=DutyBoard,dc=com

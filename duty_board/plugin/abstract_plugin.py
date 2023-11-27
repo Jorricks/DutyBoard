@@ -18,8 +18,6 @@ class AbstractPlugin(ABC):
     text_color_hex: ClassVar[str] = "white"
     absolute_path_to_favicon_ico: ClassVar[Path] = Path(__file__).resolve().parent / "example" / "favicon.ico"
     absolute_path_to_company_logo_png: ClassVar[Path] = Path(__file__).resolve().parent / "example" / "example_logo.png"
-    # Path on the back-end to the user images folder.
-    absolute_path_to_user_images_folder: ClassVar[Optional[Path]] = None
     category_order: ClassVar[List[str]] = []
     duty_calendar_configurations: ClassVar[List[DutyCalendarConfig]] = []
     enable_admin_button: ClassVar[bool] = False

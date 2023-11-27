@@ -47,7 +47,7 @@ logger.info(f"{CURRENT_DIR=}")
 plugin = plugin_fetcher.get_plugin()
 app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
-app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
+# @ToDo(jorrick) Implement person image setup
 admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
 
 if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":

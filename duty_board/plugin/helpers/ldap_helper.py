@@ -78,7 +78,7 @@ class LDAPGroupSearch(BaseModel):
 
     @property
     def search_filter(self) -> str:
-        return f"(&(ObjectClass={self.ldap_group_membership_relation[0]}){self.group_attribute}={self.name})"
+        return f"(&(ObjectClass={self.ldap_group_membership_relation[0]})({self.group_attribute}={self.name}))"
 
     @property
     def group_dn(self) -> str:
@@ -184,11 +184,9 @@ class LDAPBaseClient:
             attr_list=[self.ldap_group_membership_relation[1]],
         )
         if (not search_result) and (not self.is_existing_group(group_name)):
-            raise LdapGroupDoesNotExistError(
-                f"The group {group_name} does not exist as {group_search.dn} on Adyen LDAP.",
-            )
+            raise LdapGroupDoesNotExistError(f"The group {group_name} does not exist as {group_search.dn} on LDAP.")
 
-        dn_list: List[str] = search_result[0][1][self.ldap_group_membership_relation[1]]  # e.g. "uniqueMember"
+        dn_list: List[str] = search_result[0][1][self.ldap_group_membership_relation[1]]  # e.g. "uniquemember"
         user_list: List[str] = []
         group_list: List[str] = []
         for dn in dn_list:
@@ -236,10 +234,11 @@ class LDAPBaseClient:
         all_users: Set[str] = set()
         groups_seen = groups_seen or set()
         users, groups = self._get_group_members(group_name)
-        all_users.update(users)
+        all_users.update([user.split(",")[0].split("=")[1] for user in users])  # uid=jorrick,dc... -> jorrick
         for group in groups:
-            if group not in groups_seen:
-                all_users.update(self.get_group_users_recursively(group, {*groups_seen, group}))
+            group_name = group.split(",")[0].split("=")[1]
+            if group_name not in groups_seen:
+                all_users.update(self.get_group_users_recursively(group_name, {*groups_seen, group_name}))
         return sorted(all_users)
 
     def is_user_in_group(self, username: str, group_name: str) -> bool:

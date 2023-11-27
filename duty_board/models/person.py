@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from pendulum.datetime import DateTime
 from sqlalchemy import ForeignKey, String, UniqueConstraint
@@ -6,20 +6,18 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from duty_board.alchemy.settings import Base
 from duty_board.alchemy.sqlalchemy_types import UtcDateTime
-
-if TYPE_CHECKING:
-    from duty_board.models.person_image import PersonImage
+from duty_board.models.person_image import PersonImage
 
 
 class Person(Base):
-    __table_args__ = (UniqueConstraint("parent_id"),)  # To make sure it remains a one-to-one.
+    __table_args__ = (UniqueConstraint("image_uid", name="unique_image_uid"),)  # To make sure it remains a one-to-one.
     __tablename__ = "person"
     uid: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
     username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, unique=True)
     email: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, unique=True)
 
     image_uid: Mapped[Optional[int]] = mapped_column(ForeignKey("person_image.uid"), nullable=True)
-    image: Mapped[Optional["PersonImage"]] = relationship(
+    image: Mapped[Optional[PersonImage]] = relationship(
         back_populates="person",
         cascade="all, delete-orphan",
         single_parent=True,  # delete orphans :)

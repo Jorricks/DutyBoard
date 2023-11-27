@@ -44,11 +44,12 @@ DutyBoard runs using:
 - [iCal-library](https://jorricks.github.io/iCal-library/) for it's integration with iCalendars.
 
 ## Plugin structure
-More on this later once it's fully deployed.
+DutyBoard comes with a flexible plugin structure. You create a Python file like `plugin/example/example_plugin.py` in your container. Then simply set `DUTY_BOARD_PLUGIN_LOCATION` to that file, and DutyBoard will automatically load everything according to your specification.
+
+The example plugin comes with:
+- iCalendar support to figure out who is on Duty.
+- LDAP integration to enrich the information of who is on Duty.
+- Customization options to modify the front-end according to your companies style.
 
 ## Why this project?
 Larger corporations often have many Duty schedules. This is often to shield team members from ad-hoc work during their work-week or to ensure the platform runs smoothly 24/7. However, exposing Duty schedules is easy at the start, but once you have three schedules, it becomes unclear who is on duty. Hence, a small front-end usually solves this, but that require manual intervention when the schedule changes. This projects aims to solve that by automatically fetching who is on duty from iCalendars
-
-## Ideas for additional features
-- Implement announcement calendar.
-- Implement extra plugin sync functionality, e.g. Workday integration.

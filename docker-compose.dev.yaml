@@ -55,7 +55,7 @@ services:
 # or;
 # ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=readers)" member
 # And for groupOfUniqueNames
-# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=uniqueReaders)" uniqueMember
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=uniqueReaders)" uniquemember
 
   openldap:
     image: docker.io/bitnami/openldap:2.6
