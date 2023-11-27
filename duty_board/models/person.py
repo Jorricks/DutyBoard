@@ -12,7 +12,8 @@ from duty_board.models.person_image import PersonImage
 class Person(Base):
     __table_args__ = (
         UniqueConstraint("image_uid", name="unique_image_uid"),  # To make sure it remains a one-to-one.
-        CheckConstraint("NOT(username IS NULL AND email IS NULL)", name="person_double_null"),
+        UniqueConstraint("username", "email", name="username_email_unique"),
+        CheckConstraint("NOT(username IS NULL AND email IS NULL)", name="user_email_not_both_none"),
     )  # To make sure it remains a one-to-one.
     __tablename__ = "person"
     uid: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
