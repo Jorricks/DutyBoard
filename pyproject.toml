@@ -160,3 +160,8 @@ module = [
     "tzlocal"
 ]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+omit = [
+    "duty_board/web_helpers/generate_typescript_api.py"
+]
