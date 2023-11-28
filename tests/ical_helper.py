@@ -2,9 +2,9 @@ import random
 import string
 from datetime import timedelta
 from pathlib import Path
-from typing import Optional, Iterable, Tuple, Union
+from typing import Iterable, Optional, Tuple, Union
 
-from pendulum import DateTime
+from pendulum.datetime import DateTime
 
 
 def _get_icalender_event(
@@ -12,7 +12,7 @@ def _get_icalender_event(
     email: Optional[str],
     delta_start: Union[timedelta, DateTime],
     delta_end: timedelta,
-    relative_to: Optional[DateTime]
+    relative_to: Optional[DateTime],
 ) -> str:
     start = ((relative_to or DateTime.now()) + delta_start) if isinstance(delta_start, timedelta) else delta_start
     end = start + delta_end
@@ -69,7 +69,7 @@ def run_file_creation() -> None:
         )
     )
 
-    print(f"Created the 2 icalendar files.")
+    print("Created the 2 icalendar files.")
 
 
 if __name__ == "__main__":

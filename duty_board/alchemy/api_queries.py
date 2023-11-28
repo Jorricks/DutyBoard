@@ -1,7 +1,7 @@
 import datetime
 import json
 from collections import defaultdict
-from typing import Dict, List, Optional, Set, Iterable
+from typing import Dict, Iterable, List, Optional, Set
 
 from pendulum.datetime import DateTime
 from pytz.tzinfo import BaseTzInfo

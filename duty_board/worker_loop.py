@@ -75,9 +75,9 @@ def ensure_person_uniqueness(new_person: Person) -> Person:
 
 
 def update_the_most_outdated_person(plugin: AbstractPlugin) -> None:
-    person: Optional[Person] = None
     try:
         with create_session() as session:
+            person: Optional[Person]
             if (person := get_most_outdated_person(plugin=plugin, session=session)) is None:
                 logger.debug("Nothing to update here :).")
                 time.sleep(1)  # Avoid overload on the database.
@@ -95,15 +95,15 @@ def update_the_most_outdated_person(plugin: AbstractPlugin) -> None:
             finally:
                 person.last_update_utc = DateTime.utcnow()
                 session.merge(person)
+        logger.info("Successfully updated the state of the person in the database.")
     except Exception:
-        logger.exception(f"Failed to update {person=} in the database? Maybe there is some database error?")
-    logger.info(f"Successfully updated the state of {person=}.")
+        logger.exception("Failed to update a person in the database. There is probably some database error.")
 
 
 def update_the_most_outdated_calendar(plugin: AbstractPlugin) -> None:
-    calendar: Optional[Calendar] = None
     try:
         with create_session() as session:
+            calendar: Optional[Calendar]
             if (calendar := get_most_outdated_calendar(plugin=plugin, session=session)) is None:
                 logger.debug("Nothing to update here :).")
                 time.sleep(1)  # Avoid overload on the database.
@@ -120,9 +120,9 @@ def update_the_most_outdated_calendar(plugin: AbstractPlugin) -> None:
             finally:
                 calendar.last_update_utc = DateTime.utcnow()
                 session.merge(calendar)
+        logger.info("Successfully updated the state of the calendar in the database.")
     except Exception:
-        logger.exception(f"Failed to update {calendar} in the database? Maybe there is some database error?")
-    logger.info(f"Successfully updated the state of {calendar=}.")
+        logger.exception("Failed to update some calendar in the database. There is probably some database error.")
 
 
 def enter_calendar_refresher_loop(plugin: AbstractPlugin) -> None:

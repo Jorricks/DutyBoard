@@ -38,7 +38,7 @@ def test_get_schedule() -> None:
     assert result_json["calendars"][0]["category"] == "Big Data"
     assert result_json["calendars"][0]["order"] == 1
     assert result_json["calendars"][0]["error_msg"] == ""
-    assert result_json["calendars"][0]["sync"] == False
+    assert result_json["calendars"][0]["sync"] is False
     assert len(result_json["calendars"][0]["events"]) == 4
     assert result_json["calendars"][0]["events"][0]["start_event"] == "2023-11-28 12:46:06 CET"
     assert result_json["calendars"][0]["events"][0]["end_event"] == "2023-11-29 12:46:06 CET"
@@ -71,9 +71,9 @@ def test_get_person() -> None:
     assert result_json["uid"] == person.uid
     assert result_json["username"] == "bart"
     assert result_json["email"] == "bart@gmail.com"
-    assert result_json["img_filename"] == None
-    assert result_json["img_width"] == None
-    assert result_json["img_height"] == None
+    assert result_json["img_filename"] is None
+    assert result_json["img_width"] is None
+    assert result_json["img_height"] is None
     assert result_json["extra_attributes"] == [
         {
             "information": "Send Mattermost message",
@@ -84,11 +84,11 @@ def test_get_person() -> None:
     ]
     assert result_json["last_update"] == "2023-11-28 12:46:06 CET"
     assert result_json["error_msg"] == ""
-    assert result_json["sync"] == False
+    assert result_json["sync"] is False
 
 
 @pytest.mark.usefixtures("_wipe_database")
-def test_empty_persons_table():
+def test_empty_persons_table() -> None:
     client = TestClient(app)
     with pytest.raises(ValueError, match="Invalid person_uid=0 passed."):
         client.get("/person", params={"person_uid": 0, "timezone": "Europe/Amsterdam"})

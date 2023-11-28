@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import List
 
-from pendulum import DateTime
+from pendulum.datetime import DateTime
 from sqlalchemy import delete, select
 from sqlalchemy.orm.session import Session as SASession
 
@@ -29,7 +29,7 @@ def test_sync_duty_calendar_configurations_to_postgres(set_up_persons: List[Pers
     with create_session() as session:
         all_calendars: List[Calendar] = list(session.scalars(select(Calendar)).all())
         assert len(all_calendars) == 3
-        assert set(c.uid for c in all_calendars) == {"data_platform_duty", "infrastructure_duty", "machine_learning"}
+        assert {c.uid for c in all_calendars} == {"data_platform_duty", "infrastructure_duty", "machine_learning"}
         assert len(list(session.scalars(select(Person)).all())) == 2
 
     # Now we add some events.
@@ -74,9 +74,9 @@ def test_sync_duty_calendar_configurations_to_postgres(set_up_persons: List[Pers
 
     # Now we verify that the events were deleted, persons were kept, and calendars table was updated as expected.
     with create_session() as session:
-        all_calendars: List[Calendar] = list(session.scalars(select(Calendar)).all())
+        all_calendars = list(session.scalars(select(Calendar)).all())
         assert len(all_calendars) == 2
-        assert set(c.uid for c in all_calendars) == {"data_platform_duty", "infrastructure_duty_refreshed"}
+        assert {c.uid for c in all_calendars} == {"data_platform_duty", "infrastructure_duty_refreshed"}
         assert len(list(session.scalars(select(Person)).all())) == 2
         assert len(list(session.scalars(select(OnCallEvent)))) == 2
 

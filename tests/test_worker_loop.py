@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 import pytest
 import requests_mock
-from pendulum import DateTime
-from pendulum.tz.timezone import UTC, Timezone
+from pendulum.datetime import DateTime
+from pendulum.tz.timezone import UTC
 from sqlalchemy import select
 from sqlalchemy.orm.session import Session as SASession
 
@@ -29,7 +29,6 @@ def test_update_the_most_outdated_person() -> None:
             )
         # First run is when there is nothing to update yet :)
         worker_loop.update_the_most_outdated_person(example_plugin)
-
 
     # Ingest the Persons & OnCallEvents
     with create_session() as session:

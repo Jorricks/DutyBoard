@@ -1,8 +1,8 @@
 import datetime
 from typing import List
 
-from pendulum import UTC
-from sqlalchemy import select, delete
+from pendulum.tz.timezone import UTC
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.calendar import Calendar

@@ -23,6 +23,7 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             icalendar_url="http://ical_server:8002/icalendar1.ics",
             category="Big Data",
             order=1,
+            event_prefix=None,
         ),
         DutyCalendarConfig(
             uid="infrastructure_duty",
@@ -33,6 +34,7 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             icalendar_url="http://ical_server:8002/icalendar2.ics",
             category="Infrastructure",
             order=2,
+            event_prefix=None,
         ),
         DutyCalendarConfig(
             uid="machine_learning",
@@ -41,5 +43,6 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             icalendar_url="http://ical_server:8002/icalendar3.ics",
             category="Big Data",
             order=3,
+            event_prefix=None,
         ),
     ]

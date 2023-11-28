@@ -1,17 +1,16 @@
 import json
 import random
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List
 
-from pendulum.datetime import DateTime
-from pendulum.tz.timezone import Timezone
+from pendulum.tz.timezone import UTC
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
 
-UPDATE_TIME = DateTime(2023, 11, 28, 11, 46, 6, 0, tzinfo=Timezone("UTC"))
+UPDATE_TIME = datetime(2023, 11, 28, 11, 46, 6, 0, tzinfo=UTC)
 
 
 def create_calendars(session: SASession) -> List[Calendar]:
@@ -109,25 +108,25 @@ def create_on_call_events(calendars: List[Calendar], persons: List[Person], sess
             calendar=calendar,
             start_event_utc=UPDATE_TIME,
             end_event_utc=UPDATE_TIME + timedelta(days=1),
-            person=random.choice(persons),
+            person=random.choice(persons),  # noqa: S311
         )
         nr_2 = OnCallEvent(
             calendar=calendar,
             start_event_utc=UPDATE_TIME + timedelta(days=1),
             end_event_utc=UPDATE_TIME + timedelta(days=2),
-            person=random.choice(persons),
+            person=random.choice(persons),  # noqa: S311
         )
         nr_3 = OnCallEvent(
             calendar=calendar,
             start_event_utc=UPDATE_TIME + timedelta(days=2),
             end_event_utc=UPDATE_TIME + timedelta(days=4),
-            person=random.choice(persons),
+            person=random.choice(persons),  # noqa: S311
         )
         nr_4 = OnCallEvent(
             calendar=calendar,
             start_event_utc=UPDATE_TIME + timedelta(days=4),
             end_event_utc=UPDATE_TIME + timedelta(days=5),
-            person=random.choice(persons),
+            person=random.choice(persons),  # noqa: S311
         )
         items_to_add.extend([nr_1, nr_2, nr_3, nr_4])
     session.add_all(items_to_add)

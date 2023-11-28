@@ -1,5 +1,7 @@
 import json
 import os
+import shutil
+import subprocess
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
@@ -22,6 +24,14 @@ from tests import generate_fake_data
 
 os.environ["LDAP_FULL_QUANTIFIED_USERNAME"] = "cn=admin,dc=DutyBoard,dc=com"
 os.environ["LDAP_PASSWORD"] = "adminpassword"  # noqa: S105
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _auto_kill_docker_refreshers() -> None:
+    # We kill the docker containers that would automatically refresh stuff in the background.
+    containers_to_kill: List[str] = ["duty_worker_calendar", "duty_worker_persons"]
+    if docker_path := shutil.which("docker"):
+        subprocess.run([docker_path, "stop", *containers_to_kill])  # noqa: PLW1510, S603
 
 
 @contextmanager

@@ -34,7 +34,7 @@ def update_calendars() -> None:
         update_duty_calendars.sync_duty_calendar_configurations_to_postgres(
             session=session, duty_calendar_configurations=plugin.duty_calendar_configurations
         )
-    logger.info(f"Updated the calendars you want to track.")
+    logger.info("Updated the calendars you want to track.")
 
 
 @cli.command()
