@@ -32,7 +32,8 @@ class LDAPPluginMixin:
     LDAP_USER_OU: ClassVar[str] = "People"
     LDAP_GROUP_OU: ClassVar[Optional[str]] = "Groups"
     LDAP_ACCOUNT_ATTRIBUTE: ClassVar[str] = "uid"
-    LDAP_GROUP_ATTRIBUTE: ClassVar[str] = "cn"  # Group would be cn=a_group,ou=Group,dc=example,dc=com
+    LDAP_GROUP_ATTRIBUTE: ClassVar[str] = "cn"
+    # Group would be cn=a_group,ou=Group,dc=example,dc=com
     # With the above config you'd have:
     # - Users -> `uid=abc,ou=People,dc=example,dc=com` = f'{ACCOUNT_ATTRIBUTE}=abc,ou={LDAP_USER_OU},{LDAP_BASE_DN}'.
     # - Groups -> `cn=folks,ou=Group,dc=example,dc=com` = f'{GROUP_ATTRIBUTE}=folks,ou={LDAP_GROUP_OU},{LDAP_BASE_DN}'

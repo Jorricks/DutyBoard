@@ -20,7 +20,7 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             description="If you have any issues with Spark, Airflow or Jupyterhub, contact these guys. "
             "They are available 24/7, however, they work in AMS hours. Only call them if there is an "
             "emergency.",
-            icalendar_url="http://127.0.0.1:8002/icalendar1.ics",
+            icalendar_url="http://ical_server:8002/icalendar1.ics",
             category="Big Data",
             order=1,
         ),
@@ -30,7 +30,7 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             description="If you have any issues with Firewalls or critical tools such as Yarn, HDFS etc."
             "However, usually Data Platform Duty is your first point of contact for application "
             "issues.",
-            icalendar_url="http://127.0.0.1:8002/icalendar2.ics",
+            icalendar_url="http://ical_server:8002/icalendar2.ics",
             category="Infrastructure",
             order=2,
         ),
@@ -38,7 +38,7 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             uid="machine_learning",
             name="Machine learning",
             description="Do you have any issues with your machine learning tools? Ask these guys.",
-            icalendar_url="http://127.0.0.1:8002/icalendar3.ics",
+            icalendar_url="http://ical_server:8002/icalendar3.ics",
             category="Big Data",
             order=3,
         ),

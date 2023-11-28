@@ -10,7 +10,7 @@ services:
       timeout: 60s
       retries: 5
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
     volumes:
@@ -20,7 +20,7 @@ services:
     container_name: duty_frontend
     image: registry.hub.docker.com/library/node:18-slim
     ports:
-      - 8080:8080
+      - "8080:8080"
     environment:
       - NODE_ENV=development
     volumes:
@@ -36,13 +36,12 @@ services:
     build:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
-    links:
-      - "postgres:database_container"
     environment:
       - NODE_ENV=development
-      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5432/postgres
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
-      - LDAP_FULL_QUANTIFIED_USERNAME=admin
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
       - LDAP_PASSWORD=adminpassword
     volumes:
       - ../:/code
@@ -60,14 +59,13 @@ services:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
     ports:
-      - 8000:8000
-    links:
-      - "postgres:database_container"
+      - "8000:8000"
     environment:
       - NODE_ENV=development
-      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5432/postgres
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
-      - LDAP_FULL_QUANTIFIED_USERNAME=admin
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
       - LDAP_PASSWORD=adminpassword
     volumes:
       - ../:/code
@@ -84,13 +82,12 @@ services:
     build:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
-    links:
-      - "postgres:database_container"
     environment:
       - NODE_ENV=development
-      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5432/postgres
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
-      - LDAP_FULL_QUANTIFIED_USERNAME=admin
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
       - LDAP_PASSWORD=adminpassword
     volumes:
       - ../:/code
@@ -107,13 +104,12 @@ services:
     build:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
-    links:
-      - "postgres:database_container"
     environment:
       - NODE_ENV=development
-      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5432/postgres
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
-      - LDAP_FULL_QUANTIFIED_USERNAME=admin
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
       - LDAP_PASSWORD=adminpassword
     volumes:
       - ../:/code
@@ -126,7 +122,7 @@ services:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
     ports:
-      - 8002:8002
+      - "8002:8002"
     volumes:
       - ../:/code
     working_dir: /code
@@ -156,3 +152,7 @@ services:
 # ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=readers)" member
 # And for groupOfUniqueNames
 # ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=uniqueReaders)" uniquemember
+
+networks:
+  docker_network:
+    driver: bridge
