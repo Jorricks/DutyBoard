@@ -13,8 +13,6 @@ from duty_board.models.person import Person
 from duty_board.plugin.abstract_plugin import AbstractPlugin
 from tests.conftest import get_loaded_ldap_plugin
 
-# @ToDo(jorrick) make sure to test for the foreignkey issue
-
 
 def test_sync_duty_calendar_configurations_to_postgres(set_up_persons: List[Person]) -> None:
     session: SASession

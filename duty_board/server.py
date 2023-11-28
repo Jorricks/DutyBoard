@@ -8,13 +8,16 @@ from fastapi import FastAPI, HTTPException
 from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
 from sqladmin import Admin
+from sqlalchemy import select
+from sqlalchemy.orm.session import Session as SASession
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import FileResponse, HTMLResponse
+from starlette.responses import FileResponse, HTMLResponse, Response
 from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
 
 from duty_board.alchemy import add_sqladmin, api_queries
 from duty_board.alchemy.session import create_session
+from duty_board.models.person_image import PersonImage
 from duty_board.plugin.abstract_plugin import AbstractPlugin
 from duty_board.plugin.helpers import plugin_fetcher
 from duty_board.web_helpers.gzip_static_files import GZIPStaticFiles
@@ -46,7 +49,6 @@ plugin = plugin_fetcher.get_plugin()
 app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
 # @ToDo(jorrick) Implement person image setup
-# @ToDo(jorrick) Implement actual trial run of data
 admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
 
 
@@ -95,6 +97,14 @@ async def get_person(person_uid: int, timezone: str) -> PersonResponse:
     timezone_object = _parse_timezone_str(timezone)
     with create_session() as session:
         return api_queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
+
+
+@app.get("/person_img/{person_uid:int}", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
+async def get_person_image(person_uid: int) -> Response:
+    session: SASession
+    with create_session() as session:
+        person_image: PersonImage = session.scalars(select(PersonImage).where(PersonImage.uid == person_uid)).one()
+        return Response(content=person_image.image_in_bytes, media_type="image/jpeg")
 
 
 @app.get(

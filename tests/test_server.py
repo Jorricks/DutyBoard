@@ -1,10 +1,14 @@
+from pathlib import Path
+
 import pytest
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm.session import Session as SASession
 from starlette.testclient import TestClient
 
 from duty_board.alchemy.session import create_session
 from duty_board.models.person import Person
+from duty_board.models.person_image import PersonImage
 from duty_board.server import app
 
 
@@ -94,4 +98,19 @@ def test_empty_persons_table() -> None:
         client.get("/person", params={"person_uid": 0, "timezone": "Europe/Amsterdam"})
 
 
-# @ToDo(jorrick) Add tests for the GZIP Static files. Not sure if we can do that though?
+@pytest.mark.usefixtures("_wipe_database")
+def test_get_person_image() -> None:
+    client = TestClient(app)
+    session: SASession
+    with create_session() as session:
+        person_image = PersonImage(
+            image_in_bytes=(Path(__file__).parent / "data" / "openldap_ldifs" / "jan.jpeg").read_bytes()
+        )
+        session.add(person_image)
+
+    with pytest.raises(NoResultFound, match="No row was found when one was required"):
+        client.get("/person_img/999999999")
+
+    response = client.get(f"/person_img/{person_image.uid}")
+    assert response.headers["content-type"] == "image/jpeg"
+    assert response.content == person_image.image_in_bytes

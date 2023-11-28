@@ -5,7 +5,6 @@ import pytest
 from duty_board.alchemy import api_queries
 
 
-# @ToDo(jorrick) Add tests for the missing lines in API Queries.
 def test_parse_extra_attributes() -> None:
     assert api_queries.parse_extra_attributes(0, None) == []
 

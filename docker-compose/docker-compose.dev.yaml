@@ -37,7 +37,6 @@ services:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
     environment:
-      - NODE_ENV=development
       - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
       - LDAP_URL=ldap://openldap:1389
@@ -61,7 +60,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - NODE_ENV=development
       - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
       - LDAP_URL=ldap://openldap:1389
@@ -83,7 +81,6 @@ services:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
     environment:
-      - NODE_ENV=development
       - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
       - LDAP_URL=ldap://openldap:1389
@@ -105,7 +102,6 @@ services:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
     environment:
-      - NODE_ENV=development
       - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
       - LDAP_URL=ldap://openldap:1389
