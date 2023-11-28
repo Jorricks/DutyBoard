@@ -37,7 +37,7 @@ def _get_plugin() -> Optional[AbstractPlugin]:
         raise PluginLoadingError(f"{file_path=} must be a Python file. Please set the plugin correctly.")
     try:
         loader = importlib.machinery.SourceFileLoader(file_path.stem, str(file_path))
-        spec = importlib.util.spec_from_loader(file_path.stem, loader)  # type: ignore
+        spec = importlib.util.spec_from_loader(file_path.stem, loader)
         if spec is None:
             raise PluginLoadingError(f"Unable to import {file_path.stem}.")  # noqa: TRY301
         mod = importlib.util.module_from_spec(spec)
@@ -47,10 +47,15 @@ def _get_plugin() -> Optional[AbstractPlugin]:
         list_with_plugins: List[Type[AbstractPlugin]] = [
             m for m in mod.__dict__.values() if isclass(m) and issubclass(m, AbstractPlugin) and m != AbstractPlugin
         ]
+        if len(list_with_plugins) > 1:
+            if (plugin_class_name := os.environ.get("DUTY_BOARD_PLUGIN_CLASS_NAME", None)) is not None:
+                logger.info(f"Originally had {list_with_plugins=} but now filtering on {plugin_class_name=}.")
+                list_with_plugins = [plugin for plugin in list_with_plugins if plugin.__name__ == plugin_class_name]
+                logger.info(f"Left over with {list_with_plugins=}.")
+            else:
+                raise PluginLoadingError(f"{file_path} contains multiple AbstractPlugin implementations.")  # noqa: TRY301
         if not any(list_with_plugins):
             raise PluginLoadingError(f"{file_path} does not contain any classes that implement the AbstractPlugin.")  # noqa: TRY301
-        if len(list_with_plugins) > 1:
-            raise PluginLoadingError(f"{file_path} contains multiple AbstractPlugin implementations.")  # noqa: TRY301
         your_plugin = list_with_plugins[0]
         return your_plugin()
     except PluginLoadingError:

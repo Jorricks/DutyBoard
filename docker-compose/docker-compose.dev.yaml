@@ -1,0 +1,154 @@
+---
+version: "2.1"
+services:
+  postgres:
+    container_name: duty_database
+    image: registry.hub.docker.com/library/postgres:13.3-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 5s
+      timeout: 60s
+      retries: 5
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - ../.data/dev-postgres-db:/var/lib/postgresql/data
+
+  frontend:
+    container_name: duty_frontend
+    image: registry.hub.docker.com/library/node:18-slim
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ../duty_board/www:/code
+    working_dir: /code
+    command: /bin/bash -c "npm install && npm run dev2"
+
+  python_intialise:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    container_name: initialise_database
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "cd duty_board && alembic upgrade head && dutyBoard update-calendars"
+
+  backend:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      python_intialise:
+        condition: service_completed_successfully
+    container_name: duty_backend
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "uvicorn duty_board.server:app --host 0.0.0.0 --port 8000 --reload"
+
+  worker_persons:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      python_intialise:
+        condition: service_completed_successfully
+    container_name: duty_worker_persons
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "dutyBoard duty-officer-refresher"
+
+  worker_calendars:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      python_intialise:
+        condition: service_completed_successfully
+    container_name: duty_worker_calendar
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "dutyBoard calendar-refresher"
+
+  ical_server:
+    container_name: ical_server
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    ports:
+      - "8002:8002"
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "python3 tests/ical_helper.py && cd /code/.data/ical_files && python3 -m http.server -b 0.0.0.0 8002"
+
+  openldap:
+    image: docker.io/bitnami/openldap:2.6
+    container_name: openldap
+    ports:
+      - '1389:1389'
+      - '1636:1636'
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_ROOT=dc=DutyBoard,dc=com
+      - BITNAMI_DEBUG=true
+      - LDAP_CUSTOM_LDIF_DIR=/bitnami/openldap_ldifs
+    volumes:
+      - ../tests/data/openldap_ldifs:/bitnami/openldap_ldifs
+      - ../.data/openldap_data:/bitnami/openldap
+
+# Use the following query to list all users;
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -s 'one' -b 'ou=People,dc=DutyBoard,dc=com'
+# Use the following query to list all members of group;
+# ldapsearch -x -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "cn=readers,ou=Groups,dc=DutyBoard,dc=com"
+# or;
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=readers)" member
+# And for groupOfUniqueNames
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=uniqueReaders)" uniquemember
+
+networks:
+  docker_network:
+    driver: bridge

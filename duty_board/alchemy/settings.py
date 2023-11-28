@@ -1,66 +1,31 @@
 import logging
 import os
-from typing import Any, Callable
+from typing import Callable
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
+from sqlalchemy.orm import DeclarativeBase, scoped_session, sessionmaker
 from sqlalchemy.orm import Session as SASession
-from sqlalchemy.orm import declarative_base, scoped_session, sessionmaker
 
 log = logging.getLogger(__name__)
 SQL_ALCHEMY_CONN: str = os.environ.get("SQL_ALCHEMY_CONNECTION", "")
-engine: Engine
-Session: Callable[..., SASession]
-Base: Any = declarative_base()
+engine: Engine = create_engine(
+    SQL_ALCHEMY_CONN,
+    connect_args={},
+    pool_size=10,
+    pool_recycle=1800,
+    pool_pre_ping=True,
+    max_overflow=10,
+)
+Session: Callable[..., SASession] = scoped_session(
+    sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+        expire_on_commit=False,
+    ),
+)
 
 
-def get_engine() -> Engine:
-    return engine
-
-
-def prepare_engine_args():
-    """Prepare SQLAlchemy engine args for a postgres connection"""
-    return {
-        "pool_size": 10,
-        "pool_recycle": 1800,
-        "pool_pre_ping": True,
-        "max_overflow": 10,
-    }
-
-
-def dispose_orm():
-    """Properly close pooled database connections"""
-    log.debug("Disposing DB connection pool (PID %s)", os.getpid())
-    global engine  # noqa: PLW0603
-    global Session  # noqa: PLW0603
-
-    if Session:  # type: ignore[truthy-function]
-        Session.remove()
-        Session = None
-    if engine:  # type: ignore[truthy-function]
-        engine.dispose()
-        engine = None
-
-
-def reconfigure_orm():
-    """Properly close database connections and re-configure ORM"""
-    dispose_orm()
-    configure_orm()
-
-
-def configure_orm():
-    """Configure ORM using SQLAlchemy"""
-    # @ToDo(jorrick) refactor this setup to ignore the options without configure_orm.
-    log.debug("Setting up DB connection pool (PID %s)", os.getpid())
-    global engine  # noqa: PLW0603
-    global Session  # noqa: PLW0603
-    engine_args = prepare_engine_args()
-    engine = create_engine(SQL_ALCHEMY_CONN, connect_args={}, **engine_args)
-    Session = scoped_session(
-        sessionmaker(
-            autocommit=False,
-            autoflush=False,
-            bind=engine,
-            expire_on_commit=False,
-        ),
-    )
+class Base(DeclarativeBase):
+    pass

@@ -4,8 +4,13 @@ import sys
 from pathlib import Path
 
 import click
+from click import Context
 
 from duty_board import worker_loop
+from duty_board.alchemy import update_duty_calendars
+from duty_board.alchemy.session import create_session
+from duty_board.plugin.abstract_plugin import AbstractPlugin
+from duty_board.plugin.helpers import plugin_fetcher
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -17,21 +22,40 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 
 @cli.command()
-def worker():
-    logger.info("Starting the worker")
-    worker_loop.enter_loop()
+def update_calendars() -> None:
+    logger.info("Updating plugin calendars in the database.")
+    plugin: AbstractPlugin = plugin_fetcher.get_plugin()
+    with create_session() as session:
+        update_duty_calendars.sync_duty_calendar_configurations_to_postgres(
+            session=session, duty_calendar_configurations=plugin.duty_calendar_configurations
+        )
+    logger.info("Updated the calendars you want to track.")
+
+
+@cli.command()
+def calendar_refresher() -> None:
+    logger.info("Starting the worker to refresh the calendars.")
+    plugin: AbstractPlugin = plugin_fetcher.get_plugin()
+    worker_loop.enter_calendar_refresher_loop(plugin)
+
+
+@cli.command()
+def duty_officer_refresher() -> None:
+    logger.info("Starting the worker to refresh the persons.")
+    plugin: AbstractPlugin = plugin_fetcher.get_plugin()
+    worker_loop.enter_duty_officer_refresher_loop(plugin)
 
 
 @cli.command(name="webserver", context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option("--host", default="0.0.0.0", help="The IP address range to listen for.")  # noqa: S104
 @click.option("--port", default="80", type=int, help="The port to listen for.")
 @click.pass_context
-def webserver(ctx, host: str, port: int):
+def webserver(ctx: Context, host: str, port: int) -> None:
     command = f"uvicorn duty_board.server:app --host {host} --port {port}"
     if ctx.args:
         command += " " + " ".join(ctx.args)

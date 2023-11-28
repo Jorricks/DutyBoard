@@ -1,0 +1,159 @@
+---
+version: "2.1"
+services:
+  prod_postgres:
+    container_name: prod_database
+    image: registry.hub.docker.com/library/postgres:13.3-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 5s
+      timeout: 60s
+      retries: 5
+    ports:
+      - "5433:5432"  # Slightly different port to prevent using this for tests.
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - ../.data/prod-postgres-db:/var/lib/postgresql/data
+
+  prod_frontend:
+    container_name: prod_frontend
+    image: registry.hub.docker.com/library/node:18-slim
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ../duty_board/www:/code
+    working_dir: /code
+    command: /bin/bash -c "npm install && npm run build"
+  
+  prod_initialise:
+    container_name: prod_initialise
+    depends_on:
+      prod_postgres:
+        condition: service_healthy
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@prod_postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://prod_openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "cd duty_board && alembic upgrade head && dutyBoard update-calendars"
+
+  prod_backend:
+    container_name: prod_backend
+    depends_on:
+      prod_postgres:
+        condition: service_started
+      prod_frontend:
+        condition: service_completed_successfully
+      prod_initialise:
+        condition: service_completed_successfully
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    ports:
+      - "8001:8000"  # We expose port 8000 from the container, to 8001 for all other containers.
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@prod_postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://prod_openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+      - ../.data/docker_prod_venv:/venv
+      # Prevent docker_venv from being synced into the container twice; https://stackoverflow.com/a/37898591/2277445
+      - /code/.data/docker_venv
+      - /code/.data/docker_prod_venv
+      - /code/duty_board/www/node_modules
+    working_dir: /code
+    command: /bin/bash -c "uvicorn duty_board.server:app --host 0.0.0.0"
+
+  prod_worker_persons:
+    container_name: prod_worker_persons
+    depends_on:
+      prod_postgres:
+        condition: service_healthy
+      prod_initialise:
+        condition: service_completed_successfully
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@prod_postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://prod_openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "dutyBoard duty-officer-refresher"
+
+  prod_worker_calendars:
+    container_name: prod_worker_calendar
+    depends_on:
+      prod_postgres:
+        condition: service_healthy
+      prod_initialise:
+        condition: service_completed_successfully
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@prod_postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://prod_openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "dutyBoard calendar-refresher"
+
+  ical_server:  # Can not prefix this with prod because then we need to change the Plugin config.
+    container_name: ical_server
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    ports:
+      - "8002:8002"
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "python3 tests/ical_helper.py && cd /code/.data/ical_files && python3 -m http.server -b 0.0.0.0 8002"
+
+  prod_openldap:
+    container_name: prod_openldap
+    image: docker.io/bitnami/openldap:2.6
+    ports:
+      - '1389:1389'
+      - '1636:1636'
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_ROOT=dc=DutyBoard,dc=com
+      - BITNAMI_DEBUG=true
+      - LDAP_CUSTOM_LDIF_DIR=/bitnami/openldap_ldifs
+    volumes:
+      - ../tests/data/openldap_ldifs:/bitnami/openldap_ldifs
+      - ../.data/openldap_data:/bitnami/openldap
+
+# Use the following query to list all users;
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -s 'one' -b 'ou=People,dc=DutyBoard,dc=com'
+# Use the following query to list all members of group;
+# ldapsearch -x -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "cn=readers,ou=Groups,dc=DutyBoard,dc=com"
+# or;
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=readers)" member
+# And for groupOfUniqueNames
+# ldapsearch -H ldap://localhost:1389 -D 'cn=admin,dc=DutyBoard,dc=com' -w 'adminpassword' -b "ou=Groups,dc=DutyBoard,dc=com" "(cn=uniqueReaders)" uniquemember
+
+networks:
+  docker_network:
+    driver: bridge

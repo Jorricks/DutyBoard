@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from pathlib import Path
 from typing import Dict, Final, List, Set
@@ -9,14 +8,16 @@ from fastapi import FastAPI, HTTPException
 from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
 from sqladmin import Admin
+from sqlalchemy import select
+from sqlalchemy.orm.session import Session as SASession
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import FileResponse, HTMLResponse
+from starlette.responses import FileResponse, HTMLResponse, Response
 from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
 
-from duty_board.alchemy import add_sqladmin, queries, settings
+from duty_board.alchemy import add_sqladmin, api_queries
 from duty_board.alchemy.session import create_session
-from duty_board.models import generate_fake_data
+from duty_board.models.person_image import PersonImage
 from duty_board.plugin.abstract_plugin import AbstractPlugin
 from duty_board.plugin.helpers import plugin_fetcher
 from duty_board.web_helpers.gzip_static_files import GZIPStaticFiles
@@ -44,16 +45,11 @@ admin: Admin
 CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
 logger.info(f"{CURRENT_DIR=}")
 
-settings.configure_orm()
 plugin = plugin_fetcher.get_plugin()
 app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
-app.mount("/person_img", StaticFiles(directory=plugin.absolute_path_to_user_images_folder), name="person_img")
+# @ToDo(jorrick) Implement person image setup
 admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
-
-if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
-    with create_session() as session:
-        generate_fake_data.create_fake_database_rows_if_not_present(session)
 
 
 def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:
@@ -79,17 +75,17 @@ def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
 
 
 @app.get("/schedule", response_model=CurrentSchedule)
-async def get_schedule(timezone: str):
+async def get_schedule(timezone: str) -> CurrentSchedule:
     timezone_object = _parse_timezone_str(timezone)
     config = _get_config_object(timezone_object)
     with create_session() as session:
         all_encountered_person_uids: Set[int] = set()
-        calendars: List[_Calendar] = queries.get_calendars(
+        calendars: List[_Calendar] = api_queries.get_calendars(
             session=session,
             all_encountered_person_uids=all_encountered_person_uids,
             timezone=timezone_object,
         )
-        persons: Dict[int, _PersonEssentials] = queries.get_peoples_essentials(
+        persons: Dict[int, _PersonEssentials] = api_queries.get_peoples_essentials(
             session=session,
             all_person_uids=all_encountered_person_uids,
         )
@@ -97,10 +93,18 @@ async def get_schedule(timezone: str):
 
 
 @app.get("/person", response_model=PersonResponse)
-async def get_person(person_uid: int, timezone: str):
+async def get_person(person_uid: int, timezone: str) -> PersonResponse:
     timezone_object = _parse_timezone_str(timezone)
     with create_session() as session:
-        return queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
+        return api_queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
+
+
+@app.get("/person_img/{person_uid:int}", responses={200: {"content": {"image/png": {}}}}, response_class=Response)
+async def get_person_image(person_uid: int) -> Response:
+    session: SASession
+    with create_session() as session:
+        person_image: PersonImage = session.scalars(select(PersonImage).where(PersonImage.uid == person_uid)).one()
+        return Response(content=person_image.image_in_bytes, media_type="image/jpeg")
 
 
 @app.get(
@@ -108,7 +112,7 @@ async def get_person(person_uid: int, timezone: str):
     response_description="Returns a thumbnail image from a larger image",
     responses={200: {"description": "Company logo", "content": {"image/png": {}}}},
 )
-def company_logo():
+def company_logo() -> FileResponse:
     file_path = plugin.absolute_path_to_company_logo_png
     if file_path.is_file():
         return FileResponse(file_path, media_type="image/png", filename="company_logo.png")
@@ -120,7 +124,7 @@ def company_logo():
     response_description="Returns the favicon",
     responses={200: {"description": "Favicon", "content": {"image/x-icon": {}}}},
 )
-def favicon_ico():
+def favicon_ico() -> FileResponse:
     file_path = plugin.absolute_path_to_favicon_ico
     if file_path.is_file():
         return FileResponse(file_path, media_type="image/x-icon", filename="favicon.ico")
@@ -128,5 +132,5 @@ def favicon_ico():
 
 
 @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
-async def accept_all():
+async def accept_all() -> FileResponse:
     return FileResponse(CURRENT_DIR / "www" / "dist" / "index.html")

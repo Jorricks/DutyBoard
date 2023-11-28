@@ -1,13 +1,16 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import pytz
-import requests  # type: ignore
+import requests
 from ical_library import client
 from ical_library.help_modules import dt_utils
-from ical_library.ical_components import VCalendar, VEvent
+from ical_library.ical_components.v_calendar import VCalendar
+from ical_library.ical_components.v_event import VEvent
 from ical_library.timeline import Timeline
-from pendulum import DateTime, Duration
+from pendulum.datetime import DateTime
+from pendulum.duration import Duration
+from sqlalchemy import Select, select
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.alchemy.session import create_session
@@ -21,7 +24,7 @@ logger = logging.getLogger(__name__)
 class ICalPluginMixin:
     @staticmethod
     def _get_icalendar(icalendar_url: str) -> str:
-        response = requests.get(icalendar_url, timeout=5.0)
+        response = requests.get(icalendar_url, timeout=30.0)  # For larger calendars, it might take quite some time.
         response.raise_for_status()
         return response.text
 
@@ -29,7 +32,7 @@ class ICalPluginMixin:
         """Gets the calendar events for the upcoming 4 weeks."""
         logger.info(f"Loading {icalendar_url}, this might take some time.")
         now = DateTime.now()
-        month_from_now = now + Duration(days=7 * 4)
+        month_from_now = now + Duration(days=7 * 4)  # type: ignore[no-untyped-call]
         calendar_txt: str = self._get_icalendar(icalendar_url=icalendar_url)
         calendar: VCalendar = client.parse_lines_into_calendar(calendar_txt)
         # timeline is ordered by start date.
@@ -43,41 +46,40 @@ class ICalPluginMixin:
             and event.summary.value.startswith(event_prefix)
         ][:limit]
 
-    def _get_or_create_person(self, value: str) -> int:
+    def _get_or_create_person(self, value: str) -> Person:
         """Returns a Person object if the person is not already in the database."""
         session: SASession
         with create_session() as session:
             if "@" in value:
-                result = session.query(Person).filter(Person.email == value).first()
+                stmt: Select[Tuple[Person]] = select(Person).where(Person.email == value)
             else:
-                result = session.query(Person).filter(Person.username == value).first()
+                stmt = select(Person).where(Person.username == value)
+            result: Optional[Person] = session.scalar(stmt)
             if result:
-                return result.uid
+                return result
             username = None if "@" in value else value
             email = value if "@" in value else None
-            person = Person(
+            return Person(
                 username=username,
                 email=email,
-                img_filename=None,
+                image=None,
+                img_width=None,
+                img_height=None,
                 extra_attributes_json=None,
-                last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),
+                last_update_utc=DateTime(1970, 1, 1, 0, 0, 0, tzinfo=pytz.UTC),  # type: ignore[no-untyped-call]
                 sync=True,
             )
-            session.add(person)
-            session.flush()
-            return person.uid
 
-    def _create_on_call_event(self, calendar: Calendar, v_event: VEvent, person_uid: int) -> OnCallEvent:
+    def _create_on_call_event(self, calendar: Calendar, v_event: VEvent, person: Person) -> OnCallEvent:
         return OnCallEvent(
             calendar_uid=calendar.uid,
             start_event_utc=dt_utils.convert_time_object_to_aware_datetime(v_event.start),
             end_event_utc=dt_utils.convert_time_object_to_aware_datetime(v_event.end),
-            person_uid=person_uid,
+            person=person,
         )
 
-    def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:
-        items_to_insert: List[OnCallEvent] = []
-        session.query(OnCallEvent).filter(OnCallEvent.calendar_uid == calendar.uid).delete()
+    def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:  # noqa: ARG002
+        calendar.events = []
         event: VEvent
         for event in self._get_events_for_upcoming_month(calendar.icalendar_url, calendar.event_prefix or ""):
             # First attempt attendee. If that is not set, we look at the title/summary of the event.
@@ -93,8 +95,7 @@ class ICalPluginMixin:
                 person_information_str: str = person_unique_identifier[len(calendar.event_prefix or "") :]
             else:
                 person_information_str = person_unique_identifier
-            person_uid: int = self._get_or_create_person(person_information_str)
-            on_call_event: OnCallEvent = self._create_on_call_event(calendar, event, person_uid=person_uid)
-            items_to_insert.append(on_call_event)
-        session.bulk_save_objects(items_to_insert)
+            person: Person = self._get_or_create_person(person_information_str)
+            on_call_event: OnCallEvent = self._create_on_call_event(calendar, event, person)
+            calendar.events.append(on_call_event)
         return calendar
