@@ -1,17 +1,16 @@
 import datetime
 import json
 from collections import defaultdict
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Iterable
 
 from pendulum.datetime import DateTime
-from pendulum.tz.timezone import UTC
 from pytz.tzinfo import BaseTzInfo
+from sqlalchemy import select
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
-from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
 from duty_board.web_helpers.response_types import (
     PersonResponse,
     _Calendar,
@@ -31,7 +30,8 @@ def _get_events_ending_from_now_onwards(
     all_encountered_person_uids: Set[int],
     timezone: BaseTzInfo,
 ) -> Dict[str, List[_Events]]:
-    result = session.query(OnCallEvent).filter(OnCallEvent.end_event_utc >= DateTime.utcnow()).all()
+    stmt = select(OnCallEvent).where(OnCallEvent.end_event_utc >= DateTime.utcnow())
+    result: Iterable[OnCallEvent] = session.scalars(stmt).all()
     mapped: Dict[str, List[_Events]] = defaultdict(list)
     for calendar_event in result:
         mapped[calendar_event.calendar_uid].append(
@@ -51,7 +51,7 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
         all_encountered_person_uids=all_encountered_person_uids,
         timezone=timezone,
     )
-    result = session.query(Calendar).order_by(Calendar.order).all()
+    result: Iterable[Calendar] = session.scalars(select(Calendar).order_by(Calendar.order)).all()
     return [
         _Calendar(
             uid=single_calendar.uid,
@@ -69,7 +69,7 @@ def get_calendars(session: SASession, all_encountered_person_uids: Set[int], tim
 
 
 def get_peoples_essentials(session: SASession, all_person_uids: Set[int]) -> Dict[int, _PersonEssentials]:
-    result = session.query(Person).where(Person.uid.in_(all_person_uids))
+    result: Iterable[Person] = session.scalars(select(Person).where(Person.uid.in_(all_person_uids))).all()
     return {
         a_person.uid: _PersonEssentials(
             uid=a_person.uid,
@@ -107,7 +107,7 @@ def parse_extra_attributes(person_uid: int, extra_attributes_str: Optional[str])
 
 
 def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> PersonResponse:
-    person = session.query(Person).where(Person.uid == person_uid).first()
+    person = session.scalars(select(Person).where(Person.uid == person_uid)).one_or_none()
     if person is None:
         raise ValueError(f"Invalid {person_uid=} passed.")
 
@@ -123,39 +123,3 @@ def get_person(session: SASession, person_uid: int, timezone: BaseTzInfo) -> Per
         error_msg=person.error_msg or "",
         sync=person.sync,
     )
-
-
-def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig) -> None:
-    calendar_db_instance = session.query(Calendar).where(Calendar.uid == calendar.uid).first()
-    if calendar_db_instance is not None:
-        calendar_db_instance.name = calendar.name
-        calendar_db_instance.description = calendar.description
-        calendar_db_instance.category = calendar.category  # type: ignore[assignment]
-        calendar_db_instance.order = calendar.order
-        calendar_db_instance.icalendar_url = calendar.icalendar_url
-        calendar_db_instance.event_prefix = calendar.event_prefix
-        session.merge(calendar_db_instance)
-    else:
-        calendar_db_instance = Calendar(
-            uid=calendar.uid,
-            name=calendar.name,
-            description=calendar.description,
-            category=calendar.category,
-            order=calendar.order,
-            icalendar_url=calendar.icalendar_url,
-            event_prefix=calendar.event_prefix,
-            error_msg=None,
-            last_update_utc=datetime.datetime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
-            sync=True,
-        )
-        session.add(calendar_db_instance)
-
-
-def sync_duty_calendar_configurations_to_postgres(
-    session: SASession,
-    duty_calendar_configurations: List[DutyCalendarConfig],
-) -> None:
-    for duty_calendar_config in duty_calendar_configurations:
-        _create_or_update_calendar(session, duty_calendar_config)
-    all_described_calendar_uids: List[str] = [dcc.uid for dcc in duty_calendar_configurations]
-    session.query(Calendar).where(Calendar.uid.not_in(all_described_calendar_uids)).delete()

@@ -5,11 +5,11 @@ services:
     container_name: duty_prod_database
     image: registry.hub.docker.com/library/postgres:13.3-alpine
     ports:
-      - 5433:5432
+      - 5433:5433
     environment:
       - POSTGRES_PASSWORD=mysecretpassword
     volumes:
-      - ./.data/prod-postgres-db:/var/lib/postgresql/data
+      - ../.data/prod-postgres-db:/var/lib/postgresql/data
 
   prod_frontend:
     container_name: duty_prod_frontend
@@ -17,7 +17,7 @@ services:
     environment:
       - NODE_ENV=development
     volumes:
-      - ./duty_board/www:/code
+      - ../duty_board/www:/code
     working_dir: /code
     command: /bin/bash -c "npm install && npm run build"
 
@@ -34,15 +34,14 @@ services:
     links:
       - "prod_postgres:database_container"
     environment:
-      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5432/postgres
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@database_container:5433/postgres
       - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
-      - CREATE_DUMMY_RECORDS=1
     volumes:
-      - ./:/code
-      - ./.data/docker_prod_venv:/venv
+      - ../:/code
+      - ../.data/docker_prod_venv:/venv
       # Prevent docker_venv from being synced into the container twice; https://stackoverflow.com/a/37898591/2277445
-      - /code/docker_venv
-      - /code/docker_prod_venv
+      - /code/.data/docker_venv
+      - /code/.data/docker_prod_venv
       - /code/duty_board/www/node_modules
     working_dir: /code
     command: /bin/bash -c "python3 -m venv /venv && source /venv/bin/activate && pip3 install . && alembic upgrade head && uvicorn duty_board.server:app --host 0.0.0.0"

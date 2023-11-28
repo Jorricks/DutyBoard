@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from pendulum.datetime import DateTime
 from sqlalchemy import CheckConstraint, ForeignKey, String, UniqueConstraint
@@ -7,6 +7,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from duty_board.alchemy.settings import Base
 from duty_board.alchemy.sqlalchemy_types import UtcDateTime
 from duty_board.models.person_image import PersonImage
+
+if TYPE_CHECKING:
+    from duty_board.models.on_call_event import OnCallEvent
 
 
 class Person(Base):
@@ -20,11 +23,11 @@ class Person(Base):
     username: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     email: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
-    image_uid: Mapped[Optional[int]] = mapped_column(ForeignKey("person_image.uid"), nullable=True)
+    image_uid: Mapped[Optional[int]] = mapped_column(ForeignKey("person_image.uid", ondelete="RESTRICT"), nullable=True)
     image: Mapped[Optional[PersonImage]] = relationship(
         back_populates="person",
         cascade="all, delete-orphan",
-        single_parent=True,  # delete orphans :)
+        single_parent=True,
     )
 
     img_width: Mapped[Optional[int]]
@@ -41,6 +44,13 @@ class Person(Base):
     )
     last_update_utc: Mapped[DateTime] = mapped_column(UtcDateTime(), nullable=False)
     sync: Mapped[bool] = mapped_column(default=True)
+
+    # We don't use this field, but still good to indicate this relationship exists
+    upcoming_events: Mapped[List["OnCallEvent"]] = relationship(
+        back_populates="person",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def __repr__(self) -> str:
         return f"Person(username='{self.username}', email='{self.email}')"

@@ -3,19 +3,22 @@ import os
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List
 
 import pytest
 from pendulum.tz.timezone import UTC
 from sqlalchemy import delete
+from sqlalchemy.orm.session import Session as SASession
 
 from duty_board.alchemy import settings
+from duty_board.alchemy.session import create_session
 from duty_board.models.calendar import Calendar
 from duty_board.models.on_call_event import OnCallEvent
 from duty_board.models.person import Person
 from duty_board.models.person_image import PersonImage
 from duty_board.models.token import Token
 from duty_board.plugin.example.example_plugin import ExamplePlugin
+from tests import generate_fake_data
 
 os.environ["LDAP_FULL_QUANTIFIED_USERNAME"] = "cn=admin,dc=DutyBoard,dc=com"
 os.environ["LDAP_PASSWORD"] = "adminpassword"  # noqa: S105
@@ -51,40 +54,49 @@ def _wipe_database() -> None:
 
 
 @pytest.fixture()
-def _set_up_persons(_wipe_database: None) -> None:
-    persons = [
-        Person(
-            username="jan",
-            email="jan@schoenmaker.nl",
-            extra_attributes_json=json.dumps(
-                {
-                    "fullName": {"information": "Jan Schoenmakers", "icon": "FaUserCircle"},
-                    "location": {"information": "Amsterdam, NL", "icon": "FaMapMarkerAlt"},
-                }
+def set_up_persons(_wipe_database: None) -> List[Person]:
+    session: SASession
+    with create_session() as session:
+        persons = [
+            Person(
+                username="jan",
+                email="jan@schoenmaker.nl",
+                extra_attributes_json=json.dumps(
+                    {
+                        "fullName": {"information": "Jan Schoenmakers", "icon": "FaUserCircle"},
+                        "location": {"information": "Amsterdam, NL", "icon": "FaMapMarkerAlt"},
+                    }
+                ),
+                img_height=640,
+                img_width=428,
+                image=PersonImage(
+                    image_in_bytes=(Path(__file__).parent / "data" / "openldap_ldifs" / "jan.jpeg").read_bytes()
+                ),
+                last_update_utc=datetime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
             ),
-            img_height=640,
-            img_width=428,
-            image=PersonImage(
-                image_in_bytes=(Path(__file__).parent / "data" / "openldap_ldifs" / "jan.jpeg").read_bytes()
+            Person(
+                username="henk",
+                email="henk@tank.nl",
+                extra_attributes_json=json.dumps(
+                    {
+                        "fullName": {"information": "Henk de Tank", "icon": "FaUserCircle"},
+                        "location": {"information": "Eindhoven de gekste, NL", "icon": "FaMapMarkerAlt"},
+                    }
+                ),
+                img_height=805,
+                img_width=736,
+                image=PersonImage(
+                    image_in_bytes=(Path(__file__).parent / "data" / "openldap_ldifs" / "henk.jpeg").read_bytes()
+                ),
+                last_update_utc=datetime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
             ),
-            last_update_utc=datetime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
-        ),
-        Person(
-            username="henk",
-            email="henk@tank.nl",
-            extra_attributes_json=json.dumps(
-                {
-                    "fullName": {"information": "Henk de Tank", "icon": "FaUserCircle"},
-                    "location": {"information": "Eindhoven de gekste, NL", "icon": "FaMapMarkerAlt"},
-                }
-            ),
-            img_height=805,
-            img_width=736,
-            image=PersonImage(
-                image_in_bytes=(Path(__file__).parent / "data" / "openldap_ldifs" / "henk.jpeg").read_bytes()
-            ),
-            last_update_utc=datetime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
-        ),
-    ]
-    session = settings.Session()
-    session.bulk_save_objects(persons)
+        ]
+        session.add_all(persons)
+
+    return persons
+
+
+@pytest.fixture()
+def _get_fake_dataset(_wipe_database: None) -> None:
+    with create_session() as session:
+        generate_fake_data.create_fake_database_rows_if_not_present(session)

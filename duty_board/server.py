@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 from pathlib import Path
 from typing import Dict, Final, List, Set
@@ -14,9 +13,8 @@ from starlette.responses import FileResponse, HTMLResponse
 from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
 
-from duty_board.alchemy import add_sqladmin, queries
+from duty_board.alchemy import add_sqladmin, api_queries
 from duty_board.alchemy.session import create_session
-from duty_board.models import generate_fake_data
 from duty_board.plugin.abstract_plugin import AbstractPlugin
 from duty_board.plugin.helpers import plugin_fetcher
 from duty_board.web_helpers.gzip_static_files import GZIPStaticFiles
@@ -48,11 +46,8 @@ plugin = plugin_fetcher.get_plugin()
 app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
 # @ToDo(jorrick) Implement person image setup
+# @ToDo(jorrick) Implement actual trial run of data
 admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
-
-if os.environ.get("CREATE_DUMMY_RECORDS", "") == "1":
-    with create_session() as session:
-        generate_fake_data.create_fake_database_rows_if_not_present(session)
 
 
 def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:
@@ -83,12 +78,12 @@ async def get_schedule(timezone: str) -> CurrentSchedule:
     config = _get_config_object(timezone_object)
     with create_session() as session:
         all_encountered_person_uids: Set[int] = set()
-        calendars: List[_Calendar] = queries.get_calendars(
+        calendars: List[_Calendar] = api_queries.get_calendars(
             session=session,
             all_encountered_person_uids=all_encountered_person_uids,
             timezone=timezone_object,
         )
-        persons: Dict[int, _PersonEssentials] = queries.get_peoples_essentials(
+        persons: Dict[int, _PersonEssentials] = api_queries.get_peoples_essentials(
             session=session,
             all_person_uids=all_encountered_person_uids,
         )
@@ -99,7 +94,7 @@ async def get_schedule(timezone: str) -> CurrentSchedule:
 async def get_person(person_uid: int, timezone: str) -> PersonResponse:
     timezone_object = _parse_timezone_str(timezone)
     with create_session() as session:
-        return queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
+        return api_queries.get_person(session=session, person_uid=person_uid, timezone=timezone_object)
 
 
 @app.get(

@@ -1,50 +1,18 @@
-import random
-import string
 from datetime import timedelta
-from typing import Iterable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
-import pytest
 import requests_mock
 from pendulum.datetime import DateTime
 
 from duty_board.alchemy import settings
 from duty_board.models.calendar import Calendar
+from duty_board.models.person import Person
 from duty_board.plugin.example.example_plugin import ExamplePlugin
+from tests import ical_helper
 from tests.conftest import get_loaded_ldap_plugin
 
 
-def _get_icalender_event(
-    username: Optional[str], email: Optional[str], delta_start: timedelta, delta_end: timedelta
-) -> str:
-    start = DateTime.now() + delta_start
-    end = start + delta_end
-    attendee = f"ATTENDEE:{email}\n" if email else ""
-    return f"""BEGIN:VEVENT
-DTSTART;VALUE=DATE-TIME:{start.strftime("%Y%m%d")}T020000Z
-DTEND;VALUE=DATE-TIME:{end.strftime("%Y%m%d")}T020000Z
-{attendee}UID:{''.join(random.sample(string.ascii_lowercase, 14))}
-URL:https://adyen.pagerduty.com/schedules#P5IHOP7
-SUMMARY:{username}
-END:VEVENT"""
-
-
-def get_icalendar_response(events: Iterable[Tuple[Optional[str], Optional[str], timedelta, timedelta]]) -> str:
-    start_text = """BEGIN:VCALENDAR
-PRODID;X-RICAL-TZSOURCE=TZINFO:-//com.denhaven2/NONSGML ri_cal gem//EN
-CALSCALE:GREGORIAN
-VERSION:2.0
-X-WR-CALNAME:On Call Schedule for Data-duty"""
-    end_text = "END:VCALENDAR"
-    events_str = [
-        _get_icalender_event(username=username, email=email, delta_start=delta_start, delta_end=delta_end)
-        for username, email, delta_start, delta_end in events
-    ]
-    event_text = "\n".join(events_str)
-    return f"{start_text}\n{event_text}\n{end_text}"
-
-
-@pytest.mark.usefixtures("_set_up_persons")
-def test_sync_calendar() -> None:
+def test_sync_calendar(set_up_persons: Person) -> None:
     calendar = Calendar(
         uid="duty-board-test-calendar",
         name="DutyBoard Test calendar",
@@ -63,7 +31,7 @@ def test_sync_calendar() -> None:
             ("henkietankie", "henk@tank.nl", timedelta(days=2), timedelta(days=20)),
             ("non-existing", None, timedelta(days=42), timedelta(days=20)),
         ]
-        ical_response = get_icalendar_response(events=events)
+        ical_response = ical_helper.get_icalendar_response(events=events)
         m.get("https://non-existing-url.com/icalendar.ics", text=ical_response)
         calendar = plugin.sync_calendar(calendar=calendar, session=settings.Session())
 

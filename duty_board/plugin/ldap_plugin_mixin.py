@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class LDAPPluginMixin:
     # Basic LDAP settings
-    LDAP_URL: ClassVar[str] = "ldap://127.0.0.1:1389"
+    LDAP_URL: ClassVar[str] = os.environ.get("LDAP_URL", "ldap://127.0.0.1:1389")
     LDAP_BASE_DN: ClassVar[str] = "dc=DutyBoard,dc=com"
     LDAP_USER_OU: ClassVar[str] = "People"
     LDAP_GROUP_OU: ClassVar[Optional[str]] = "Groups"
@@ -44,6 +44,12 @@ class LDAPPluginMixin:
     LDAP_ADMIN_GROUP_NAMES: ClassVar[Tuple[str, ...]] = ("admin-unique-interface",)
 
     def __init__(self, *args: Any, **kwargs: Any):
+        self.client: Optional[LDAPBaseClient] = None
+        super().__init__(*args, **kwargs)
+
+    def get_client(self) -> LDAPBaseClient:
+        if self.client is not None:
+            return self.client
         self.client = LDAPBaseClient(
             url=self.LDAP_URL,
             base_dn=self.LDAP_BASE_DN,
@@ -56,7 +62,7 @@ class LDAPPluginMixin:
             password=os.environ["LDAP_PASSWORD"],
             auto_referrals=False,
         )
-        super().__init__(*args, **kwargs)
+        return self.client
 
     @staticmethod
     def _get_jpeg_photo_from_person(
@@ -69,7 +75,7 @@ class LDAPPluginMixin:
         return img_as_b64, image.width, image.height
 
     def _extract_user_info(self, username: str) -> Tuple[str, Mapping[str, Union[str, List[str]]]]:
-        result = self.client.get_user(username)
+        result = self.get_client().get_user(username)
         if not result:
             raise ValueError(f"Could not find user {username}.")
         if len(result) > 1:
@@ -118,7 +124,7 @@ class LDAPPluginMixin:
         return person
 
     def _is_user_in_admin_group(self, username: str) -> bool:
-        return any(self.client.is_user_in_group(username, group) for group in self.LDAP_ADMIN_GROUP_NAMES)
+        return any(self.get_client().is_user_in_group(username, group) for group in self.LDAP_ADMIN_GROUP_NAMES)
 
     async def admin_login_attempt(self, username: str, password: str) -> bool:  # noqa: ARG002
         loop = asyncio.get_event_loop()

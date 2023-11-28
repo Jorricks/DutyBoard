@@ -12,7 +12,11 @@ class PersonImage(Base):
     __tablename__ = "person_image"
     uid: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
     image_in_bytes: Mapped[bytes] = mapped_column(nullable=False)  # LargeBinary
-    person: Mapped["Person"] = relationship(back_populates="image")
+    person: Mapped["Person"] = relationship(
+        back_populates="image",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def __repr__(self) -> str:
         return f"PersonImage(uid='{self.uid}')"

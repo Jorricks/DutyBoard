@@ -19,4 +19,4 @@ class DutyCalendarConfig(BaseModel):
     # Priority of order. The lower the number, the earlier this calendar shows up.
     order: Annotated[int, Field(default=99999, ge=0, le=9999999)]
     # Prefix before user LDAP or user email is mentioned. Example prefix; 'duty:' when calendar event; 'duty: thomas'
-    event_prefix: Annotated[Optional[str], Field(max_length=50)]
+    event_prefix: Annotated[Optional[str], Field(max_length=50, default=None)]

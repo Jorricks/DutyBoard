@@ -27,7 +27,11 @@ class Calendar(Base):
     )
     last_update_utc: Mapped[DateTime] = mapped_column(UtcDateTime(), nullable=False)
     sync: Mapped[bool] = mapped_column(default=True)
-    events: Mapped[List["OnCallEvent"]] = relationship(back_populates="calendar", cascade="all, delete-orphan")
+    events: Mapped[List["OnCallEvent"]] = relationship(
+        back_populates="calendar",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
     def __repr__(self) -> str:
         return f"Calendar(uid={self.uid})"

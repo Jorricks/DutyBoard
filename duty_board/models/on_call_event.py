@@ -25,11 +25,11 @@ class OnCallEvent(Base):
     start_event_utc: Mapped[DateTime] = mapped_column(UtcDateTime(), nullable=False)
     end_event_utc: Mapped[DateTime] = mapped_column(UtcDateTime(), nullable=False)
 
-    calendar_uid: Mapped[str] = mapped_column(String(50), ForeignKey("calendar.uid"), nullable=False)
-    calendar: Mapped["Calendar"] = relationship("Calendar", back_populates="events")
+    calendar_uid: Mapped[str] = mapped_column(String(50), ForeignKey("calendar.uid", ondelete="CASCADE"))
+    calendar: Mapped["Calendar"] = relationship(back_populates="events")
 
-    person_uid: Mapped[int] = mapped_column(Integer, ForeignKey("person.uid"), nullable=False)
-    person: Mapped["Person"] = relationship("Person")
+    person_uid: Mapped[int] = mapped_column(Integer, ForeignKey("person.uid", ondelete="CASCADE"), nullable=False)
+    person: Mapped["Person"] = relationship(back_populates="upcoming_events")
 
     def __repr__(self) -> str:
         return (

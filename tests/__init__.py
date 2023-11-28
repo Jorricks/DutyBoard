@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 
+os.environ["DUTY_BOARD_SECRET_KEY"] = "abcdef"
 os.environ["SQL_ALCHEMY_CONNECTION"] = "postgresql://postgres:mysecretpassword@localhost:5432/postgres"
 
 logging.basicConfig(
