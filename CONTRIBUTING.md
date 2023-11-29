@@ -28,11 +28,11 @@ Note: The first run will create the python venv & install all node modules. This
 
 Starting up
 ```shell
-docker-compose -f docker-compose.dev.yaml up -d
+docker-compose -f docker-compose/docker-compose.dev.yaml up -d
 ```
 Shutting down
 ```shell
-docker-compose -f docker-compose.dev.yaml down
+docker-compose -f docker-compose/docker-compose.dev.yaml down
 ```
 
 #### Docker production setup
@@ -44,9 +44,9 @@ Note: The first run will create the python venv. This will take some time.
 
 Starting up
 ```shell
-docker-compose -f docker-compose.prod.yaml up -d
+docker-compose -f docker-compose/docker-compose.prod.yaml up -d
 ```
 Shutting down
 ```shell
-docker-compose -f docker-compose.prod.yaml down
+docker-compose -f docker-compose/docker-compose.prod.yaml down
 ```
