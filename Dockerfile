@@ -6,4 +6,4 @@ COPY . .
 
 RUN pip3 install --no-cache-dir .
 
-CMD ["dutyBoard"]
+CMD ["DutyBoard"]

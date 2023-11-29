@@ -45,7 +45,7 @@ services:
     volumes:
       - ../:/code
     working_dir: /code
-    command: /bin/bash -c "cd duty_board && alembic upgrade head && dutyBoard update-calendars"
+    command: /bin/bash -c "cd duty_board && DutyBoard db upgrade head && DutyBoard update-calendars"
 
   backend:
     depends_on:
@@ -89,7 +89,7 @@ services:
     volumes:
       - ../:/code
     working_dir: /code
-    command: /bin/bash -c "dutyBoard duty-officer-refresher"
+    command: /bin/bash -c "DutyBoard duty-officer-refresher"
 
   worker_calendars:
     depends_on:
@@ -110,7 +110,7 @@ services:
     volumes:
       - ../:/code
     working_dir: /code
-    command: /bin/bash -c "dutyBoard calendar-refresher"
+    command: /bin/bash -c "DutyBoard calendar-refresher"
 
   ical_server:
     container_name: ical_server

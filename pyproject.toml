@@ -86,7 +86,7 @@ PullRequests = "https://github.com/Jorricks/DutyBoard/pulls"
 Issues = "https://github.com/Jorricks/DutyBoard/issues"
 
 [project.scripts]
-dutyBoard = "duty_board.__main__:cli"
+DutyBoard = "duty_board.__main__:cli"
 
 [tool.setuptools.dynamic]
 version = {attr = "duty_board.__version__"}
