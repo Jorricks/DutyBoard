@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase, scoped_session, sessionmaker
 from sqlalchemy.orm import Session as SASession
 
 log = logging.getLogger(__name__)
-SQL_ALCHEMY_CONN: str = os.environ.get("SQL_ALCHEMY_CONNECTION", "")
+SQL_ALCHEMY_CONN: str = os.environ["SQL_ALCHEMY_CONNECTION"]
 engine: Engine = create_engine(
     SQL_ALCHEMY_CONN,
     connect_args={},
