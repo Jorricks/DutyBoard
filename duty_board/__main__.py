@@ -2,8 +2,10 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any, List
 
 import click
+from alembic.config import CommandLine
 from click import Context
 
 from duty_board import worker_loop
@@ -24,6 +26,13 @@ logger = logging.getLogger(__name__)
 @click.group()
 def cli() -> None:
     pass
+
+
+@cli.command(context_settings={"ignore_unknown_options": True, "help_option_names": []})
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+def db(args: List[Any]) -> None:
+    path_to_alembic_ini = Path(__file__).resolve().parent / "alembic.ini"
+    CommandLine(prog="DutyBoard db").main(argv=["-c", str(path_to_alembic_ini), *args])  # type: ignore[no-untyped-call]
 
 
 @cli.command()

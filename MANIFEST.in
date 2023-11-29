@@ -1,5 +1,6 @@
 include README.md
 include CONTRIBUTING.md
+include duty_board/alembic.ini
 graft duty_board/plugin/example
 graft duty_board/www/static
 graft duty_board/www/user_images
