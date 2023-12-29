@@ -52,10 +52,10 @@ const PersonImage = ({person}: {person: PersonResponse}) => {
     <div>
       {person.imgHeight != null && person.imgWidth != null && person.imgWidth > person.imgHeight
         ? <div className="circular--landscape">
-            <img src={process.env.API_ADDRESS + "person_img/" + person.imgFilename} alt={"Profile picture"}/>
+            <img src={import.meta.env.VITE_API_ADDRESS + "person_img/" + person.imgFilename} alt={"Profile picture"}/>
           </div>
         : <div className="circular--portrait">
-            <img src={process.env.API_ADDRESS + "person_img/" + person.imgFilename} alt={"Profile picture"}/>
+            <img src={import.meta.env.VITE_API_ADDRESS + "person_img/" + person.imgFilename} alt={"Profile picture"}/>
           </div>
       }
     </div>

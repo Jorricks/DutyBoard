@@ -1,5 +1,5 @@
 import { Box, Button, Heading, List, ListItem, Stack, useColorModeValue } from "@chakra-ui/react";
-import useCollapse from "react-collapsed";
+import { useCollapse } from "react-collapsed";
 import { Calendar, Person } from "../api/api-generated-types";
 import ExpandedCalendarInfo from "./expandedCalendarInfo";
 import { FaCalendarCheck } from "react-icons/fa";

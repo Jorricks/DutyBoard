@@ -7,8 +7,8 @@ import useGetSchedule from "./useGetSchedule";
 //   baseURL: "http://localhost:8000/",
 //   withCredentials: false
 // });
-if (!process.env.PRODUCTION) {
-  axios.defaults.baseURL = process.env.API_ADDRESS;
+if (import.meta.env.VITE_PRODUCTION === "false") {
+  axios.defaults.baseURL = import.meta.env.VITE_API_ADDRESS;
 }
 axios.interceptors.response.use((res: AxiosResponse) =>
   res.data ? camelcaseKeys(res.data, { deep: true }) : res

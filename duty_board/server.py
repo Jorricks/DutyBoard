@@ -46,7 +46,7 @@ CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
 logger.info(f"{CURRENT_DIR=}")
 
 plugin = plugin_fetcher.get_plugin()
-app.mount("/dist", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist", check_dir=False), name="dist")
+app.mount("/assets", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist" / "assets", check_dir=False), name="assets")
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
 # @ToDo(jorrick) Implement person image setup
 admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
