@@ -2,4 +2,4 @@
 Package to display an overview of all active Duty rosters you have at your Company using iCalendars.
 """
 
-__version__ = "0.3.0a4"
+__version__ = "0.3.0b0"
