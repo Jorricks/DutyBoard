@@ -74,7 +74,10 @@ export default function Footer() {
           justify={{ base: "center", md: "space-between" }}
           align={{ base: "center", md: "center" }}
         >
-          <Text>© 2022 All rights reserved</Text>
+          <Text fontSize={"xs"}>
+            Copyright © 2023-2024 Jorrick Sleijster<br/>
+            Licensed under the Apache License, Version 2.0.
+          </Text>
           <Stack direction={"row"} spacing={6}>
             <SocialButton label={"Github"} href={"https://github.com/Jorricks/DutyBoard"}>
               <FaGithub />

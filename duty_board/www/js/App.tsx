@@ -69,7 +69,9 @@ function App() {
             <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
               <AnnouncementBar />
               <Navbar />
-              <Outlet /> {/* Start rendering router matches */}
+              <main>
+                <Outlet /> {/* Start rendering router matches */}
+              </main>
               <div style={{ marginTop: "auto" }}>
                 <Footer />
               </div>

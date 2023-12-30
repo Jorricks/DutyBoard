@@ -18,6 +18,7 @@ import { GrUserAdmin } from "@react-icons/all-files/gr/GrUserAdmin";
 import CompanyLogo from "./companyLogo";
 import { useGetSchedule } from "../api";
 import { Link } from "@tanstack/react-router";
+import ExternalLink from "./externalLink";
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link to="/$category" params={{ category: children }} activeProps={{ className: "font-bold" }}>
@@ -64,7 +65,7 @@ export default function Navbar() {
           <Flex alignItems={"center"} mr={"20px"}>
             {config.gitRepositoryUrl &&
               <Menu>
-                <Link to={config.gitRepositoryUrl} target="_blank">
+                <ExternalLink href={config.gitRepositoryUrl} external={true}>
                   <Button
                       leftIcon={<AiFillGithub color={config.textColor} fontSize={"30px"}/>}
                       colorScheme='teal'
@@ -73,12 +74,12 @@ export default function Navbar() {
                   >
                     <Text color={config.textColor}>Repo</Text>
                   </Button>
-                </Link>
+                </ExternalLink>
               </Menu>
             }
             {config.enableAdminButton &&
               <Menu>
-                <Link to={import.meta.env.VITE_API_ADDRESS + "admin/"} target="_blank">
+                <ExternalLink href={import.meta.env.VITE_API_ADDRESS + "admin/"} external={true}>
                   <Button
                       leftIcon={<GrUserAdmin color={config.textColor} fontSize={"25px"} />}
                       colorScheme='teal'
@@ -86,7 +87,7 @@ export default function Navbar() {
                   >
                     <Text color={config.textColor}>Admin</Text>
                   </Button>
-                </Link>
+                </ExternalLink>
               </Menu>
             }
           </Flex>

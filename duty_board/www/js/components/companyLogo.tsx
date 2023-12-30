@@ -7,7 +7,7 @@ const CompanyLogo = ({ maxHeight, maxWidth }: Props) => {
   return (
     <img
       src={import.meta.env.VITE_API_ADDRESS + "company_logo.png"}
-      alt="Logo"
+      alt="DutyBoard company logo"
       style={{ maxHeight: maxHeight, maxWidth: maxWidth }}
     />
   );
