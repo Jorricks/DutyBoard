@@ -32,7 +32,7 @@ def cli() -> None:
 @click.argument("args", nargs=-1, type=click.UNPROCESSED)
 def db(args: List[Any]) -> None:
     path_to_alembic_ini = Path(__file__).resolve().parent / "alembic.ini"
-    CommandLine(prog="DutyBoard db").main(argv=["-c", str(path_to_alembic_ini), *args])  # type: ignore[no-untyped-call]
+    CommandLine(prog="DutyBoard db").main(argv=["-c", str(path_to_alembic_ini), *args])
 
 
 @cli.command()
