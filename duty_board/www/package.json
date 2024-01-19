@@ -44,7 +44,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.6.0",
     "react-query": "^3.39.2",
-    "vite": "^5.0.10",
+    "vite": "^5.0.12",
     "web-vitals": "^2.1.4"
   },
   "eslintConfig": {
