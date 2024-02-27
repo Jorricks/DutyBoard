@@ -79,9 +79,14 @@ class ICalPluginMixin:
         )
 
     def sync_calendar(self, calendar: Calendar, session: SASession) -> Calendar:  # noqa: ARG002
+        # We first make sure we can actually fetch the calendar
+        parsed_events: List[VEvent]
+        parsed_events = self._get_events_for_upcoming_month(calendar.icalendar_url, calendar.event_prefix or "")
+
+        # Only when it was successfully fetched, we wipe the records.
         calendar.events = []
         event: VEvent
-        for event in self._get_events_for_upcoming_month(calendar.icalendar_url, calendar.event_prefix or ""):
+        for event in parsed_events:
             # First attempt attendee. If that is not set, we look at the title/summary of the event.
             person_unique_identifier: Optional[str] = None
             if event.attendee is not None and any(event.attendee):
