@@ -14,7 +14,6 @@ const Schedule = () => {
     : config.categories[0];
 
   const personsMap = new Map(Object.entries(persons));
-  console.log(category);
 
   // Design heavily influenced by https://chakra-templates.dev/page-sections/pricing
   return (

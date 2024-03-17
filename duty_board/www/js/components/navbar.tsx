@@ -17,7 +17,7 @@ import { IoCloseOutline } from "@react-icons/all-files/io5/IoCloseOutline";
 import { GrUserAdmin } from "@react-icons/all-files/gr/GrUserAdmin";
 import CompanyLogo from "./companyLogo";
 import { useGetSchedule } from "../api";
-import { Link } from "@tanstack/react-router";
+import {Link, useMatch} from "@tanstack/react-router";
 import ExternalLink from "./externalLink";
 
 const NavLink = ({ children }: { children: ReactNode }) => (
@@ -43,6 +43,11 @@ export default function Navbar() {
     isLoading
   } = useGetSchedule();
 
+  const data = useMatch("/$category", { strict: false });
+  const enabledCategory = data && data.params && data.params.category !== undefined
+    ? decodeURI(data.params.category)
+    : config.categories[0];
+
   return (
     <>
       <Box bg={config.backgroundColor} color={config.textColor} px={4}>
@@ -58,7 +63,11 @@ export default function Navbar() {
             <CompanyLogo maxWidth={300} maxHeight={40} />
             <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
               {config.categories.map((category: string) => (
-                <NavLink key={"normal" + category}>{category}</NavLink>
+                category === enabledCategory ? (
+                  <Box textDecoration='underline'><NavLink key={"normal" + category}>{category}</NavLink></Box>
+                ) : (
+                  <Box><NavLink key={"normal" + category}>{category}</NavLink></Box>
+                )
               ))}
             </HStack>
           </HStack>
