@@ -90,7 +90,7 @@ const SingleCalendar = ({ category, calendar, persons }: Props) => {
                         color={useColorModeValue(colorTextLight, colorTextDark)}
                         bgColor={useColorModeValue(bgColorLight, bgColorDark)}
                       >
-                        Less
+                        Close
                       </Button>
                     </Link>
                   : <Link to="/$category/$calendarId" params={{ category: category, calendarId: calendar.uid }}>
@@ -99,7 +99,7 @@ const SingleCalendar = ({ category, calendar, persons }: Props) => {
                         color={useColorModeValue(colorTextLight, colorTextDark)}
                         bgColor={useColorModeValue(bgColorLight, bgColorDark)}
                       >
-                        More
+                        Schedule
                       </Button>
                     </Link>
               }

@@ -75,7 +75,7 @@ export default function Footer() {
           align={{ base: "center", md: "center" }}
         >
           <Text fontSize={"xs"}>
-            Copyright © 2023-2024 Jorrick Sleijster<br/>
+            Copyright © 2024 Jorrick Sleijster<br/>
             Licensed under the Apache License, Version 2.0.
           </Text>
           <Stack direction={"row"} spacing={6}>
