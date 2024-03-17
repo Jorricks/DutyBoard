@@ -9,8 +9,12 @@ const Schedule = () => {
   const {
     data: { config, calendars, persons }
   } = useGetSchedule();
-  const category = data ? decodeURI(data.params.category) : config.categories[0];
+  const category = data && data.params && data.params.category !== undefined
+    ? decodeURI(data.params.category)
+    : config.categories[0];
+
   const personsMap = new Map(Object.entries(persons));
+  console.log(category);
 
   // Design heavily influenced by https://chakra-templates.dev/page-sections/pricing
   return (
