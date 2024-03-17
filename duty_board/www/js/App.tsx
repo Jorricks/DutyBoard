@@ -1,5 +1,5 @@
 import { ChakraProvider } from "@chakra-ui/react";
-import { QueryClient, QueryClientProvider } from "react-query";
+import {QueryCache, QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import "./App.css";
 import Schedule from "./components/schedule";
 import Footer from "./components/footer";
@@ -8,45 +8,67 @@ import Navbar from "./components/navbar";
 import {
   Outlet,
   RouterProvider,
-  createReactRouter,
-  createRouteConfig,
-  useMatch
+  createRouter,
+  createRoute,
+  createRootRoute,
 } from "@tanstack/react-router";
-import {Component} from "react";
 import AnnouncementBar from "./components/announcementBar";
 import SingleCalendar from "./components/singleCalendar";
+import useErrorToast from "./utils/useErrorToast";
 
-const rootRoute = createRouteConfig();
+const rootRoute = createRootRoute({
+  component: () => (
+    <div>
+      <div style={{minHeight: "100vh", display: "flex", flexDirection: "column"}}>
+        <AnnouncementBar/>
+        <Navbar/>
+        <main>
+          <Outlet/> {/* Start rendering router matches */}
+        </main>
+        <div style={{marginTop: "auto"}}>
+          <Footer/>
+        </div>
+      </div>
+      <div></div>
+    </div>
+  )
+});
 
-const indexRoute = rootRoute.createRoute({
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
   path: "/",
   component: Schedule
 });
 
-const categoryRoute = rootRoute.createRoute({
+const categoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
   path: "$category",
   component: Schedule
 });
 
-const calendarRoute = categoryRoute.createRoute({
+const calendarRoute = createRoute({
+  getParentRoute: () => categoryRoute,
   path: "$calendarId",
   component: SingleCalendar
 });
 
-const routeConfig = rootRoute.addChildren([indexRoute, categoryRoute.addChildren([calendarRoute])]);
+
+const routeTree = rootRoute.addChildren([indexRoute, categoryRoute.addChildren([calendarRoute])]);
 
 // Set up a ReactRouter instance
-const router = createReactRouter({
-  routeConfig,
-  defaultPreload: "intent"
-});
-
+const router = createRouter({routeTree, defaultPreload: "intent"});
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+
+      useErrorToast()({error});
+    },
+  }),
   defaultOptions: {
     queries: {
-      notifyOnChangeProps: 'tracked',
-      refetchOnWindowFocus: false,
+      notifyOnChangeProps: 'all',
+      refetchOnWindowFocus: true,
       retry: 1,
       retryDelay: 500,
       refetchOnMount: true, // Refetches stale queries, not "always"
@@ -64,21 +86,7 @@ function App() {
   return (
     <ChakraProvider>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router}>
-          <div>
-            <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-              <AnnouncementBar />
-              <Navbar />
-              <main>
-                <Outlet /> {/* Start rendering router matches */}
-              </main>
-              <div style={{ marginTop: "auto" }}>
-                <Footer />
-              </div>
-            </div>
-            <div></div>
-          </div>
-        </RouterProvider>
+        <RouterProvider router={router} />
       </QueryClientProvider>
     </ChakraProvider>
   );

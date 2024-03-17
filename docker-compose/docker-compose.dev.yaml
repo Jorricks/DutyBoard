@@ -26,7 +26,7 @@ services:
     volumes:
       - ../duty_board/www:/code
     working_dir: /code
-    command: /bin/bash -c "npm install && npm run dev2"
+    command: /bin/bash -c "npm install && npm run dev2 -- --host"
 
   python_intialise:
     depends_on:
