@@ -7,3 +7,5 @@ docker_venv/
 venv/
 duty_board/www/node_modules
 duty_board/www/dist
+*.egg-info
+*.Dockerfile
