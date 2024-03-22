@@ -7,8 +7,8 @@ from typing import Any, List
 import click
 from alembic.config import CommandLine
 from click import Context
+from prometheus_client import start_http_server
 
-from duty_board import worker_loop
 from duty_board.alchemy import update_duty_calendars
 from duty_board.alchemy.session import create_session
 from duty_board.plugin.abstract_plugin import AbstractPlugin
@@ -48,16 +48,24 @@ def update_calendars() -> None:
 
 @cli.command()
 def calendar_refresher() -> None:
+    # Local imports so that only the relevant prometheus-client metrics are present.
+    from duty_board import worker_calendars
+
     logger.info("Starting the worker to refresh the calendars.")
     plugin: AbstractPlugin = plugin_fetcher.get_plugin()
-    worker_loop.enter_calendar_refresher_loop(plugin)
+    start_http_server(port=8000)
+    worker_calendars.enter_calendar_refresher_loop(plugin)
 
 
 @cli.command()
 def duty_officer_refresher() -> None:
+    # Local imports so that only the relevant prometheus-client metrics are present.
+    from duty_board import worker_duty_officer
+
     logger.info("Starting the worker to refresh the persons.")
     plugin: AbstractPlugin = plugin_fetcher.get_plugin()
-    worker_loop.enter_duty_officer_refresher_loop(plugin)
+    start_http_server(port=8000)
+    worker_duty_officer.enter_duty_officer_refresher_loop(plugin)
 
 
 @cli.command(name="webserver", context_settings={"ignore_unknown_options": True, "allow_extra_args": True})

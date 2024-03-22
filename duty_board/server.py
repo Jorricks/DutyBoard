@@ -6,6 +6,7 @@ from typing import Dict, Final, List, Set
 
 import pytz
 from fastapi import FastAPI, HTTPException
+from prometheus_client import Gauge
 from prometheus_fastapi_instrumentator import Instrumentator
 from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
@@ -47,6 +48,7 @@ if "PROMETHEUS_MULTIPROC_DIR" in os.environ:
     Path(os.environ["PROMETHEUS_MULTIPROC_DIR"]).mkdir(exist_ok=True)
 # Setup metrics collection for our FastAPI endpoints.
 Instrumentator().instrument(app).expose(app)
+calendar_events_gauge = Gauge("duty_events_per_calendar", "Currently planned events per calendar", ["calendar_name"])
 
 
 CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
@@ -80,6 +82,11 @@ def _get_config_object(timezone_object: BaseTzInfo) -> _Config:
     )
 
 
+def collect_calendar_metrics(calendars: List[_Calendar]) -> None:
+    for calendar in calendars:
+        calendar_events_gauge.labels(calendar.name).set(len(calendar.events))
+
+
 @app.get("/schedule", response_model=CurrentSchedule)
 async def get_schedule(timezone: str) -> CurrentSchedule:
     timezone_object = _parse_timezone_str(timezone)
@@ -91,6 +98,7 @@ async def get_schedule(timezone: str) -> CurrentSchedule:
             all_encountered_person_uids=all_encountered_person_uids,
             timezone=timezone_object,
         )
+        collect_calendar_metrics(calendars=calendars)
         persons: Dict[int, _PersonEssentials] = api_queries.get_peoples_essentials(
             session=session,
             all_person_uids=all_encountered_person_uids,
