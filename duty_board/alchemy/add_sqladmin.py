@@ -23,8 +23,6 @@ from duty_board.models.person import Person
 from duty_board.models.token import Token
 from duty_board.plugin.abstract_plugin import AbstractPlugin
 
-loop = asyncio.get_event_loop()
-
 
 class AppBuilderDateTimeAwareSelector(DateTimeField):
     """This is a DateTimePicker"""
@@ -168,7 +166,8 @@ class MyBackend(AuthenticationBackend):
 
     async def authenticate(self, request: Request) -> bool:
         token = request.session.get("token")
-        if not await loop.run_in_executor(None, self.verify_token, token):  # type: ignore[arg-type]
+        loop = asyncio.get_event_loop()
+        if not await loop.run_in_executor(None, self.verify_token, token):
             request.session.clear()
             return False
         return True
