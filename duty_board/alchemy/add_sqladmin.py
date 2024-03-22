@@ -167,7 +167,7 @@ class MyBackend(AuthenticationBackend):
     async def authenticate(self, request: Request) -> bool:
         token = request.session.get("token")
         loop = asyncio.get_event_loop()
-        if not await loop.run_in_executor(None, self.verify_token, token):
+        if not await loop.run_in_executor(None, self.verify_token, token):  #type: ignore[arg-type]
             request.session.clear()
             return False
         return True
