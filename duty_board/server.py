@@ -1,10 +1,12 @@
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Dict, Final, List, Set
 
 import pytz
 from fastapi import FastAPI, HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator
 from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
 from sqladmin import Admin
@@ -39,17 +41,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-plugin: AbstractPlugin
-admin: Admin
+if "PROMETHEUS_MULTIPROC_DIR" in os.environ:
+    # If you use Gunicorn, you should use this environment variable.
+    # This just makes sure the folder exists.
+    Path(os.environ["PROMETHEUS_MULTIPROC_DIR"]).mkdir(exist_ok=True)
+# Setup metrics collection for our FastAPI endpoints.
+Instrumentator().instrument(app).expose(app)
+
 
 CURRENT_DIR: Final[Path] = Path(__file__).absolute().parent
 logger.info(f"{CURRENT_DIR=}")
 
-plugin = plugin_fetcher.get_plugin()
+plugin: AbstractPlugin = plugin_fetcher.get_plugin()
 app.mount("/assets", GZIPStaticFiles(directory=CURRENT_DIR / "www" / "dist" / "assets", check_dir=False), name="assets")
 app.mount("/static", StaticFiles(directory=CURRENT_DIR / "www" / "static"), name="static")
-# @ToDo(jorrick) Implement person image setup
-admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
+admin: Admin = add_sqladmin.add_sqladmin(app=app, plugin=plugin)
 
 
 def _parse_timezone_str(timezone_str: str) -> BaseTzInfo:
