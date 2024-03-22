@@ -3,7 +3,6 @@ import io
 import json
 import logging
 import os
-from concurrent.futures import ThreadPoolExecutor
 from typing import (
     Any,
     ClassVar,
@@ -15,6 +14,7 @@ from typing import (
     Union,
 )
 
+from ldap3.core.exceptions import LDAPExceptionError
 from PIL import Image
 from sqlalchemy.orm import Session as SASession
 
@@ -48,10 +48,8 @@ class LDAPPluginMixin:
         self.client: Optional[LDAPBaseClient] = None
         super().__init__(*args, **kwargs)
 
-    def get_client(self) -> LDAPBaseClient:
-        if self.client is not None:
-            return self.client
-        self.client = LDAPBaseClient(
+    def _create_ldap_client(self, full_quantified_username: str, password: str) -> LDAPBaseClient:
+        return LDAPBaseClient(
             url=self.LDAP_URL,
             base_dn=self.LDAP_BASE_DN,
             user_organizational_unit=self.LDAP_USER_OU,
@@ -59,9 +57,17 @@ class LDAPPluginMixin:
             account_attribute=self.LDAP_ACCOUNT_ATTRIBUTE,
             group_attribute=self.LDAP_GROUP_ATTRIBUTE,
             ldap_group_membership_relation=self.LDAP_GROUP_MEMBERSHIP_RELATION,
+            full_quantified_username=full_quantified_username,
+            password=password,
+            auto_referrals=False,
+        )
+
+    def get_client(self) -> LDAPBaseClient:
+        if self.client is not None:
+            return self.client
+        self.client = self._create_ldap_client(
             full_quantified_username=os.environ["LDAP_FULL_QUANTIFIED_USERNAME"],
             password=os.environ["LDAP_PASSWORD"],
-            auto_referrals=False,
         )
         return self.client
 
@@ -124,14 +130,22 @@ class LDAPPluginMixin:
         logger.debug(f"Updating references of {person}.")
         return person
 
-    def _is_user_in_admin_group(self, username: str) -> bool:
-        return any(self.get_client().is_user_in_group(username, group) for group in self.LDAP_ADMIN_GROUP_NAMES)
+    def _is_user_in_admin_group(self, username: str, password: str) -> bool:
+        full_quantified_name = f"{self.LDAP_ACCOUNT_ATTRIBUTE}={username},ou={self.LDAP_USER_OU},{self.LDAP_BASE_DN}"
+        try:
+            self._create_ldap_client(
+                full_quantified_username=full_quantified_name,
+                password=password,
+            )
+            return any(self.get_client().is_user_in_group(username, group) for group in self.LDAP_ADMIN_GROUP_NAMES)
+        except LDAPExceptionError as exc:
+            logger.warning(f"Invalid credentials for {username=}, {exc=!s}.")
+            return False
 
-    async def admin_login_attempt(self, username: str, password: str) -> bool:  # noqa: ARG002
+    async def admin_login_attempt(self, username: str, password: str) -> bool:
         loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor() as pool:
-            result: bool = await loop.run_in_executor(pool, self._is_user_in_admin_group, username)
-            return result
+        result: bool = await loop.run_in_executor(None, self._is_user_in_admin_group, username, password)
+        return result
 
 
 # Left this code here, so you can copy-paste this code to your extension and check whether your setup works.

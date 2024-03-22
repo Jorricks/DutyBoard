@@ -136,6 +136,8 @@ class LDAPBaseClient:
             raise exceptions.LDAPException(f"Incorrect credentials for ldap url: {self.url}.") from exc
         except exceptions.LDAPInvalidDNSyntaxResult as exc:
             raise exceptions.LDAPException(f"Invalid bind user: {bind_dn}.") from exc
+        except exceptions.LDAPException as exc:
+            raise exceptions.LDAPException(f"Unable to connect to {self.url=} with {bind_dn=}") from exc
         if not connection.bound:
             raise exceptions.LDAPException(f"LDAP not bound for url {self.url}")
         return connection
