@@ -83,6 +83,8 @@ services:
         condition: service_healthy
       prod_initialise:
         condition: service_completed_successfully
+    ports:
+      - "8004:8000" # We expose port 8000 from the container as 8004 to the world.
     build:
       context: ../
       dockerfile: docker-compose/python.Dockerfile
@@ -104,6 +106,8 @@ services:
         condition: service_healthy
       prod_initialise:
         condition: service_completed_successfully
+    ports:
+      - "8005:8000" # We expose port 8000 from the container as 8005 to the world.
     build:
       context: ../
       dockerfile: docker-compose/python.Dockerfile

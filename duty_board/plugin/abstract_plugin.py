@@ -27,6 +27,7 @@ class AbstractPlugin(ABC):
     In case you want to know more check <a href="https://github.com/Jorricks/DutyBoard">here</a>.<br>
     Cheers!
     """
+    interval_worker_metrics_update: ClassVar[datetime.timedelta] = datetime.timedelta(seconds=30)
 
     announcement_background_color_hex: ClassVar[str] = "#FF0000"
     announcement_text_color_hex: ClassVar[str] = "#FFFFFF"
