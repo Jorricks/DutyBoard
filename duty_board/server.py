@@ -11,10 +11,11 @@ from prometheus_fastapi_instrumentator import Instrumentator
 from pytz.exceptions import UnknownTimeZoneError
 from pytz.tzinfo import BaseTzInfo
 from sqladmin import Admin
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm.session import Session as SASession
+from starlette import status
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import FileResponse, HTMLResponse, Response
+from starlette.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from starlette.staticfiles import StaticFiles
 from tzlocal import get_localzone
 
@@ -143,6 +144,24 @@ def favicon_ico() -> FileResponse:
     if file_path.is_file():
         return FileResponse(file_path, media_type="image/x-icon", filename="favicon.ico")
     raise HTTPException(status_code=500, detail="Company logo could not be found.")
+
+
+@app.get(
+    "/health",
+    tags=["healthcheck"],
+    summary="Perform a Health Check",
+    status_code=status.HTTP_200_OK,
+    response_model=None,
+)
+def get_health() -> JSONResponse:
+    try:
+        with create_session() as session:
+            session.execute(text("SELECT 1"))
+            return JSONResponse(content={"result": "OK", "error": None}, status_code=status.HTTP_200_OK)
+    except Exception as exc:
+        return JSONResponse(
+            content={"result": "ERROR", "error": str(exc)}, status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
 
 
 @app.get("/{full_path:path}", response_class=HTMLResponse, include_in_schema=False)
