@@ -21,4 +21,4 @@ class DutyCalendarConfig(BaseModel):
     # Prefix before user LDAP or user email is mentioned. Example prefix; 'duty:' when calendar event; 'duty: thomas'
     event_prefix: Annotated[Optional[str], Field(max_length=50, default=None)]
     # The extra_info can be used to store information that we can use in the plugin.
-    extra_info: Optional[Dict[str, Union[int, float, str]]]
+    extra_info: Annotated[Optional[Dict[str, Union[int, float, str]]], Field(default=None)]
