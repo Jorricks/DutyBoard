@@ -24,6 +24,7 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             category="Big Data",
             order=1,
             event_prefix=None,
+            extra_info=None,
         ),
         DutyCalendarConfig(
             uid="infrastructure_duty",
@@ -35,6 +36,7 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             category="Infrastructure",
             order=2,
             event_prefix=None,
+            extra_info=None,
         ),
         DutyCalendarConfig(
             uid="machine_learning",
@@ -44,5 +46,6 @@ class ExamplePlugin(ICalPluginMixin, LDAPPluginMixin, AbstractPlugin):
             category="Big Data",
             order=3,
             event_prefix=None,
+            extra_info=None,
         ),
     ]
