@@ -99,7 +99,7 @@ const SingleCalendar = ({ category, calendar, persons }: Props) => {
                         color={useColorModeValue(colorTextLight, colorTextDark)}
                         bgColor={useColorModeValue(bgColorLight, bgColorDark)}
                       >
-                        Schedule
+                        More info
                       </Button>
                     </Link>
               }
