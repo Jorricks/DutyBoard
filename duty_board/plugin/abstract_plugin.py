@@ -1,13 +1,16 @@
 import datetime
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, ClassVar, List, Optional
+from typing import Any, ClassVar, List, Optional, Set
 
 from sqlalchemy.orm import Session as SASession
 
 from duty_board.models.calendar import Calendar
 from duty_board.models.person import Person
 from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractPlugin(ABC):
@@ -28,6 +31,8 @@ class AbstractPlugin(ABC):
     Cheers!
     """
     interval_worker_metrics_update: ClassVar[datetime.timedelta] = datetime.timedelta(seconds=30)
+    # How often to check whether a new person was assigned on Duty.
+    interval_worker_check_for_update_events: ClassVar[datetime.timedelta] = datetime.timedelta(minutes=1)
 
     announcement_background_color_hex: ClassVar[str] = "#FF0000"
     announcement_text_color_hex: ClassVar[str] = "#FFFFFF"
@@ -49,3 +54,12 @@ class AbstractPlugin(ABC):
     @abstractmethod
     async def admin_login_attempt(self, username: str, password: str) -> bool:
         pass
+
+    def handle_new_person_on_duty_event(self, calendar: Calendar, persons: Set[Person]) -> None:
+        """
+        You can choose to implement this method and run the update_events worker.
+        Any time a new person is on duty, this method will be called with the information of the calendar and the
+        person. You can use this function to then update Access Control or Duty Groups in messaging apps.
+        Note: When nobody is on Duty anymore, we will call this function with `persons=set()`.
+        """
+        logger.info(f"New people of duty for {calendar=}; {persons=}.")

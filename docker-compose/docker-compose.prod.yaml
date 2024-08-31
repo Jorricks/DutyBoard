@@ -122,6 +122,29 @@ services:
     working_dir: /code
     command: /bin/bash -c "DutyBoard calendar-refresher"
 
+  prod_worker_duty_watcher:
+    container_name: prod_worker_duty_watcher
+    depends_on:
+      prod_postgres:
+        condition: service_healthy
+      prod_initialise:
+        condition: service_completed_successfully
+    ports:
+      - "8006:8000" # We expose port 8000 from the container as 8006 to the world.
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@prod_postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://prod_openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "DutyBoard duty-watcher"
+
   ical_server:  # Can not prefix this with prod because then we need to change the Plugin config.
     container_name: ical_server
     build:

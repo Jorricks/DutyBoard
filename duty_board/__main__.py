@@ -68,6 +68,17 @@ def duty_officer_refresher() -> None:
     worker_duty_officer.enter_duty_officer_refresher_loop(plugin)
 
 
+@cli.command()
+def duty_watcher() -> None:
+    # Local imports so that only the relevant prometheus-client metrics are present.
+    from duty_board import worker_duty_watcher
+
+    logger.info("Starting the worker to fire callbacks when persons on duty changes.")
+    plugin: AbstractPlugin = plugin_fetcher.get_plugin()
+    start_http_server(port=8000)
+    worker_duty_watcher.enter_update_events_loop(plugin)
+
+
 @cli.command(name="webserver", context_settings={"ignore_unknown_options": True, "allow_extra_args": True})
 @click.option("--host", default="0.0.0.0", help="The IP address range to listen for.")  # noqa: S104
 @click.option("--port", default="80", type=int, help="The port to listen for.")

@@ -112,6 +112,27 @@ services:
     working_dir: /code
     command: /bin/bash -c "DutyBoard calendar-refresher"
 
+  worker_duty_watcher:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      python_intialise:
+        condition: service_completed_successfully
+    container_name: duty_worker_duty_watcher
+    build:
+      context: ../
+      dockerfile: docker-compose/python.Dockerfile
+    environment:
+      - SQL_ALCHEMY_CONNECTION=postgresql://postgres:mysecretpassword@postgres:5432/postgres
+      - DUTY_BOARD_SECRET_KEY=RANDOM_SECRET_KEY
+      - LDAP_URL=ldap://openldap:1389
+      - LDAP_FULL_QUANTIFIED_USERNAME=cn=admin,dc=DutyBoard,dc=com
+      - LDAP_PASSWORD=adminpassword
+    volumes:
+      - ../:/code
+    working_dir: /code
+    command: /bin/bash -c "DutyBoard duty-watcher"
+
   ical_server:
     container_name: ical_server
     build:
