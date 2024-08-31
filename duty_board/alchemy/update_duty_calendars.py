@@ -1,5 +1,6 @@
 import datetime
-from typing import List
+import json
+from typing import List, Union
 
 from pendulum.tz.timezone import UTC
 from sqlalchemy import delete, select
@@ -11,6 +12,7 @@ from duty_board.plugin.helpers.duty_calendar_config import DutyCalendarConfig
 
 def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig) -> None:
     calendar_db_instance = session.scalars(select(Calendar).where(Calendar.uid == calendar.uid)).one_or_none()
+    extra_info_serialized: Union[None, str] = json.dumps(calendar.extra_info) if calendar.extra_info else None
     if calendar_db_instance is not None:
         calendar_db_instance.name = calendar.name
         calendar_db_instance.description = calendar.description
@@ -18,6 +20,7 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
         calendar_db_instance.order = calendar.order
         calendar_db_instance.icalendar_url = calendar.icalendar_url
         calendar_db_instance.event_prefix = calendar.event_prefix
+        calendar_db_instance.extra_info = extra_info_serialized
         session.merge(calendar_db_instance)
     else:
         calendar_db_instance = Calendar(
@@ -28,6 +31,7 @@ def _create_or_update_calendar(session: SASession, calendar: DutyCalendarConfig)
             order=calendar.order,
             icalendar_url=calendar.icalendar_url,
             event_prefix=calendar.event_prefix,
+            extra_info=extra_info_serialized,
             error_msg=None,
             last_update_utc=datetime.datetime(1970, 1, 1, 0, 0, 0, tzinfo=UTC),
             sync=True,

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional, Union
 
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
@@ -20,3 +20,5 @@ class DutyCalendarConfig(BaseModel):
     order: Annotated[int, Field(default=99999, ge=0, le=9999999)]
     # Prefix before user LDAP or user email is mentioned. Example prefix; 'duty:' when calendar event; 'duty: thomas'
     event_prefix: Annotated[Optional[str], Field(max_length=50, default=None)]
+    # The extra_info can be used to store information that we can use in the plugin.
+    extra_info: Optional[Dict[str, Union[int, float, str]]]
