@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from pendulum.datetime import DateTime
-from sqlalchemy import String
+from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from duty_board.alchemy.settings import Base
@@ -20,6 +20,8 @@ class Calendar(Base):
     order: Mapped[int]
     icalendar_url: Mapped[str] = mapped_column(String(500), nullable=False)
     event_prefix: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    # The `extra_info` can be used to store information that we can use in the plugin.
+    extra_info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     error_msg: Mapped[Optional[str]] = mapped_column(
         String(9999),
         nullable=True,
