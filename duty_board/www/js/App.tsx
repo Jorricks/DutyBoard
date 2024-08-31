@@ -49,7 +49,7 @@ const categoryRoute = createRoute({
 const calendarRoute = createRoute({
   getParentRoute: () => categoryRoute,
   path: "$calendarId",
-  component: SingleCalendar
+  component: Schedule
 });
 
 
