@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import {
   Box,
   Flex,
@@ -19,9 +18,14 @@ import CompanyLogo from "./companyLogo";
 import { useGetSchedule } from "../api";
 import {Link, useMatch} from "@tanstack/react-router";
 import ExternalLink from "./externalLink";
+import SearchBox from "./searchBox";
 
-const NavLink = ({ children }: { children: ReactNode }) => (
-  <Link to="/$category" params={{ category: children }} activeProps={{ className: "font-bold" }}>
+const NavLink = ({ category }: { category: string }) => (
+  <Link to="/$category" params={{ category }} search={(previous) => {
+    const next = {...previous};
+    delete next.search;
+    return next;
+  }} activeProps={{ className: "font-bold" }}>
     <Box
       px={2}
       py={1}
@@ -31,7 +35,7 @@ const NavLink = ({ children }: { children: ReactNode }) => (
         bg: useColorModeValue("gray.200", "gray.700")
       }}
     >
-      {children}
+      {category}
     </Box>
   </Link>
 );
@@ -61,17 +65,11 @@ export default function Navbar() {
           />
           <HStack spacing={8} alignItems={"center"}>
             <CompanyLogo maxWidth={300} maxHeight={40} />
-            <HStack as={"nav"} spacing={4} display={{ base: "none", md: "flex" }}>
-              {config.categories.map((category: string) => (
-                category === enabledCategory ? (
-                  <Box textDecoration='underline'><NavLink key={"normal" + category}>{category}</NavLink></Box>
-                ) : (
-                  <Box><NavLink key={"normal" + category}>{category}</NavLink></Box>
-                )
-              ))}
-            </HStack>
           </HStack>
-          <Flex alignItems={"center"} mr={"20px"}>
+          <Flex alignItems={"center"} gap={4} ml={6} mr={"20px"}>
+            <Box display={{ base: "none", md: "block" }}>
+              <SearchBox />
+            </Box>
             {config.gitRepositoryUrl &&
               <Menu>
                 <ExternalLink href={config.gitRepositoryUrl} external={true}>
@@ -79,7 +77,6 @@ export default function Navbar() {
                       leftIcon={<AiFillGithub color={config.textColor} fontSize={"30px"}/>}
                       colorScheme='teal'
                       variant='outline'
-                      mr={"20px"}
                   >
                     <Text color={config.textColor}>Repo</Text>
                   </Button>
@@ -102,12 +99,33 @@ export default function Navbar() {
           </Flex>
         </Flex>
 
+        <Box
+          display={{ base: "none", md: "block" }}
+          overflowX="auto"
+          pb={3}
+          sx={{
+            "&::-webkit-scrollbar": {display: "none"},
+            scrollbarWidth: "none"
+          }}
+        >
+          <HStack as={"nav"} spacing={4} minW="max-content">
+            {config.categories.map((category: string) => (
+              category === enabledCategory ? (
+                <Box key={"normal" + category} textDecoration='underline'><NavLink category={category} /></Box>
+              ) : (
+                <Box key={"normal" + category}><NavLink category={category} /></Box>
+              )
+            ))}
+          </HStack>
+        </Box>
+
         {isOpen ? (
           <Box pb={4} display={{ md: "none" }}>
             <Stack as={"nav"} spacing={4}>
               {config.categories.map((category: string) => (
-                <NavLink key={"mobile" + category}>{category}</NavLink>
+                <NavLink category={category} key={"mobile" + category} />
               ))}
+              <SearchBox width="100%" />
             </Stack>
           </Box>
         ) : null}

@@ -17,6 +17,9 @@ import SingleCalendar from "./components/singleCalendar";
 import useErrorToast from "./utils/useErrorToast";
 
 const rootRoute = createRootRoute({
+  validateSearch: (search: Record<string, unknown>): { search?: string } => ({
+    search: typeof search.search === "string" ? search.search : undefined,
+  }),
   component: () => (
     <div>
       <div style={{minHeight: "100vh", display: "flex", flexDirection: "column"}}>

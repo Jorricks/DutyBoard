@@ -3,13 +3,15 @@ import { Calendar, Events, Person } from "../api/api-generated-types";
 import ParsingError from "./parsingError";
 import ParsingWarning from "./parsingWarning";
 import PersonComponent from "./personComponent";
+import SearchHighlight from "./searchHighlight";
 
 interface Props {
   calendar: Calendar;
   persons: Map<string, Person>;
+  searchTerms?: string[];
 }
 
-const ExpandedCalendarInfo = ({ calendar, persons }: Props) => {
+const ExpandedCalendarInfo = ({ calendar, persons, searchTerms = [] }: Props) => {
   return (
     <Box bg="#f5f5f5">
       <Divider />
@@ -39,7 +41,7 @@ const ExpandedCalendarInfo = ({ calendar, persons }: Props) => {
       <Box p={10}>
         <Box>
           <Text as="b">Description</Text>
-          <Text>{calendar.description}</Text>
+          <Text><SearchHighlight searchTerms={searchTerms} text={calendar.description} /></Text>
         </Box>
         <Box mt={10}>
           <Text as="b">Schedule</Text>

@@ -7,15 +7,17 @@ import { FaCalendarTimes } from "react-icons/fa";
 import PersonComponent from "./personComponent";
 import {useEffect, useState} from "react";
 import {Link, useMatch} from "@tanstack/react-router";
+import SearchHighlight from "./searchHighlight";
 
 interface Props {
   category: string;
   calendar: Calendar;
   persons: Map<string, Person>;
+  searchTerms?: string[];
 }
 
 // Huge credits to https://blog.logrocket.com/create-collapsible-react-components-react-collapsed/
-const SingleCalendar = ({ category, calendar, persons }: Props) => {
+const SingleCalendar = ({ category, calendar, persons, searchTerms = [] }: Props) => {
   const currentRoute = useMatch("/$category/$calendarId", { strict: false });
 
   const firstEvent = calendar.events.length > 0 ? calendar.events[0] : undefined;
@@ -52,7 +54,7 @@ const SingleCalendar = ({ category, calendar, persons }: Props) => {
         alignItems={{ md: "center" }}
       >
         <Box width={{base: "auto", md: "25%"}}>
-          <Heading size={"md"}>{calendar.name}</Heading>
+          <Heading size={"md"}><SearchHighlight searchTerms={searchTerms} text={calendar.name} /></Heading>
         </Box>
         <Box width={{base: "auto", md: "25%"}}>
           <List spacing={3} textAlign="start">
@@ -84,7 +86,7 @@ const SingleCalendar = ({ category, calendar, persons }: Props) => {
           <Stack>
             <div className="header">
               {isExpanded
-                  ? <Link to="/$category" params={{ category: category}}>
+                  ? <Link to="/$category" params={{ category: category}} search={(previous) => previous}>
                       <Button
                         size="md"
                         color={useColorModeValue(colorTextLight, colorTextDark)}
@@ -93,7 +95,7 @@ const SingleCalendar = ({ category, calendar, persons }: Props) => {
                         Close
                       </Button>
                     </Link>
-                  : <Link to="/$category/$calendarId" params={{ category: category, calendarId: calendar.uid }}>
+                  : <Link to="/$category/$calendarId" params={{ category: category, calendarId: calendar.uid }} search={(previous) => previous}>
                       <Button
                         size="md"
                         color={useColorModeValue(colorTextLight, colorTextDark)}
@@ -109,7 +111,7 @@ const SingleCalendar = ({ category, calendar, persons }: Props) => {
       </Stack>
       <div {...getCollapseProps()}>
         <div className="content">
-          <ExpandedCalendarInfo calendar={calendar} persons={persons} />
+          <ExpandedCalendarInfo calendar={calendar} persons={persons} searchTerms={searchTerms} />
         </div>
       </div>
     </>
