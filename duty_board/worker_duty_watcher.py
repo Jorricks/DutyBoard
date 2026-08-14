@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, timezone
-from typing import Dict, Iterable, List, Set, Union
+from typing import Dict, Iterable, List, Set, Tuple, Union
 
 from pendulum.datetime import DateTime
 from prometheus_client import Counter, Gauge
@@ -88,6 +88,7 @@ def run_update_event_loop(
     plugin: AbstractPlugin,
     calendars_with_new_on_call: Dict[str, Set[int]],
 ) -> None:
+    callback_arguments: List[Tuple[Calendar, Set[Person]]] = []
     for calendar_uid_with_new_duty, new_duty_uids in calendars_with_new_on_call.items():
         calendar_stmt = select(Calendar).where(Calendar.uid == calendar_uid_with_new_duty)
         result: List[Calendar] = list(session.scalars(calendar_stmt).all())
@@ -98,6 +99,13 @@ def run_update_event_loop(
         persons: Set[Person] = set(session.scalars(person_stmt).all())
         logger.debug(f"Fetching {new_duty_uids=} gave {persons=}.")
 
+        callback_arguments.append((calendar, persons))
+
+    # The callbacks talk to external chat systems (Slack/Mattermost), including rate-limit retry sleeps.
+    # Release the transaction before running them so the backend does not sit `idle in transaction`.
+    session.commit()
+
+    for calendar, persons in callback_arguments:
         run_callback_for_calendar_with_new_duty(plugin, calendar, persons)
 
 

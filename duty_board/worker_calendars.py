@@ -52,6 +52,10 @@ def update_the_most_outdated_calendar(plugin: AbstractPlugin) -> None:
                 time.sleep(1)  # Avoid overload on the database.
                 return
 
+            # sync_calendar() fetches the iCalendar over the network. Committing the read here stops
+            # the backend from sitting `idle in transaction` during the fetch.
+            session.commit()
+
             logger.info(f"Updating {calendar=}.")
             try:
                 calendar = plugin.sync_calendar(calendar=calendar, session=session)

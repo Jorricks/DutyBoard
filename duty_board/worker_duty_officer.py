@@ -89,6 +89,10 @@ def update_the_most_outdated_person(plugin: AbstractPlugin) -> None:
                 time.sleep(1)  # Avoid overload on the database.
                 return
 
+            # sync_person() performs LDAP lookups and image fetching over the network. Committing the
+            # read here stops the backend from sitting `idle in transaction` during the fetch.
+            session.commit()
+
             logger.info(f"Updating {person=}.")
             try:
                 person = plugin.sync_person(person=person, session=session)
